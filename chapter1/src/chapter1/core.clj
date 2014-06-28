@@ -1622,7 +1622,8 @@ alpha-increment
 (def density-for-boston 1.25)  ; kg/m^3
 (def mass 0.145)  ; kg
 (def diameter 0.074)  ; m
-(defn beta [density] (* 0.5 drag-coeff density (* 3.14159 0.25 (square diameter))))
+(defn beta [density]
+  (* 0.5 drag-coeff density (* 3.14159 0.25 (square diameter))))
 
 (defn calc-dv
   [m u0 v0 beta g dt]
@@ -1654,7 +1655,7 @@ alpha-increment
        dy (* v dt)
        x (+ x0 dx)
        y (+ y0 dy)]
-    (if (< y 0) 
+    (if (< y 0)
       x0
       (recur x y u v dt g m beta))))
 
@@ -1732,7 +1733,8 @@ alpha-increment
 ;; Now need to find the time until we reach a specified distance
 
 
-(defn integrate-time-and-distance [x0 y0 u0 v0 dt g m beta time-so-far]
+(defn integrate-time-and-distance-and-speed
+  [x0 y0 u0 v0 dt g m beta time-so-far]
   (let
       [dv (calc-dv m u0 v0 beta g dt)
        du (calc-du m u0 v0 beta g dt)
@@ -1744,38 +1746,47 @@ alpha-increment
        y (+ y0 dy)
        new-time (+ time-so-far dt)]
     (if (< y 0)
-      (list time-so-far x0)
+      (list time-so-far x0 (/ (sqrt (+ (square x0) (square y0))) dt))
       (recur x y u v dt g m beta new-time))))
 
-(defn travel-time-and-distance 
+(defn travel-time-and-distance-and-speed
   ([velocity angle-in-degrees density-for-area]
-     (travel-time-and-distance velocity angle-in-degrees density-for-area 0))
+     (travel-time-and-distance-and-speed velocity angle-in-degrees
+                                         density-for-area 0))
   ([velocity angle-in-degrees density-for-area initial-height]
-     (let [angle-in-radians (degree2radian angle-in-degrees)
-           initial-horizontal-velocity (* velocity (Math/cos angle-in-radians))
-           initial-vertical-velocity (* velocity (Math/sin angle-in-radians))
-           x0 0
-           y0 0
-           u0 initial-horizontal-velocity
-           v0 initial-vertical-velocity
-           dt 0.01
-           m-in-kg 0.15
-           beta-for-area (beta density-for-area)]
-       (integrate-time-and-distance x0 y0 u0 v0 dt gravity m-in-kg beta-for-area 0))))
+     (do
+       (println (str "angle-in-degrees: " angle-in-degrees))
+       (println (str "velocity: " velocity))
+       (println (str "angle-in-radians: " (degree2radian angle-in-degrees)))
+       (let [angle-in-radians (degree2radian angle-in-degrees)
+             initial-horizontal-velocity (* velocity (Math/cos
+                                                      angle-in-radians))
+             initial-vertical-velocity (* velocity (Math/sin angle-in-radians))
+             x0 0
+             y0 0
+             u0 initial-horizontal-velocity
+             v0 initial-vertical-velocity
+             dt 0.01
+             m-in-kg 0.15
+             beta-for-area (beta density-for-area)]
+         (integrate-time-and-distance-and-speed x0 y0 u0 v0 dt gravity
+                                                m-in-kg beta-for-area 0)))))
 
 (travel-time-and-distance 45 78 density-in-boston)
 
 (def max-error 5)
 
 (defn time-for-distance [distance velocity angle-in-degrees density-for-area]
-  (let [[time travelled-distance] (travel-time-and-distance velocity angle-in-degrees density-for-area)
+  (let [[time travelled-distance] (travel-time-and-distance velocity
+                                                            angle-in-degrees
+                                                            density-for-area)
         distance-error (abs (- distance travelled-distance))]
     (if (< distance-error max-error) time
         0)))
 
 (defn is-valid-angle? [distance velocity density-for-area angle-in-degrees]
-  (not (= 0 (time-for-distance distance velocity angle-in-degrees density-for-area))))
-
+  (not (= 0 (time-for-distance distance velocity angle-in-degrees
+                               density-for-area))))
 
 (defn valid-angles [distance velocity density-for-area]
   (let [angles (all-angles -90 90)]
@@ -1788,7 +1799,7 @@ alpha-increment
   (let [angles (valid-angles distance velocity density-in-boston)]
     (ffirst
      (map #(travel-time-and-distance velocity % density-for-area) angles))))
-;  )
+                                        ;  )
 
 (time-to-target 36 45 density-in-boston) ;; takes 0.8 seconds to reach second base
 (time-to-target 36 35 density-in-boston) ;; takes 1.0 seconds to reach second base
@@ -1820,17 +1831,57 @@ alpha-increment
 
 (time-to-target 90 35 density-in-boston)
 
-(defn distance-with-bounces [velocity angle-in-degrees density-for-area initial-height num-bounces]
+(defn distance-with-bounces
+  [velocity angle-in-degrees density-for-area initial-height num-bounces]
   (if (< num-bounces 0)
     0
     (+
-     (travel-time-and-distance velocity angle-in-degrees density-for-area initial-height)
-     (distance-with-bounces (/ velocity 2) angle-in-degrees density-for-area 0 (dec num-bounces))))) ;; next bounce
+     (second
+      (travel-time-and-distance-and-speed velocity angle-in-degrees
+                                          density-for-area initial-height))
+     (distance-with-bounces (/ velocity 2)
+                            angle-in-degrees
+                            density-for-area
+                            0
+                            (dec num-bounces))))) ;; next bounce
 
-(travel-time-and-distance )
-(distance-with-bounces 35 45 density-in-boston 2 0)
+(distance-with-bounces 35 45 density-in-boston 2 0) ;= 70.11632891725478
+(distance-with-bounces 35 45 density-in-boston 2 1) ;= 95.78661258641844
+(distance-with-bounces 35 45 density-in-boston 2 5) ;= 105.54968947303661
 
 ;; Problem 9
+
+;; velocity of ball when it bounces
+;;
+;; use x and y components of velocity when the ball hits the ground.
+;;
+;; velocity would be (sqrt (+ (square x) (square y)))
+
+
+(defn real-distance-with-bounces
+  [velocity angle-in-degrees density-for-area initial-height num-bounces]
+  (if (< num-bounces 0)
+    0
+    (let
+        [[time distance velocity-after-bounce]
+         (travel-time-and-distance-and-speed velocity
+                                             angle-in-degrees
+                                             density-for-area
+                                             initial-height)]
+      (+
+       distance
+       (do
+         (println (str "Velocity before bounce: " velocity))
+         (println (str "Velocity after bounce: " velocity-after-bounce))
+         (real-distance-with-bounces velocity-after-bounce
+                                     angle-in-degrees
+                                     density-for-area 0
+                                     (dec num-bounces))))))) ;; next bounce
+
+(real-distance-with-bounces 35 45 density-in-boston 2 0) ;= 70.11632891725478
+(real-distance-with-bounces 35 45 density-in-boston 2 1) ;= 520.1866564136751
+
+
 
 
 ;; Section 1.2.5 Greatest Common Divisors
