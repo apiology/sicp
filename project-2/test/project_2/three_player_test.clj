@@ -37,11 +37,12 @@
             '("c" "c" "d" "d"))))))
 
 
-(deftest make-history-summary-test-2
+(deftest make-history-summary-test-3
   (testing
     (is (= '((3 0 3) (1 1 2) (0 2 2))
            (make-history-summary
             '("c" "c" "d" "d" "c" "d" "c" "c")
             '("c" "c" "c" "d" "d" "c" "d" "c")
             '("c" "c" "d" "d" "d" "c" "c" "c"))))))
+
 
