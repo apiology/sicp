@@ -251,9 +251,21 @@
         (recur (rest-of-plays hist-0) (rest-of-plays hist-1) (rest-of-plays hist-2)
                updated-summary)))))
         
+(defn subprobability [[c d ttl]]
+  (if (= ttl 0)
+    nil
+    (/ c ttl)))
 
-; (defn characterize-strategy [hist-0 hist-1 hist-2])
+(defn get-probability-of-c [summary]
+  (let [both-c (nth summary 0)
+        only-one-c (nth summary 1)
+        both-d (nth summary 2)
+        c-given-both-c (subprobability both-c)
+        c-given-only-one-c (subprobability only-one-c)
+        c-given-both-d (subprobability both-d)]
+    (list c-given-both-c c-given-only-one-c c-given-both-d)))
 
+;; Problem 14
 
 ;; in expected-values: #f = don't care
 ;;                      X = actual-value needs to be #f or X
@@ -261,6 +273,10 @@
   (cond (empty? expected-values) (empty? actual-values)
 
         (empty? actual-values) false
+        
+        (nil? (first expected-values)) (nil? (first actual-values)) 
+
+        (nil? (first actual-values)) false
 
         (or (not (first expected-values))
             (not (first actual-values))
@@ -270,27 +286,110 @@
         :else false))
 
 
-;(defn test-entry [expected-values actual-values]
-;   (cond ((null? expected-values) (null? actual-values))
-;         ((null? actual-values) #f)
-;         ((or (not (car expected-values))
-;              (not (car actual-values))
-;              (= (car expected-values) (car actual-values)))
-;          (test-entry (cdr expected-values) (cdr actual-values)))
-;         (else #f)))
-;
-;
-;(defn (is-he-a-fool? [hist0 hist1 hist2]
-;   (test-entry (list 1 1 1)
-;               (get-probability-of-c
-;                (make-history-summary hist0 hist1 hist2))))
-;
-;(defn could-he-be-a-fool? [hist0 hist1 hist2]
-;  (test-entry (list 1 1 1)
-;              (map (lambda (elt)
-;                      (cond ((null? elt) 1)
-;                            ((= elt 1) 1)
-;                            (else 0)))
-;                   (get-probability-of-c (make-history-summary hist0
-;                                                               hist1
-;                                                               hist2)))))
+(defn is-he-a-fool? [hist0 hist1 hist2]
+  (test-entry (list 1 1 1)
+              (get-probability-of-c
+               (make-history-summary hist0 hist1 hist2))))
+
+(defn could-he-be-a-fool? [hist0 hist1 hist2]
+  (test-entry (list 1 1 1)
+              (map #(cond (nil? %) 1 
+                          (= % 1) 1
+                          :else 0)
+                   (get-probability-of-c (make-history-summary hist0
+                                                               hist1
+                                                               hist2)))))
+
+;; Use the get-probability-of procedure to write a predicate that
+;; tests whether another player is using the soft-eye-for-eye
+;; strategy.
+
+(defn is-he-soft-eye-for-eye? [hist0 hist1 hist2]
+  (test-entry (list 1 1 0)
+              (get-probability-of-c
+               (make-history-summary hist0 hist1 hist2))))
+
+;; Write a new strategy called DONT-TOLERATE-FOOLS that should
+;; cooperate for the first ten rounds; on subsequent rounds it checks
+;; (on each round) to see whether the other players might both be
+;; playing Patsy.  If our strategy finds that both other players seem
+;; to be cooperating uniformly, it defects; otherwise it cooperates.
+
+(defn DONT-TOLERATE-FOOLS [my-history history-a history-b]
+  (if (<= (history-length my-history) 10)
+      "c"
+      (if (and (could-he-be-a-fool? history-a my-history history-b)
+               (could-he-be-a-fool? history-b my-history history-a))
+        "d"
+        "c")))
+
+; (play-loop PATSY PATSY PATSY)
+
+;; Player 1 Score:  
+;; 4.0
+
+;; Player 2 Score:  
+;; 4.0
+
+;; Player 3 Score:  
+;; 4.0
+;; nil
+
+; (play-loop DONT-TOLERATE-FOOLS PATSY PATSY)
+
+;; Player 1 Score:  
+;; 4.891089108910891
+
+;; Player 2 Score:  
+;; 2.217821782178218
+
+;; Player 3 Score:  
+;; 2.217821782178218
+;; nil
+
+; (play-loop DONT-TOLERATE-FOOLS PATSY TOUGH-EYE-FOR-EYE)
+
+;; Player 1 Score:  
+;; 3.98
+
+;; Player 2 Score:  
+;; 3.92
+
+;; Player 3 Score:  
+;; 3.98
+;; nil
+
+; (play-loop PATSY PATSY TOUGH-EYE-FOR-EYE)
+
+;; Player 1 Score:  
+;; 4.0
+
+;; Player 2 Score:  
+;; 4.0
+
+;; Player 3 Score:  
+;; 4.0
+;; nil
+
+; (play-loop PATSY NASTY TOUGH-EYE-FOR-EYE)
+
+;; Player 1 Score:  
+;; 0.01818181818181818
+
+;; Player 2 Score:  
+;; 3.018181818181818
+
+;; Player 3 Score:  
+;; 2.990909090909091
+;; nil
+
+; (play-loop DONT-TOLERATE-FOOLS NASTY TOUGH-EYE-FOR-EYE)
+
+;; Player 1 Score:  
+;; 0.0202020202020202
+
+;; Player 2 Score:  
+;; 3.02020202020202
+
+;; Player 3 Score:  
+;; 2.98989898989899
