@@ -7,6 +7,8 @@
 ;;;
 (defn gcd [x y]
   (cond
+   (= x 0) 1
+   (= y 0) 1
    (> x y) (recur (- x y) y)
    (< x y) (recur x (- y x))
    :else x))
@@ -73,6 +75,7 @@
     (put-op :mul '(:clj-number :clj-number) #(tag (* %1 %2)))
     (put-op :div '(:clj-number :clj-number) #(tag (/ %1 %2)))
     (put-op :equ? '(:clj-number :clj-number) =)
+    (put-op :=zero? '(:clj-number) #(= 0.0 %1))
     (put-op :make :clj-number #(tag %)))
   :done)
 
@@ -82,7 +85,9 @@
 (defn install-rational-package []
   (let [numer #(first %)
         denom #(second %)
-        make-rat (fn [n d] (let [g (gcd n d)] (list (/ n g) (/ d g))))
+        make-rat (fn [n d] (let [g (gcd n d)]
+                             (print (str "gcd of " n " and " d " is " g))
+                             (list (/ n g) (/ d g))))
         add-rat #(make-rat (+ (* (numer %1) (denom %2))
                               (* (numer %2) (denom %1)))
                            (* (denom %1) (denom %2)))
@@ -99,6 +104,7 @@
     (put-op :mul '(:rational :rational) #(tag (mul-rat %1 %2)))
     (put-op :div '(:rational :rational) #(tag (div-rat %1 %2)))
     (put-op :equ? '(:rational :rational) =)
+    (put-op :=zero? '(:rational) #(= (numer %1) 0))
     (put-op :make '(:rational) #(tag (make-rat %1 %2)))))
 
 (defn make-rational [n d]
@@ -119,6 +125,9 @@
 (defn equ? [a b]
   (apply-generic :equ? a b))
 
+(defn =zero? [num]
+  (apply-generic :=zero? num))
+
 (defn install-rectangular-package []
   (letfn [(real-part [z] (first z))
           (imag-part [z] (second z))
@@ -132,6 +141,9 @@
           (make-from-real-imag [x y] (list x y))
           (tag [x] (attach-tag :rectangular x))]
     (put-op :equ? '(:rectangular :rectangular) =)
+    (put-op :=zero? '(:rectangular) (fn [n] (let [r (real-part n) 
+                                                  i (imag-part n)]
+                                              (and (= r 0) (= i 0)))))
     (put-op :real-part '(:rectangular) real-part)
     (put-op :imag-part '(:rectangular) imag-part)
     (put-op :magnitude '(:rectangular) magnitude)
@@ -155,8 +167,10 @@
             (cons (Math/sqrt (+ (square real) (square imag)))
                   (Math/atan2 imag real)))
           (tag [x] (attach-tag :polar x))
-          (make-from-mag-ang [r a] (list r a))]
+          (make-from-mag-ang [r a] (list r a))
+          (=zero? [z] (= (magnitude z) 0))]
     (put-op :equ? '(:polar :polar) =)
+    (put-op :=zero? '(:polar) #(= (magnitude %1) 0))
     (put-op :real-part '(:polar) real-part)
     (put-op :imag-part '(:polar) imag-part)
     (put-op :magnitude '(:polar) magnitude)
@@ -189,6 +203,7 @@
     (put-op :mul '(:complex :complex) #(tag (mul-complex %1 %2)))
     (put-op :div '(:complex :complex) #(tag (div-complex %1 %2)))
     (put-op :equ? '(:complex :complex) #(equ? %1 %2))
+    (put-op :=zero? '(:complex) =zero?)
     (put-op :make-from-real-imag '(:complex) #(tag (make-from-real-imag %1 %2)))
     (put-op :make-from-mag-ang '(:complex) #(tag (make-from-mag-ang %1 %2)))
     ;; below added as part of Exercise 2.77
@@ -270,6 +285,29 @@
   (testing "equ? works on complex-polar numbers"
     (is (equ? (make-complex-from-mag-ang 1 2)
               (make-complex-from-mag-ang 1 2)))))
+
+;; Exercise 2.80
+
+(deftest zero-ordinary
+  (testing "=zero? works on ordinary numbers"
+    (is (=zero? (make-clj-number 0.0)))))
+
+;(make-rational 0 5)
+
+(deftest zero-rational
+  (testing "=zero? works on rational numbers"
+    (is (=zero? (make-rational 0 5)))))
+
+;; (make-complex-from-real-imag 0 0)
+
+(deftest zero-complex-rectangular
+  (testing "=zero? works on complex-rectangular numbers"
+    (is (=zero? (make-complex-from-real-imag 0 0)))))
+
+(deftest zero-complex-polar
+  (testing "=zero? works on complex-polar numbers"
+     (is (=zero? (make-complex-from-mag-ang 0 523)))))
+
 
 
 ;;
