@@ -30,7 +30,6 @@
       (throw (Exception. (str "Could not find op " op-sym " with tags " (types-to-str type-tags) ".  Valid tags would be " (keys @operations))))
       op)))
 
-
 (defn attach-tag [type-tag contents]
   (if (= type-tag :clj-number)
     (list contents)
@@ -73,6 +72,7 @@
     (put-op :sub '(:clj-number :clj-number) #(tag (- %1 %2)))
     (put-op :mul '(:clj-number :clj-number) #(tag (* %1 %2)))
     (put-op :div '(:clj-number :clj-number) #(tag (/ %1 %2)))
+    (put-op :equ? '(:clj-number :clj-number) =)
     (put-op :make :clj-number #(tag %)))
   :done)
 
@@ -98,10 +98,11 @@
     (put-op :sub '(:rational :rational) #(tag (sub-rat %1 %2)))
     (put-op :mul '(:rational :rational) #(tag (mul-rat %1 %2)))
     (put-op :div '(:rational :rational) #(tag (div-rat %1 %2)))
+    (put-op :equ? '(:rational :rational) =)
     (put-op :make '(:rational) #(tag (make-rat %1 %2)))))
 
 (defn make-rational [n d]
-  ((get-op :make :rational) n d))
+  ((get-op :make '(:rational)) n d))
 
 (defn real-part [z]
   (apply-generic :real-part z))
@@ -115,24 +116,8 @@
 (defn angle [z]
   (apply-generic :angle z))
 
-
-(defn real-part-rectangular [z] (first z))
-
-(defn imag-part-rectangular [z] (second z))
-
-(defn magnitude-rectangular [z]
-  (Math/sqrt (+ (square (real-part-rectangular z))
-                (square (imag-part-rectangular z)))))
-
-(defn angle-rectangular [z]
-  (Math/atan2 (imag-part-rectangular z)
-              (real-part-rectangular z)))
-
-(defn make-from-real-imag-rectangular [real imag]
-  (cons real imag))
-
-(defn make-from-mag-ang-rectangular [mag ang]
-  (cons (* mag (Math/cos ang)) (* mag (Math/sin ang))))
+(defn equ? [a b]
+  (apply-generic :equ? a b))
 
 (defn install-rectangular-package []
   (letfn [(real-part [z] (first z))
@@ -140,11 +125,13 @@
           (make-from-real-imag [real imag] (list real imag))
           (magnitude [z] (Math/sqrt (+ (square (real-part z))
                                        (square (imag-part z)))))
-          (angle [z] (Math/atan2 (imag-part-rectangular z)
-                                 (real-part-rectangular z)))
+          (angle [z] (Math/atan2 (imag-part z)
+                                 (real-part z)))
           (make-from-mag-ang [mag ang] (cons (* mag (Math/cos ang))
                                              (* mag (Math/sin ang))))
+          (make-from-real-imag [x y] (list x y))
           (tag [x] (attach-tag :rectangular x))]
+    (put-op :equ? '(:rectangular :rectangular) =)
     (put-op :real-part '(:rectangular) real-part)
     (put-op :imag-part '(:rectangular) imag-part)
     (put-op :magnitude '(:rectangular) magnitude)
@@ -167,14 +154,16 @@
           (make-from-real-imag [real imag]
             (cons (Math/sqrt (+ (square real) (square imag)))
                   (Math/atan2 imag real)))
-          (tag [x] (attach-tag :polar x))]
-    (put-op :real-part :polar real-part)
-    (put-op :imag-part :polar imag-part)
-    (put-op :magnitude :polar magnitude)
-    (put-op :angle :polar angle)
+          (tag [x] (attach-tag :polar x))
+          (make-from-mag-ang [r a] (list r a))]
+    (put-op :equ? '(:polar :polar) =)
+    (put-op :real-part '(:polar) real-part)
+    (put-op :imag-part '(:polar) imag-part)
+    (put-op :magnitude '(:polar) magnitude)
+    (put-op :angle '(:polar) angle)
     (put-op :make-from-real-imag '(:polar)
             (fn [x y] (tag (make-from-real-imag x y))))
-    (put-op :make-from-mag-ang :polar (fn [r a] (tag (make-from-mag-ang r a))))
+    (put-op :make-from-mag-ang '(:polar) (fn [r a] (tag (make-from-mag-ang r a))))
     :done))
 
 
@@ -199,6 +188,7 @@
     (put-op :sub '(:complex :complex) #(tag (sub-complex %1 %2)))
     (put-op :mul '(:complex :complex) #(tag (mul-complex %1 %2)))
     (put-op :div '(:complex :complex) #(tag (div-complex %1 %2)))
+    (put-op :equ? '(:complex :complex) #(equ? %1 %2))
     (put-op :make-from-real-imag '(:complex) #(tag (make-from-real-imag %1 %2)))
     (put-op :make-from-mag-ang '(:complex) #(tag (make-from-mag-ang %1 %2)))
     ;; below added as part of Exercise 2.77
@@ -214,11 +204,6 @@
 (defn make-complex-from-mag-ang [x y]
   ((get-op :make-from-mag-ang '(:complex)) x y))
 
-
-
-
-    
-        
 ;;;        
 ;;; test a little
 ;;;
@@ -239,6 +224,8 @@
 
 ;; Exercise 2.77
 
+(install-rational-package)
+(install-polar-package)
 (install-rectangular-package)
 (install-complex-package)
 
@@ -257,6 +244,32 @@
 ;; this works because the ultimate data gets unwrapped one step at a
 ;; time, from '(:complex (:rectangular (3 4)))))), to (:rectangular (3
 ;; 4))
+
+;; Exercise 2.78 - changes made above - see git d648c64
+
+;; Exercise 2.79
+
+(make-complex-from-mag-ang 1 2)
+
+(deftest equ-ordinary
+  (testing "equ? works on ordinary numbers"
+    (is (equ? (make-clj-number 5.0)
+              (make-clj-number 5.0)))))
+
+(deftest equ-rational
+  (testing "equ? works on rational numbers"
+    (is (equ? (make-rational 1 2)
+              (make-rational 1 2)))))
+
+(deftest equ-complex-rectangular
+  (testing "equ? works on complex-rectangular numbers"
+    (is (equ? (make-complex-from-real-imag 1 2)
+              (make-complex-from-real-imag 1 2)))))
+
+(deftest equ-complex-polar
+  (testing "equ? works on complex-polar numbers"
+    (is (equ? (make-complex-from-mag-ang 1 2)
+              (make-complex-from-mag-ang 1 2)))))
 
 
 ;;
