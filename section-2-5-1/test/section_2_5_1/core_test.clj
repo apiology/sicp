@@ -13,10 +13,6 @@
 
 (defn square [x] (* x x))
 
-
-(defn attach-tag [type-tag contents]
-  (list type-tag contents))
-
 (def operations (atom {}))
 
 (defn put-op [op-sym type-tags op-fn]
@@ -34,15 +30,26 @@
       (throw (Exception. (str "Could not find op " op-sym " with tags " (types-to-str type-tags) ".  Valid tags would be " (keys @operations))))
       op)))
 
+
+(defn attach-tag [type-tag contents]
+  (if (= type-tag :clj-number)
+    (list contents)
+    (list type-tag contents)))
+
 (defn type-tag [datum]
   (if (seq datum)
-    (first datum)
+    (let [fitem (first datum)]
+      (if (number? fitem)
+        :clj-number
+        fitem))
     (throw (IllegalArgumentException. (str "Bad tagged dataum -- TYPE-TAG "
-                                           datum)))))
+                                             datum)))))
 
 (defn contents [datum]
   (if (seq datum)
-    (second datum)
+    (if (= :clj-number (type-tag datum))
+      (first datum)
+      (second datum))
     (throw (IllegalArgumentException. (str "Bad tagged dataum -- CONTENTS "
                                            datum)))))
 
@@ -160,7 +167,7 @@
           (make-from-real-imag [real imag]
             (cons (Math/sqrt (+ (square real) (square imag)))
                   (Math/atan2 imag real)))
-          (tag [x] (attach-tag 'polar x))]
+          (tag [x] (attach-tag :polar x))]
     (put-op :real-part :polar real-part)
     (put-op :imag-part :polar imag-part)
     (put-op :magnitude :polar magnitude)
