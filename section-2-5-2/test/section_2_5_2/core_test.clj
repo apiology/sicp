@@ -15,6 +15,20 @@
 
 ;; module infrastructure
 
+(def coercions (atom {}))
+
+(defn put-coercion [input-type output-type coercion-fn]
+  "Add to the global list of coercion based on the two-element list of
+   type tags describing the input and the output of the type, and the
+   function (coercion-fn) which should be called if matched"
+  (swap! coercions assoc (list input-type output-type) coercion-fn))
+
+(defn get-coercion [input-type output-type]
+  (let [coercion (get @coercions (list input-type output-type))] 
+    (if (nil? coercion)
+      nil
+      coercion)))
+
 (def operations (atom {}))
 
 (defn put-op [op-sym type-tags op-fn]
@@ -35,7 +49,7 @@
 (defn get-op [op-sym type-tags]
   (let [op (get @operations (list op-sym type-tags))] 
     (if (nil? op)
-      (throw (Exception. (str "Could not find op " op-sym " with tags " (types-to-str type-tags) ".  Valid tags would be " (keys @operations))))
+      nil
       op)))
 
 (defn attach-tag [type-tag contents]
@@ -48,14 +62,38 @@
     datum
     (second datum)))
 
+(declare apply-generic)
+
+(defn apply-two-arg-generic-with-coercions [op type-1 type-2 arg-1 arg-2]
+  (let [t1->t2 (get-coercion type-1 type-2)
+        t2->t1 (get-coercion type-2 type-1)]
+    (cond t1->t2
+          (apply-generic op (t1->t2 arg-1) arg-2)
+
+          t2->t1 
+          (apply-generic op arg-1 (t2->t1 arg-2))
+
+          :else 
+          (throw (Exception. (str "Could not find op " op 
+                                  " with tags " (types-to-str (list type-1 type-2))
+                                  ".  Valid tags would be " (keys @operations)))))))
+
+(defn apply-generic-with-coercions [op type-tags args]
+  (if (not= (count args) 2)
+    (throw (IllegalArgumentException.
+            (str "No method for these types - apply-generic"
+                 (list op type-tags))))
+    (apply-two-arg-generic-with-coercions op
+                                          (first type-tags) (second type-tags) 
+                                          (first args) (second args))))
+
 (defn apply-generic [op & args]
   (let [type-tags (map type-tag args)
         proc (get-op op type-tags)]
     (if proc
       (apply proc (map contents args))
-      (throw (IllegalArgumentException.
-              (str "No method for these types - apply-generic"
-                   (list op type-tags)))))))
+      (apply-generic-with-coercions op type-tags args))))
+
 
 ;(defn make-from-real-imag [real imag]
 ;  (apply-generic :make-from-real-imag real imag))
@@ -104,9 +142,6 @@
         div-complex (fn [z1 z2]
                       (make-from-mag-ang (/ (magnitude z1) (magnitude z2))
                                          (- (angle z1) (angle z2))))
-        bad-add-complex-to-cljnum (fn [z x]
-                                    (make-from-real-imag (+ (real-part z) x)
-                                                         (imag-part z)))
         tag #(attach-tag :complex %)]
     (put-op :add '(:complex :complex) #(tag (add-complex %1 %2)))
     (put-op :sub '(:complex :complex) #(tag (sub-complex %1 %2)))
@@ -121,7 +156,6 @@
     (put-op :imag-part '(:complex) imag-part)
     (put-op :magnitude '(:complex) magnitude)
     (put-op :angle '(:complex) angle)
-    (put-op :add '(:complex :clj-number) #(tag (bad-add-complex-to-cljnum %1 %2)))
     'done))
 
 (defn make-complex-from-real-imag [x y]
@@ -173,11 +207,6 @@
 
 ;; the bad way
 
-(deftest test-bad-approach
-  (testing "FIXME, I fail."
-    (is (= (make-complex-from-real-imag 6 2) 
-           (add (make-complex-from-real-imag 1 2)
-                5)))))
 
 ;; slightly better way
 
@@ -188,6 +217,23 @@
   (testing "FIXME, I fail."
     (is (= (make-complex-from-real-imag 5 0)
            (clj-number->complex 5)))))
+
+
+
+(put-coercion :clj-number :complex clj-number->complex)
+
+(deftest test-slightly-better-approach
+  (testing "FIXME, I fail."
+    (is (= (make-complex-from-real-imag 5 0)
+           (clj-number->complex 5)))))
+
+(deftest test-adding-mixed
+  (testing "FIXME, I fail."
+    (is (= (make-complex-from-real-imag 6 2) 
+           (add (make-complex-from-real-imag 1 2)
+                5)))))
+
+
 
 ;; (defn apply-generic [op & args]
 ;;   (let [type-tags (map type-tag args)
