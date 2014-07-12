@@ -65,20 +65,24 @@
     (second datum)))
 
 (declare apply-generic)
+(defn cant-resolve-op [op types]
+  (throw (Exception. (str "Could not find op " op 
+                          " with tags " (types-to-str types)
+                          ".  Valid tags would be " (keys @operations)))))
 
 (defn apply-two-arg-generic-with-coercions [op type-1 type-2 arg-1 arg-2]
-  (let [t1->t2 (get-coercion type-1 type-2)
-        t2->t1 (get-coercion type-2 type-1)]
-    (cond t1->t2
-          (apply-generic op (t1->t2 arg-1) arg-2)
+  (if (= type-1 type-2) ;; coercing type to itself is silly.
+    (cant-resolve-op op (list type-1 type-2))
+    (let [t1->t2 (get-coercion type-1 type-2)
+          t2->t1 (get-coercion type-2 type-1)]
+      (cond t1->t2
+            (apply-generic op (t1->t2 arg-1) arg-2)
 
-          t2->t1 
-          (apply-generic op arg-1 (t2->t1 arg-2))
+            t2->t1 
+            (apply-generic op arg-1 (t2->t1 arg-2))
 
-          :else 
-          (throw (Exception. (str "Could not find op " op 
-                                  " with tags " (types-to-str (list type-1 type-2))
-                                  ".  Valid tags would be " (keys @operations)))))))
+            :else 
+            (cant-resolve-op op (list type-1 type-2))))))
 
 (defn apply-generic-with-coercions [op type-tags args]
   (if (not= (count args) 2)
@@ -250,8 +254,9 @@
     (is (= (make-complex-from-real-imag 6 2) 
            (add (make-complex-from-real-imag 1 2)
                 5)))))
-
+;;
 ;; Exercise 2.81
+;;
 
 ;; Will it try to coerce into each other's type even if types are same?
 
@@ -264,8 +269,25 @@
 ; coercion and try it...infinitely, as we keep finding it and trying
 ; it.  it would be bad.
 
-;; 
-
-(deftest test-exponentiating
-  (testing "FIXME, I fail."
+(deftest test-exponentiating-clj-number
+  (testing "exponentiation clojure numbers"
     (is (= (exp 2 5) 32))))
+
+;; what happens if we call exp with two complex numbers as arguments?
+
+(deftest test-exponentiating-complexes
+  (testing "exponentiation complex numbers"
+    (is (thrown? java.lang.Exception
+           (exp (make-complex-from-real-imag 6 2)
+                (make-complex-from-real-imag 6 2))))))
+         
+;; b. Is Louis correct that something had to be done abou coercion
+;; with arguments of the same type, or does apply-generic work
+;; correctly as is?
+
+; probably wouldn't be a bad idea.
+
+;;
+;; Exercise 2.82
+;;
+
