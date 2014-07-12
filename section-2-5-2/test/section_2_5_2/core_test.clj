@@ -104,6 +104,9 @@
         div-complex (fn [z1 z2]
                       (make-from-mag-ang (/ (magnitude z1) (magnitude z2))
                                          (- (angle z1) (angle z2))))
+        bad-add-complex-to-cljnum (fn [z x]
+                                    (make-from-real-imag (+ (real-part z) x)
+                                                         (imag-part z)))
         tag #(attach-tag :complex %)]
     (put-op :add '(:complex :complex) #(tag (add-complex %1 %2)))
     (put-op :sub '(:complex :complex) #(tag (sub-complex %1 %2)))
@@ -118,6 +121,7 @@
     (put-op :imag-part '(:complex) imag-part)
     (put-op :magnitude '(:complex) magnitude)
     (put-op :angle '(:complex) angle)
+    (put-op :add '(:complex :clj-number) #(tag (bad-add-complex-to-cljnum %1 %2)))
     'done))
 
 (defn make-complex-from-real-imag [x y]
@@ -149,9 +153,9 @@
     (put-op :imag-part '(:rectangular) imag-part)
     (put-op :magnitude '(:rectangular) magnitude)
     (put-op :angle '(:rectangular) angle)
-    (put-op :make-from-real-imag '(:complex)
+    (put-op :make-from-real-imag '(:rectangular)
             (fn [x y] (tag (make-from-real-imag x y))))
-    (put-op :make-from-mag-ang '(:complex)
+    (put-op :make-from-mag-ang '(:rectangular)
             (fn [r a] (tag (make-from-mag-ang r a))))
     :done))
 
@@ -168,17 +172,22 @@
 
 
 ;; the bad way
-(defn bad-add-complex-to-cljnum [z x]
-  (make-complex-from-real-imag (+ (real-part z) x)
-                               (imag-part z)))
-
-;(put-op :add '(:complex :clj-num) #(tag (bad-add-complex-to-cljnum %1 %2))
 
 (deftest test-bad-approach
   (testing "FIXME, I fail."
     (is (= (make-complex-from-real-imag 6 2) 
-           (bad-add-complex-to-cljnum (make-complex-from-real-imag 1 2)
-                                      5)))))
+           (add (make-complex-from-real-imag 1 2)
+                5)))))
+
+;; slightly better way
+
+(defn clj-number->complex [n]
+  (make-complex-from-real-imag (contents n) 0))
+
+(deftest test-slightly-better-approach
+  (testing "FIXME, I fail."
+    (is (= (make-complex-from-real-imag 5 0)
+           (clj-number->complex 5)))))
 
 ;; (defn apply-generic [op & args]
 ;;   (let [type-tags (map type-tag args)
