@@ -24,13 +24,10 @@
   (swap! operations assoc (list op-sym type-tags) op-fn))
 
 (defn type-tag [datum]
-  (if (seq datum)
-    (let [fitem (first datum)]
-      (if (number? fitem)
-        :clj-number
-        fitem))
-    (throw (IllegalArgumentException. (str "Bad tagged dataum -- TYPE-TAG "
-                                             datum)))))
+  (cond (number? datum) :clj-number
+        (seq? datum) (first datum)
+        :else (throw (IllegalArgumentException. (str "Bad tagged dataum -- TYPE-TAG "
+                                                     datum)))))
 
 (defn types-to-str [type-tags]
   (apply str (flatten (list type-tags))))
@@ -47,12 +44,9 @@
     (list type-tag contents)))
 
 (defn contents [datum]
-  (if (seq datum)
-    (if (= :clj-number (type-tag datum))
-      (first datum)
-      (second datum))
-    (throw (IllegalArgumentException. (str "Bad tagged dataum -- CONTENTS "
-                                           datum)))))
+  (if (= :clj-number (type-tag datum))
+    datum
+    (second datum)))
 
 (defn apply-generic [op & args]
   (let [type-tags (map type-tag args)
