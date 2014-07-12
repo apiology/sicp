@@ -70,28 +70,35 @@
                           " with tags " (types-to-str types)
                           ".  Valid tags would be " (keys @operations)))))
 
-(defn apply-two-arg-generic-with-coercions [op type-1 type-2 arg-1 arg-2]
-  (if (= type-1 type-2) ;; coercing type to itself is silly.
-    (cant-resolve-op op (list type-1 type-2))
-    (let [t1->t2 (get-coercion type-1 type-2)
-          t2->t1 (get-coercion type-2 type-1)]
-      (cond t1->t2
-            (apply-generic op (t1->t2 arg-1) arg-2)
+(defn coerce-value [new-type value]
+  (let [old-type (type-tag value)
+        coercion-fn (get-coercion old-type new-type)]
+    (if coercion-fn
+      (coercion-fn value)
+      (if (= new-type old-type)
+        value
+        nil))))
 
-            t2->t1 
-            (apply-generic op arg-1 (t2->t1 arg-2))
-
-            :else 
-            (cant-resolve-op op (list type-1 type-2))))))
+(defn coerce-args [unified-type args]
+  (let [new-args (map #(coerce-value unified-type %) args)]
+    (if (some nil? new-args)
+      nil ;; couldn't coerce at least one arg
+      new-args)))
 
 (defn apply-generic-with-coercions [op type-tags args]
-  (if (not= (count args) 2)
-    (throw (IllegalArgumentException.
-            (str "No method for these types - apply-generic"
-                 (list op type-tags))))
-    (apply-two-arg-generic-with-coercions op
-                                          (first type-tags) (second type-tags) 
-                                          (first args) (second args))))
+  (let [unique-types (set type-tags)]
+    (loop [unified-type (first unique-types)
+           remaining-types (rest unique-types)]
+      (let [unified-type-tags (repeat (count args) unified-type)]
+        (if-let [new-args (coerce-args unified-type args)]
+          (if-let [proc (get-op op unified-type-tags)]
+            (apply proc (map contents new-args))
+            (if (empty? remaining-types)
+              (cant-resolve-op op type-tags)
+              (recur (first remaining-types) (rest remaining-types))))
+          (if (empty? remaining-types)
+            (cant-resolve-op op type-tags)
+            (recur (first remaining-types) (rest remaining-types))))))))
 
 (defn apply-generic [op & args]
   (let [type-tags (map type-tag args)
@@ -291,3 +298,10 @@
 ;; Exercise 2.82
 ;;
 
+;; When trying to to coerce all to the same type, you're going to run
+;; into problems where mixed types don't work correctly.  For
+;; instance, if we had a complex->integer function foo(complex,
+;; integer), and tried to call it with two integers, we wouldn't find
+;; the value.
+
+;; See above for implementation
