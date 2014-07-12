@@ -1,6 +1,8 @@
 (ns section-2-5-2.core-test
   (:require [clojure.test :refer :all]
-            [section-2-5-2.core :refer :all]))
+            [section-2-5-2.core :refer :all]
+            [clojure.math.numeric-tower :as math]))
+
 
 ;; common stuff
 (defn gcd [x y]
@@ -54,7 +56,7 @@
 
 (defn attach-tag [type-tag contents]
   (if (= type-tag :clj-number)
-    (list contents)
+    contents
     (list type-tag contents)))
 
 (defn contents [datum]
@@ -120,6 +122,7 @@
 (defn sub [x y] (apply-generic :sub x y))
 (defn mul [x y] (apply-generic :mul x y))
 (defn div [x y] (apply-generic :div x y))
+(defn exp [x y] (apply-generic :exp x y))
 
 
 ;;;;;;;;;;;;;;;;;;
@@ -195,10 +198,25 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn install-clj-number-package []
+  (let [tag #(attach-tag :clj-number %)]
+    (put-op :add '(:clj-number :clj-number) #(tag (+ %1 %2)))
+    (put-op :sub '(:clj-number :clj-number) #(tag (- %1 %2)))
+    (put-op :mul '(:clj-number :clj-number) #(tag (* %1 %2)))
+    (put-op :div '(:clj-number :clj-number) #(tag (/ %1 %2)))
+    (put-op :equ? '(:clj-number :clj-number) =)
+    (put-op :exp '(:clj-number :clj-number) #(tag (math/expt %1 %2)))
+    (put-op :=zero? '(:clj-number) #(= 0.0 %1))
+    (put-op :make :clj-number #(tag %)))
+  :done)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;;;;;;;;;;;;;;;;;
 ;install packages
 ;;;;;;;;;;;;;;;;;;
 
+(install-clj-number-package)
 (install-complex-package)
 (install-rectangular-package)
 
@@ -233,21 +251,21 @@
            (add (make-complex-from-real-imag 1 2)
                 5)))))
 
+;; Exercise 2.81
 
+;; Will it try to coerce into each other's type even if types are same?
 
-;; (defn apply-generic [op & args]
-;;   (let [type-tags (map type-tag args)
-;;         proc (get-op op type-tags)]
-;;     (if proc
-;;       (apply proc (map contents args))
-;;       (if (= (length args) 2)
-;;         (let [type1 (first type-tags)
-;;               type2 (second type-tags)
-;;               a1 (XXX)]))
-      
-;;       (throw (IllegalArgumentException.
-;;               (str "No method for these types - apply-generic"
-;;                    (list op type-tags)))))))
+; well, yes, but only if the op doesn't exist already.
 
+;; With like-to-like coercion installed, what happens if apply-generic
+;; is called with two args of clj-number or complex?
 
+; If the function is installed, we'll use it.  If not, we'll look for
+; coercion and try it...infinitely, as we keep finding it and trying
+; it.  it would be bad.
 
+;; 
+
+(deftest test-exponentiating
+  (testing "FIXME, I fail."
+    (is (= (exp 2 5) 32))))
