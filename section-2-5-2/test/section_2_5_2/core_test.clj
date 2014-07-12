@@ -108,9 +108,6 @@
       (apply-generic-with-coercions op type-tags args))))
 
 
-;(defn make-from-real-imag [real imag]
-;  (apply-generic :make-from-real-imag real imag))
-
 (defn real-part [z]
   (apply-generic :real-part z))
 
@@ -129,6 +126,9 @@
 (defn =zero? [num]
   (apply-generic :=zero? num))
 
+(defn raise [num]
+  (apply-generic :raise num))
+
 (defn add [x y] (apply-generic :add x y))
 (defn sub [x y] (apply-generic :sub x y))
 (defn mul [x y] (apply-generic :mul x y))
@@ -136,13 +136,44 @@
 (defn exp [x y] (apply-generic :exp x y))
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn install-rational-package []
+  (let [numer #(first %)
+        denom #(second %)
+        make-rat (fn [n d] (let [g (gcd n d)]
+                             (print (str "gcd of " n " and " d " is " g))
+                             (list (/ n g) (/ d g))))
+        add-rat #(make-rat (+ (* (numer %1) (denom %2))
+                              (* (numer %2) (denom %1)))
+                           (* (denom %1) (denom %2)))
+        sub-rat #(make-rat (- (* (numer %1) (denom %2))
+                              (* (numer %2) (denom %1)))
+                           (* (denom %1) (denom %2)))
+        mul-rat #(make-rat (* (* (numer %1) (numer %2))
+                              (* (denom %1) (denom %2))))
+        div-rat #(make-rat (* (numer %1) (denom %2))
+                           (* (denom %1) (denom %2)))
+        tag #(attach-tag :rational %)]
+    (put-op :add '(:rational :rational) #(tag (add-rat %1 %2)))
+    (put-op :sub '(:rational :rational) #(tag (sub-rat %1 %2)))
+    (put-op :mul '(:rational :rational) #(tag (mul-rat %1 %2)))
+    (put-op :div '(:rational :rational) #(tag (div-rat %1 %2)))
+    (put-op :equ? '(:rational :rational) =)
+    (put-op :=zero? '(:rational) #(= (numer %1) 0))
+    (put-op :raise '(:clj-number) #(tag (make-rat %1 1)))
+    (put-op :make :rational #(tag (make-rat %1 %2)))))
+
+(defn make-rational [n d]
+  ((get-op :make :rational) n d))
+
 ;;;;;;;;;;;;;;;;;;
 
 ;; complex module
 
 (defn install-complex-package []
-  (let [make-from-real-imag #((get-op :make-from-real-imag '(:rectangular)) %1 %2)
-        make-from-mag-ang #((get-op :make-from-mag-ang '(:polar)) %1 %2)
+  (let [make-from-real-imag #((get-op :make-from-real-imag :rectangular) %1 %2)
+        make-from-mag-ang #((get-op :make-from-mag-ang :polar) %1 %2)
         ;; internal procedures
         add-complex (fn [z1 z2]
                       (make-from-real-imag (+ (real-part z1) (real-part z2))
@@ -163,20 +194,21 @@
     (put-op :div '(:complex :complex) #(tag (div-complex %1 %2)))
     (put-op :equ? '(:complex :complex) #(equ? %1 %2))
     (put-op :=zero? '(:complex) =zero?)
-    (put-op :make-from-real-imag '(:complex) #(tag (make-from-real-imag %1 %2)))
-    (put-op :make-from-mag-ang '(:complex) #(tag (make-from-mag-ang %1 %2)))
+    (put-op :make-from-real-imag :complex #(tag (make-from-real-imag %1 %2)))
+    (put-op :make-from-mag-ang :complex #(tag (make-from-mag-ang %1 %2)))
     ;; below added as part of Exercise 2.77
     (put-op :real-part '(:complex) real-part)
     (put-op :imag-part '(:complex) imag-part)
     (put-op :magnitude '(:complex) magnitude)
     (put-op :angle '(:complex) angle)
+    (put-op :raise '(:rational) #(tag (make-from-real-imag (apply make-rational %1) 0)))
     'done))
 
 (defn make-complex-from-real-imag [x y]
-  ((get-op :make-from-real-imag '(:complex)) x y))
+  ((get-op :make-from-real-imag :complex) x y))
 
 (defn make-complex-from-mag-ang [x y]
-  ((get-op :make-from-mag-ang '(:complex)) x y))
+  ((get-op :make-from-mag-ang :complex) x y))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; rectangular module
@@ -201,9 +233,9 @@
     (put-op :imag-part '(:rectangular) imag-part)
     (put-op :magnitude '(:rectangular) magnitude)
     (put-op :angle '(:rectangular) angle)
-    (put-op :make-from-real-imag '(:rectangular)
+    (put-op :make-from-real-imag :rectangular
             (fn [x y] (tag (make-from-real-imag x y))))
-    (put-op :make-from-mag-ang '(:rectangular)
+    (put-op :make-from-mag-ang :rectangular
             (fn [r a] (tag (make-from-mag-ang r a))))
     :done))
 
@@ -230,6 +262,7 @@
 (install-clj-number-package)
 (install-complex-package)
 (install-rectangular-package)
+(install-rational-package)
 
 ;;;; test a little
 
@@ -305,3 +338,19 @@
 ;; the value.
 
 ;; See above for implementation
+
+;; Exercise 2.83
+
+;; Design a procedure that raises objects of that type one level in
+;; the tower.  Show how to install a generic raise operation that will
+;; work for each type (except complex)
+
+
+(deftest test-raise
+  (testing "can raise clj-number"
+    (is (= '(:rational (3 1))
+           (raise 3))))
+  (testing "can raise rational"
+    (is (= '(:complex (:rectangular ((:rational (3 1)) 0)))
+           (raise (raise 3))))))
+
