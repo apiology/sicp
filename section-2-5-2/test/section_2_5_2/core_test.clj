@@ -12,11 +12,15 @@
 ;  (println (pretty-format args))
 )
 
+
 ;; common stuff
 (defn gcd [x y]
   {:pre [(>= x 0)
-         (>= y 0)]
+         (>= y 0)
+         (integer? x)
+         (integer? y)]
    :post [(> % 0)]}
+  (log "Calling (gcd " x " " y ")")
   (cond
    (= x 0) 1
    (= y 0) 1
@@ -280,8 +284,10 @@
 (defn install-rational-package []
   (let [numer #(first %)
         denom #(second %)
-        make-rat (fn [n d] (let [g (gcd (abs n) (abs d))]
-                             (list (/ n g) (/ d g))))
+        make-rat (fn [n d] (if (and (integer? n) (integer? d))
+                             (let [g (gcd (abs n) (abs d))]
+                               (list (/ n g) (/ d g)))
+                             (list n d)))
         add-rat #(make-rat (+ (* (numer %1) (denom %2))
                               (* (numer %2) (denom %1)))
                            (* (denom %1) (denom %2)))
