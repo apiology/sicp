@@ -3,8 +3,13 @@
             [section-2-5-2.core :refer :all]
             [clojure.math.numeric-tower :as math]))
 
+;(defn space-out [coll]
+;  (map str coll))
+(defn pretty-format [args]
+  (apply str args))
+
 (defn log [& args]
-;  (println (apply str args))
+;  (println (pretty-format args))
 )
 
 ;; common stuff
