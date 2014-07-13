@@ -799,7 +799,8 @@
   (testing "magnitude of a regular polar complex"
     (is (= 1
            (magnitude (make-complex-from-mag-ang 1 1)))))
-  ;(testing "magnitude of a rational polar complex"
-  ;  (is (= nil
-  ;         (magnitude (make-complex-from-mag-ang 1 1)))))
+  (testing "magnitude of a rational polar complex"
+    (is (= 1
+           (magnitude (make-complex-from-mag-ang (make-rational 1 1) (make-rational 1 1))))))
+  
 )
