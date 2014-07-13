@@ -216,6 +216,9 @@
 (defn lt [x y] (let [ret (apply-generic-no-simplify :lt x y)]
                  (log "(lt " x " " y ") = " ret)
                  ret))
+(defn gt [x y] (let [ret (apply-generic-no-simplify :gt x y)]
+                 (log "(gt " x " " y ") = " ret)
+                 ret))
 (defn gte [x y] (let [ret (not (lt x y))]
                   (log "(gte " x " " y ") = " ret)
                   ret))
@@ -330,8 +333,10 @@
                        (log "(is-neg-rat? " %1 ") = " ret)
                        ret)
         lt-rat #(is-neg?-rat (sub-rat %1 %2))
+        gt-rat #(is-neg?-rat (sub-rat %2 %1))
         tag #(attach-tag :rational %)]
     (put-op :lt '(:rational :rational) #(lt-rat %1 %2))
+    (put-op :gt '(:rational :rational) #(gt-rat %1 %2))
     (put-op :add '(:rational :rational) #(tag (add-rat %1 %2)))
     (put-op :sub '(:rational :rational) #(tag (sub-rat %1 %2)))
     (put-op :mul '(:rational :rational) #(tag (mul-rat %1 %2)))
@@ -430,6 +435,7 @@
     (put-op :mul '(:clj-number :clj-number) #(tag (* %1 %2)))
     (put-op :div '(:clj-number :clj-number) #(tag (/ %1 %2)))
     (put-op :lt '(:clj-number :clj-number) #(< %1 %2))
+    (put-op :gt '(:clj-number :clj-number) #(> %1 %2))
     (put-op :equ? '(:clj-number :clj-number) =)
     (put-op :exp '(:clj-number :clj-number) #(tag (math/expt %1 %2)))
     (put-op :=zero? '(:clj-number) #(= 0.0 %1))
