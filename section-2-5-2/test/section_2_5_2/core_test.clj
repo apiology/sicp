@@ -213,7 +213,9 @@
             (let [next-args (raise-one-step current-args)]
               (recur next-args))))))))
 
-(defn lt [x y] (apply-generic-no-simplify :lt x y))
+(defn lt [x y] (let [ret (apply-generic-no-simplify :lt x y)]
+                 (log "(lt " x " " y ") = " ret)
+                 ret))
 (defn add [x y] (apply-generic :add x y))
 (defn sub [x y] (apply-generic :sub x y))
 (defn mul [x y] (apply-generic :mul x y))
@@ -291,9 +293,13 @@
         add-rat #(make-rat (+ (* (numer %1) (denom %2))
                               (* (numer %2) (denom %1)))
                            (* (denom %1) (denom %2)))
-        sub-rat #(make-rat (- (* (numer %1) (denom %2))
-                              (* (numer %2) (denom %1)))
-                           (* (denom %1) (denom %2)))
+        sub-rat #(do
+                   (log "(sub-rat " %1 %2 ")")
+                   (let [ret (make-rat (- (* (numer %1) (denom %2))
+                                          (* (numer %2) (denom %1)))
+                                       (* (denom %1) (denom %2)))]
+                     (log "(sub-rat " %1 %2 ") = " ret)
+                     ret))
         mul-rat #(make-rat (* (numer %1) (numer %2))
                            (* (denom %1) (denom %2)))
         div-rat #(make-rat (* (numer %1) (denom %2))
