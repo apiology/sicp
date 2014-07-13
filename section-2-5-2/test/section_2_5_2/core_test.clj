@@ -13,8 +13,6 @@
    (< x y) (recur x (- y x))
    :else x))
 
-(defn square [x] (* x x))
-
 ;; module infrastructure
 
 (def coercions (atom {}))
@@ -127,12 +125,6 @@
             (cant-resolve-op op type-tags)
             (recur (first remaining-types) (rest remaining-types))))))))
 
-(defn apply-generic [op & args]
-  (let [type-tags (map type-tag args)
-        proc (get-op op type-tags)]
-    (if proc
-      (apply proc (map contents args))
-      (apply-generic-with-coercions op type-tags args))))
 
 (defn apply-generic-or-nil [op & args]
   (let [type-tags (map type-tag args)
@@ -155,6 +147,7 @@
   (apply-generic :angle z))
 
 (defn equ? [a b]
+  (println (str "Call equ? on " a " and " b))
   (apply-generic :equ? a b))
 
 (defn =zero? [num]
@@ -162,6 +155,9 @@
 
 (defn raise [num]
   (apply-generic-or-nil :raise num))
+
+(defn project-one-step [x] 
+  (apply-generic-or-nil :project-one-step x))
 
 (defn raise-one-step [args]
   (let [type-tags-vec (vec (map type-tag args))
@@ -175,11 +171,50 @@
         nil)
       nil)))
 
+(defn apply-generic [op & args]
+  (loop [current-args args]
+    (println (str "Trying " op " apply-generic with args " (apply str current-args)))
+    (if (nil? current-args)
+      (cant-resolve-op op (map type-tag args))
+      (let [type-tags (map type-tag current-args)
+            proc (get-op op type-tags)]
+        (if proc
+          (apply proc (map contents current-args))
+          (let [next-args (raise-one-step current-args)]
+            (recur next-args)))))))
+
+
 (defn add [x y] (apply-generic :add x y))
 (defn sub [x y] (apply-generic :sub x y))
 (defn mul [x y] (apply-generic :mul x y))
 (defn div [x y] (apply-generic :div x y))
 (defn exp [x y] (apply-generic :exp x y))
+(defn square [x] (mul x x))
+
+(defn abs [x]
+  (if (> 0 x) (- x) x))
+(def tolerance 0.00001)
+(defn average [a b]
+  (div (add a b) 2))
+(defn average-damp [f]
+  #(average % (f %)))
+
+(defn fixed-point [f first-guess]
+  (defn close-enough? [v1 v2]
+    (println (str "Close enough? " v1 " " v2))
+    (let [delta (abs (sub v1 v2))]
+      (<  delta tolerance)))
+  (defn my-try [guess]
+    (let [next (f guess)]
+      (if (close-enough? guess next)
+        next
+        (my-try next))))
+  (my-try first-guess))
+(defn sqrt-damped [x]
+  (println (str "Trying to sqrt-damped of " sqrt-damped))
+  (fixed-point (average-damp #(div x %))
+               1.0))
+(def sqrt sqrt-damped)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -195,8 +230,8 @@
         sub-rat #(make-rat (- (* (numer %1) (denom %2))
                               (* (numer %2) (denom %1)))
                            (* (denom %1) (denom %2)))
-        mul-rat #(make-rat (* (* (numer %1) (numer %2))
-                              (* (denom %1) (denom %2))))
+        mul-rat #(make-rat (* (numer %1) (numer %2))
+                           (* (denom %1) (denom %2)))
         div-rat #(make-rat (* (numer %1) (denom %2))
                            (* (denom %1) (denom %2)))
         tag #(attach-tag :rational %)]
@@ -208,6 +243,7 @@
     (put-op :=zero? '(:rational) #(= (numer %1) 0))
     (put-op :lower-type :rational (fn [] :clj-number))
     (put-op :raise '(:clj-number) #(tag (make-rat %1 1)))
+    (put-op :project-one-step '(:rational) #(numer %1))
     (put-op :make :rational #(tag (make-rat %1 %2)))))
 
 (defn make-rational [n d]
@@ -222,17 +258,17 @@
         make-from-mag-ang #((get-op :make-from-mag-ang :polar) %1 %2)
         ;; internal procedures
         add-complex (fn [z1 z2]
-                      (make-from-real-imag (+ (real-part z1) (real-part z2))
-                                           (+ (imag-part z1) (imag-part z2))))
+                      (make-from-real-imag (add (real-part z1) (real-part z2))
+                                           (add (imag-part z1) (imag-part z2))))
         sub-complex (fn [z1 z2]
-                      (make-from-real-imag (- (real-part z1) (real-part z2))
-                                           (- (imag-part z1) (imag-part z2))))
+                      (make-from-real-imag (sub (real-part z1) (real-part z2))
+                                           (sub (imag-part z1) (imag-part z2))))
         mul-complex (fn [z1 z2]
-                      (make-from-mag-ang (* (magnitude z1) (magnitude z2))
-                                         (+ (angle z1) (angle z2))))
+                      (make-from-mag-ang (mul (magnitude z1) (magnitude z2))
+                                         (add (angle z1) (angle z2))))
         div-complex (fn [z1 z2]
-                      (make-from-mag-ang (/ (magnitude z1) (magnitude z2))
-                                         (- (angle z1) (angle z2))))
+                      (make-from-mag-ang (div (magnitude z1) (magnitude z2))
+                                         (sub (angle z1) (angle z2))))
         tag #(attach-tag :complex %)]
     (put-op :add '(:complex :complex) #(tag (add-complex %1 %2)))
     (put-op :sub '(:complex :complex) #(tag (sub-complex %1 %2)))
@@ -248,6 +284,7 @@
     (put-op :magnitude '(:complex) magnitude)
     (put-op :angle '(:complex) angle)
     (put-op :lower-type :complex (fn [] :rational))
+    (put-op :project-one-step '(:complex) #(project-one-step %1))
     (put-op :raise '(:rational) #(tag (make-from-real-imag (apply make-rational %1) 0)))
     'done))
 
@@ -264,8 +301,8 @@
   (letfn [(real-part [z] (first z))
           (imag-part [z] (second z))
           (make-from-real-imag [real imag] (list real imag))
-          (magnitude [z] (Math/sqrt (+ (square (real-part z))
-                                       (square (imag-part z)))))
+          (magnitude [z] (sqrt (add (square (real-part z))
+                                    (square (imag-part z)))))
           (angle [z] (Math/atan2 (imag-part z)
                                  (real-part z)))
           (make-from-mag-ang [mag ang] (cons (* mag (Math/cos ang))
@@ -284,6 +321,7 @@
             (fn [x y] (tag (make-from-real-imag x y))))
     (put-op :make-from-mag-ang :rectangular
             (fn [r a] (tag (make-from-mag-ang r a))))
+    (put-op :project-one-step '(:rectangular) #(real-part %1))
     :done))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -338,9 +376,10 @@
 
 (deftest test-adding-mixed
   (testing "FIXME, I fail."
-    (is (= (make-complex-from-real-imag 6 2) 
+    (is (= (make-complex-from-real-imag (make-rational 6 1) 2) 
            (add (make-complex-from-real-imag 1 2)
                 5)))))
+
 ;;
 ;; Exercise 2.81
 ;;
@@ -507,3 +546,56 @@
   (testing "raise-one-step five"
     (is (= nil
            (raise-one-step (list (make-complex-from-real-imag 3 4) (make-complex-from-real-imag 3 4)))))))
+
+;;
+;; Exercise 2.85
+;;
+
+
+(deftest test-project-one-step
+  (testing "project a clj-number unsuccessfully"
+    (is (= nil
+           (project-one-step 5))))
+  (testing "project a rational"
+    (is (= 5
+           (project-one-step (make-rational 5 1)))))
+  (testing "project a rational unsuccessfully"
+    (is (= 5
+           (project-one-step (make-rational 5 2)))))
+;;  (testing "project a complex to a rational"
+;;    (is (= '(:rational (1 2))
+;;           (project-one-step (make-complex-from-real-imag (make-rational 1 2) 0)))))
+  (testing "project a complex to a clj-number"
+    (is (= 2
+           (project-one-step (make-complex-from-real-imag 2 0)))))
+  (testing "project a complex unsuccessfully"
+    (is (= 2
+           (project-one-step (make-complex-from-real-imag 2 1))))))
+
+(defn drop-item-one-step [num]
+  (if-let [projected (project-one-step num)]
+    (let [raised (raise projected)]
+      (println (str "drop-item-one-step: Projected is " projected ", raised is " raised))
+      (if (equ? num raised)
+        projected
+        nil))))
+
+(deftest test-drop-item-one-step
+  (testing "drop a clj-number unsuccessfully"
+    (is (= nil
+           (drop-item-one-step 5))))
+  (testing "drop a rational"
+    (is (= 5
+           (drop-item-one-step (make-rational 5 1)))))
+  (testing "drop a rational unsuccessfully"
+    (is (= nil
+           (drop-item-one-step (make-rational 5 2)))))
+;;  (testing "drop a complex to a rational"
+;;    (is (= '(:rational (1 2))
+;;           (drop-item-one-step (make-complex-from-real-imag (make-rational 1 2) 0)))))
+  (testing "drop a complex to a clj-number"
+    (is (= (make-rational 2 1)
+           (drop-item-one-step (make-complex-from-real-imag (make-rational 2 1) 0)))))
+  (testing "drop a complex unsuccessfully"
+    (is (= nil
+           (drop-item-one-step (make-complex-from-real-imag (make-rational 2 1) 1))))))
