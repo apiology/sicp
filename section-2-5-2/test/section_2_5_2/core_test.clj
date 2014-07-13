@@ -763,13 +763,13 @@
   (testing "magnitude of a regular rectangular complex"
     (is (= (sqrt 2)
            (magnitude (make-complex-from-real-imag 1 1)))))
-  ;(testing "magnitude of a rational rectangular complex"
-  ;  (is (= nil
-  ;         (magnitude (make-complex-from-real-imag (make-rational 1 2) 
-  ;                                                 (make-rational 1 2))))))
-  ;; (testing "magnitude of a regular polar complex"
-  ;;   (is (= nil
-  ;;          (magnitude (make-complex-from-mag-ang 1 1)))))
+  (testing "magnitude of a rational rectangular complex"
+    (is (= (sqrt (add (square (make-rational 1 2)) (square (make-rational 1 2))))
+           (magnitude (make-complex-from-real-imag (make-rational 1 2) 
+                                                   (make-rational 1 2))))))
+  ;;(testing "magnitude of a regular polar complex"
+  ;;  (is (= nil
+  ;;         (magnitude (make-complex-from-mag-ang 1 1)))))
   ;; (testing "magnitude of a rational polar complex"
   ;;   (is (= nil
   ;;          (magnitude (make-complex-from-mag-ang 1 1)))))
