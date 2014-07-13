@@ -554,10 +554,10 @@
     (is (= '(:rational (-1 1))
            (raise -1))))
   (testing "can raise floating clj-number"
-    (is (= '(:rational (1.0 2.0))
+    (is (= '(:rational (0.5 1))
            (raise 0.5))))
   (testing "can raise negative floating clj-number"
-    (is (= '(:rational (-1.0 2.0))
+    (is (= '(:rational (-0.5 1))
            (raise -0.5))))
   (testing "can raise rational"
     (is (= '(:complex (:rectangular ((:rational (3 1)) 0)))
@@ -673,7 +673,7 @@
     (is (= nil
            (raise-one-step (list (make-complex-from-real-imag 3 4) (make-complex-from-real-imag 3 4))))))
   (testing "raise-one-step six"
-    (is (= '((:rational 0 1) (:rational (-1.0 2.0)))
+    (is (= '((:rational 0 1) (:rational (-0.5 1)))
            (raise-one-step '((:rational 0 1) -0.5))))))
 
 
