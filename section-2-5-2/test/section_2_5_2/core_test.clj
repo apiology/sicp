@@ -226,6 +226,7 @@
 (defn sub [x y] (apply-generic :sub x y))
 (defn mul [x y] (apply-generic :mul x y))
 (defn div [x y] (apply-generic :div x y))
+(defn atan2 [x y] (apply-generic :atan2 x y))
 (defn exp [x y] 
   (let [ret (apply-generic :exp x y)]
     (log "exp returning " ret)
@@ -338,6 +339,10 @@
     (put-op :lt '(:rational :rational) #(lt-rat %1 %2))
     (put-op :gt '(:rational :rational) #(gt-rat %1 %2))
     (put-op :add '(:rational :rational) #(tag (add-rat %1 %2)))
+    (put-op :atan2 '(:rational :rational) #(atan2 (div (numer %1)
+                                                       (denom %1))
+                                                  (div (numer %2)
+                                                       (denom %2))))
     (put-op :sub '(:rational :rational) #(tag (sub-rat %1 %2)))
     (put-op :mul '(:rational :rational) #(tag (mul-rat %1 %2)))
     (put-op :div '(:rational :rational) #(tag (div-rat %1 %2)))
@@ -405,8 +410,8 @@
           (make-from-real-imag [real imag] (list real imag))
           (magnitude [z] (sqrt (add (square (real-part z))
                                     (square (imag-part z)))))
-          (angle [z] (Math/atan2 (imag-part z)
-                                 (real-part z)))
+          (angle [z] (atan2 (imag-part z)
+                            (real-part z)))
           (make-from-mag-ang [mag ang] (cons (* mag (Math/cos ang))
                                              (* mag (Math/sin ang))))
           (make-from-real-imag [x y] (list x y))
@@ -437,6 +442,7 @@
     (put-op :lt '(:clj-number :clj-number) #(< %1 %2))
     (put-op :gt '(:clj-number :clj-number) #(> %1 %2))
     (put-op :equ? '(:clj-number :clj-number) =)
+    (put-op :atan2 '(:clj-number :clj-number) #(Math/atan2 %1 %2))
     (put-op :exp '(:clj-number :clj-number) #(tag (math/expt %1 %2)))
     (put-op :=zero? '(:clj-number) #(= 0.0 %1))
     (put-op :make :clj-number #(tag %)))
@@ -858,10 +864,10 @@
   (testing "angle of a regular rectangular complex"
     (is (= 0.7853981633974483
            (angle (make-complex-from-real-imag 1 1)))))
-;  (testing "angle of a rational rectangular complex"
-;    (is (= nil
-;           (angle (make-complex-from-real-imag (make-rational 1 2) 
-;                                               (make-rational 1 2))))))
+  (testing "angle of a rational rectangular complex"
+    (is (= 0.7853981633974483
+           (angle (make-complex-from-real-imag (make-rational 1 2) 
+                                               (make-rational 1 2))))))
   (testing "angle of a regular polar complex"
     (is (= 1
            (angle (make-complex-from-mag-ang 1 1)))))
