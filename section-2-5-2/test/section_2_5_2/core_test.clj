@@ -242,6 +242,21 @@
         (log "(abs " x ") = " ret)
         ret))))
 
+(defn cube [x] (* x x x))
+
+(defn p [x]
+  (- (* 3 x) (* 4 (cube x))))
+
+(defn sine [angle]
+  (if (not (> (abs angle) 0.1))
+    angle
+    (p (sine (/ angle 3.0)))))
+
+(def pi 3.14159265359)
+
+(defn cosine [x]
+  (sine (sub (/ pi 2) x)))
+
 (def tolerance 0.00001)
 (defn average [a b]
   (div (add a b) 2))
@@ -429,7 +444,7 @@
           (make-from-mag-ang [mag ang]
             (cons mag ang))
           (real-part [z]
-            (* (magnitude z) (Math/cos (angle z))))
+            (mul (magnitude z) (cosine (angle z))))
           (imag-part [z]
             (* (magnitude z) (Math/sin (angle z))))
           (make-from-real-imag [real imag]
@@ -812,11 +827,11 @@
            (real-part (make-complex-from-real-imag (make-rational 1 2) 
                                                    (make-rational 1 2))))))
   (testing "real-part of a regular polar complex"
-    (is (= 0.5403023058681398
+    (is (= 0.5406248433479329
            (real-part (make-complex-from-mag-ang 1 1)))))
-;  (testing "real-part of a rational polar complex"
-;    (is (= nil
-;           (real-part (make-complex-from-mag-ang (make-rational 1 1) (make-rational 1 1))))))
+  (testing "real-part of a rational polar complex"
+    (is (= 0.5406248433479329
+           (real-part (make-complex-from-mag-ang (make-rational 1 1) (make-rational 1 1))))))
 )
 
 ;; todo: track down references to Math/... above and debug here
