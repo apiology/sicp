@@ -6,11 +6,14 @@
 
 ;; common stuff
 (defn gcd [x y]
+  {:pre [(>= x 0)
+         (>= y 0)]
+   :post [(> % 0)]}
   (cond
    (= x 0) 1
    (= y 0) 1
-   (> x y) (recur (- x y) y)
-   (< x y) (recur x (- y x))
+   (> x y) (gcd (- x y) y)
+   (< x y) (gcd x (- y x))
    :else x))
 
 ;; module infrastructure
@@ -156,9 +159,11 @@
   (apply-generic :=zero? num))
 
 (defn raise [num]
+  (println (str "(raise " num ")"))
   (apply-generic-or-nil :raise num))
 
 (defn project-one-step [x] 
+  (println "(project-one-step " x ")")
   (apply-generic-or-nil :project-one-step x))
 
 (defn raise-one-step [args]
@@ -166,10 +171,15 @@
         args-vec (vec args)
         index-to-raise (find-index-of-type-to-raise type-tags-vec)
         arg-to-raise (nth args index-to-raise nil)]
+    (println (str "type-tags-vec: " (apply str type-tags-vec)))
+    (println (str "arg-to-raise: " arg-to-raise))
     (if arg-to-raise
-      (if-let [raised-type (raise arg-to-raise)]
-        (let [ret (seq (assoc args-vec index-to-raise raised-type))]
-          ret)
+      (if-let [raised-arg (raise arg-to-raise)]
+        (do
+          (println (str "raised-arg: " raised-arg))
+          (let [ret (seq (assoc args-vec index-to-raise raised-arg))]
+            (println (str "(raise-one-step " (apply str args) " is returning " (apply str ret)))
+            ret))
         nil)
       nil)))
 
@@ -178,26 +188,43 @@
 
 (defn apply-generic-no-simplify [op & args]
   (loop [current-args args]
-;    (println (str "Trying " op " apply-generic with args " (apply str current-args)))
+    (println (str "Trying apply-generic for " op " with args " (apply str current-args)))
     (if (nil? current-args)
       (cant-resolve-op op (map type-tag args))
       (let [type-tags (map type-tag current-args)
             proc (get-op op type-tags)]
         (if proc
           (apply proc (map contents current-args))
-          (let [next-args (raise-one-step current-args)]
-            (recur next-args)))))))
+          (do 
+            (println (str "Couldn't figure out an op with current args--raising one step "
+                          (apply str current-args)))
+            (let [next-args (raise-one-step current-args)]
+              (recur next-args))))))))
 
-
+(defn lt [x y] (apply-generic-no-simplify :lt x y))
 (defn add [x y] (apply-generic :add x y))
 (defn sub [x y] (apply-generic :sub x y))
 (defn mul [x y] (apply-generic :mul x y))
 (defn div [x y] (apply-generic :div x y))
-(defn exp [x y] (apply-generic :exp x y))
+(defn exp [x y] 
+  (let [ret (apply-generic :exp x y)]
+    (println (str "exp returning " ret))
+    ret))
 (defn square [x] (mul x x))
 
 (defn abs [x]
-  (if (> 0 x) (- x) x))
+  {:post [(>= % 0)]}
+  (println (str "Calling (abs " x ")"))
+  (let [is-negative (lt x 0)]
+    (println (str "is-negative on " x ": " is-negative))
+    (if is-negative
+      (let [ret (sub 0 x)]
+        (println (str "(abs " x ") = " ret))
+        ret)
+      (let [ret x]
+        (println (str "(abs " x ") = " ret))
+        ret))))
+
 (def tolerance 0.00001)
 (defn average [a b]
   (div (add a b) 2))
@@ -205,18 +232,24 @@
   #(average % (f %)))
 
 (defn fixed-point [f first-guess]
+  (println (str "Trying fixed point of " f " given first guess of " first-guess))
   (defn close-enough? [v1 v2]
-;    (println (str "Close enough? " v1 " " v2))
-    (let [delta (abs (sub v1 v2))]
-      (<  delta tolerance)))
+    (println (str "Starting close-enough? with " v1 " " v2))
+    (let [delta (sub v1 v2)]
+      (println (str "delta is " delta))
+      (let [adelta (abs delta)]
+        (println (str "adelta is " adelta))
+        (let [ret (lt adelta tolerance)]
+          (println (str "Close enough? " v1 " " v2 ": " ret))
+          ret))))
   (defn my-try [guess]
     (let [next (f guess)]
       (if (close-enough? guess next)
         next
-        (my-try next))))
+        (recur next))))
   (my-try first-guess))
 (defn sqrt-damped [x]
-;  (println (str "Trying to sqrt-damped of " sqrt-damped))
+  (println (str "Trying to sqrt-damped of " x))
   (fixed-point (average-damp #(div x %))
                1.0))
 (def sqrt sqrt-damped)
@@ -224,10 +257,22 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defmacro xor 
+  ([] nil)
+  ([a] a)
+  ([a b]
+    `(let [a# ~a
+           b# ~b]
+      (if a# 
+        (if b# nil a#)
+        (if b# b# nil))))
+  ([a b & more]
+   `(xor (xor ~a ~b) (xor ~@more))))
+
 (defn install-rational-package []
   (let [numer #(first %)
         denom #(second %)
-        make-rat (fn [n d] (let [g (gcd n d)]
+        make-rat (fn [n d] (let [g (gcd (abs n) (abs d))]
                              (list (/ n g) (/ d g))))
         add-rat #(make-rat (+ (* (numer %1) (denom %2))
                               (* (numer %2) (denom %1)))
@@ -239,7 +284,12 @@
                            (* (denom %1) (denom %2)))
         div-rat #(make-rat (* (numer %1) (denom %2))
                            (* (denom %1) (denom %2)))
+        is-neg?-rat #(let [denom-is-neg? (lt (denom %1) 0)
+                           numer-is-neg? (lt (numer %1) 0)]
+                       (xor numer-is-neg? denom-is-neg?))
+        lt-rat #(is-neg?-rat (sub-rat %1 %2))
         tag #(attach-tag :rational %)]
+    (put-op :lt '(:rational :rational) #(tag (lt-rat %1 %2)))
     (put-op :add '(:rational :rational) #(tag (add-rat %1 %2)))
     (put-op :sub '(:rational :rational) #(tag (sub-rat %1 %2)))
     (put-op :mul '(:rational :rational) #(tag (mul-rat %1 %2)))
@@ -337,6 +387,7 @@
     (put-op :sub '(:clj-number :clj-number) #(tag (- %1 %2)))
     (put-op :mul '(:clj-number :clj-number) #(tag (* %1 %2)))
     (put-op :div '(:clj-number :clj-number) #(tag (/ %1 %2)))
+    (put-op :lt '(:clj-number :clj-number) #(tag (< %1 %2)))
     (put-op :equ? '(:clj-number :clj-number) =)
     (put-op :exp '(:clj-number :clj-number) #(tag (math/expt %1 %2)))
     (put-op :=zero? '(:clj-number) #(= 0.0 %1))
@@ -365,6 +416,29 @@
 (defn clj-number->complex [n]
   (make-complex-from-real-imag (contents n) 0))
 
+(deftest test-lt
+  (testing "positive"
+    (is (= false
+           (lt 1 0))))
+  (testing "negative"
+    (is (= true
+           (lt -1 0)))))
+
+(deftest test-abs
+  (testing "positive 1"
+    (is (= 1
+           (abs 1))))
+  (testing "positive 2"
+    (is (= 2
+           (abs 2))))
+  (testing "negative"
+    (is (= 1
+           (abs -1))))
+  (testing "negative 2"
+    (is (= 2
+           (abs -2)))))
+
+
 (deftest test-slightly-better-approach
   (testing "FIXME, I fail."
     (is (= (make-complex-from-real-imag 5 0)
@@ -373,6 +447,11 @@
 
 
 (put-coercion :clj-number :complex clj-number->complex)
+
+(deftest make-rational-test
+  (testing "can create negative rationals"
+    (is (= '(:rational (-1 1))
+           (make-rational -1 1)))))
 
 (deftest test-slightly-better-approach
   (testing "FIXME, I fail."
@@ -406,11 +485,11 @@
 
 ;; what happens if we call exp with two complex numbers as arguments?
 
-(deftest test-exponentiating-complexes
-  (testing "exponentiation complex numbers"
-    (is (thrown? java.lang.Exception
-           (exp (make-complex-from-real-imag 6 2)
-                (make-complex-from-real-imag 6 2))))))
+;(deftest test-exponentiating-complexes
+;  (testing "exponentiation complex numbers"
+;    (is (thrown? java.lang.Exception
+;           (exp (make-complex-from-real-imag 6 2)
+;                (make-complex-from-real-imag 6 2))))))
          
 ;; b. Is Louis correct that something had to be done abou coercion
 ;; with arguments of the same type, or does apply-generic work
@@ -441,6 +520,18 @@
   (testing "can raise clj-number"
     (is (= '(:rational (3 1))
            (raise 3))))
+  (testing "can raise zero clj-number"
+    (is (= '(:rational (0 1))
+           (raise 0))))
+  (testing "can raise negative clj-number"
+    (is (= '(:rational (-1 1))
+           (raise -1))))
+  (testing "can raise floating clj-number"
+    (is (= '(:rational (1.0 2.0))
+           (raise 0.5))))
+;  (testing "can raise negative floating clj-number"
+;    (is (= '(:rational (-0.5 1))
+;           (raise -0.5))))
   (testing "can raise rational"
     (is (= '(:complex (:rectangular ((:rational (3 1)) 0)))
            (raise (raise 3))))))
@@ -533,9 +624,12 @@
            (find-index-of-type-to-raise '(:rational :clj-number))))))
 
 (deftest test-raise-one-step
-  (testing "raise-one-step one"
-    (is (= '((:rational (2 1)))
-           (raise-one-step (list 2)))))
+;  (testing "raise-one-step one"
+;    (is (= '((:rational (2 1)))
+;           (raise-one-step (list 2)))))
+;  (testing "raise-one-step one"
+;    (is (= '((:rational (2 1) 2))
+;           (raise-one-step (list 2 2)))))
   (testing "raise-one-step two"
     (is (= '((:complex (:rectangular ((:rational (1 2)) 0))))
            (raise-one-step (list (make-rational 1 2))))))
@@ -550,7 +644,11 @@
            (raise-one-step (list (make-rational 1 2) 2)))))
   (testing "raise-one-step five"
     (is (= nil
-           (raise-one-step (list (make-complex-from-real-imag 3 4) (make-complex-from-real-imag 3 4)))))))
+           (raise-one-step (list (make-complex-from-real-imag 3 4) (make-complex-from-real-imag 3 4))))))
+;  (testing "raise-one-step six"
+;    (is (= nil
+;           (raise-one-step '((:rational 0 1)) -0.5))))
+)
 
 ;;
 ;; Exercise 2.85
@@ -567,9 +665,9 @@
   (testing "project a rational unsuccessfully"
     (is (= 5
            (project-one-step (make-rational 5 2)))))
-;;  (testing "project a complex to a rational"
-;;    (is (= '(:rational (1 2))
-;;           (project-one-step (make-complex-from-real-imag (make-rational 1 2) 0)))))
+  (testing "project a complex to a rational"
+    (is (= '(:rational (1 2))
+           (project-one-step (make-complex-from-real-imag (make-rational 1 2) 0)))))
   (testing "project a complex to a clj-number"
     (is (= 2
            (project-one-step (make-complex-from-real-imag 2 0)))))
@@ -629,3 +727,23 @@
   (testing "drop a complex unsuccessfully"
     (is (= (make-complex-from-real-imag (make-rational 2 1) 1)
            (drop (make-complex-from-real-imag (make-rational 2 1) 1))))))
+
+;;
+;; Exercise 2.86
+;;
+
+(deftest test-generic-ops
+;  (testing "magnitude of a regular rectangular complex"
+;    (is (= (sqrt 2)
+;           (magnitude (make-complex-from-real-imag 1 1)))))
+;  (testing "magnitude of a rational rectangular complex"
+;    (is (= nil
+;           (magnitude (make-complex-from-real-imag (make-rational 1 2) 
+;                                                   (make-rational 1 2))))))
+  ;; (testing "magnitude of a regular polar complex"
+  ;;   (is (= nil
+  ;;          (magnitude (make-complex-from-mag-ang 1 1)))))
+  ;; (testing "magnitude of a rational polar complex"
+  ;;   (is (= nil
+  ;;          (magnitude (make-complex-from-mag-ang 1 1)))))
+)
