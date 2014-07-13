@@ -485,11 +485,11 @@
 
 ;; what happens if we call exp with two complex numbers as arguments?
 
-;(deftest test-exponentiating-complexes
-;  (testing "exponentiation complex numbers"
-;    (is (thrown? java.lang.Exception
-;           (exp (make-complex-from-real-imag 6 2)
-;                (make-complex-from-real-imag 6 2))))))
+(deftest test-exponentiating-complexes
+  (testing "exponentiation complex numbers"
+    (is (thrown? java.lang.Exception
+           (exp (make-complex-from-real-imag 6 2)
+                (make-complex-from-real-imag 6 2))))))
          
 ;; b. Is Louis correct that something had to be done abou coercion
 ;; with arguments of the same type, or does apply-generic work
@@ -529,9 +529,9 @@
   (testing "can raise floating clj-number"
     (is (= '(:rational (1.0 2.0))
            (raise 0.5))))
-;  (testing "can raise negative floating clj-number"
-;    (is (= '(:rational (-0.5 1))
-;           (raise -0.5))))
+  (testing "can raise negative floating clj-number"
+    (is (= '(:rational (-1.0 2.0))
+           (raise -0.5))))
   (testing "can raise rational"
     (is (= '(:complex (:rectangular ((:rational (3 1)) 0)))
            (raise (raise 3))))))
@@ -624,12 +624,12 @@
            (find-index-of-type-to-raise '(:rational :clj-number))))))
 
 (deftest test-raise-one-step
-;  (testing "raise-one-step one"
-;    (is (= '((:rational (2 1)))
-;           (raise-one-step (list 2)))))
-;  (testing "raise-one-step one"
-;    (is (= '((:rational (2 1) 2))
-;           (raise-one-step (list 2 2)))))
+  (testing "raise-one-step one"
+    (is (= '((:rational (2 1)))
+           (raise-one-step (list 2)))))
+  (testing "raise-one-step one"
+    (is (= '((:rational (2 1)) 2)
+           (raise-one-step (list 2 2)))))
   (testing "raise-one-step two"
     (is (= '((:complex (:rectangular ((:rational (1 2)) 0))))
            (raise-one-step (list (make-rational 1 2))))))
@@ -645,10 +645,10 @@
   (testing "raise-one-step five"
     (is (= nil
            (raise-one-step (list (make-complex-from-real-imag 3 4) (make-complex-from-real-imag 3 4))))))
-;  (testing "raise-one-step six"
-;    (is (= nil
-;           (raise-one-step '((:rational 0 1)) -0.5))))
-)
+  (testing "raise-one-step six"
+    (is (= '((:rational 0 1) (:rational (-1.0 2.0)))
+           (raise-one-step '((:rational 0 1) -0.5))))))
+
 
 ;;
 ;; Exercise 2.85
@@ -733,13 +733,13 @@
 ;;
 
 (deftest test-generic-ops
-;  (testing "magnitude of a regular rectangular complex"
-;    (is (= (sqrt 2)
-;           (magnitude (make-complex-from-real-imag 1 1)))))
-;  (testing "magnitude of a rational rectangular complex"
-;    (is (= nil
-;           (magnitude (make-complex-from-real-imag (make-rational 1 2) 
-;                                                   (make-rational 1 2))))))
+  (testing "magnitude of a regular rectangular complex"
+    (is (= (sqrt 2)
+           (magnitude (make-complex-from-real-imag 1 1)))))
+  ;(testing "magnitude of a rational rectangular complex"
+  ;  (is (= nil
+  ;         (magnitude (make-complex-from-real-imag (make-rational 1 2) 
+  ;                                                 (make-rational 1 2))))))
   ;; (testing "magnitude of a regular polar complex"
   ;;   (is (= nil
   ;;          (magnitude (make-complex-from-mag-ang 1 1)))))
