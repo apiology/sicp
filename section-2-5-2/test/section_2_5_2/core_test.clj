@@ -788,7 +788,7 @@
 ;; Exercise 2.86
 ;;
 
-(deftest test-generic-ops
+(deftest test-complex-generic-ops-magnitude
   (testing "magnitude of a regular rectangular complex"
     (is (= (sqrt 2)
            (magnitude (make-complex-from-real-imag 1 1)))))
@@ -801,6 +801,22 @@
            (magnitude (make-complex-from-mag-ang 1 1)))))
   (testing "magnitude of a rational polar complex"
     (is (= 1
-           (magnitude (make-complex-from-mag-ang (make-rational 1 1) (make-rational 1 1))))))
-  
+           (magnitude (make-complex-from-mag-ang (make-rational 1 1) (make-rational 1 1)))))))
+
+(deftest test-complex-generic-ops-real
+  (testing "real-part of a regular rectangular complex"
+    (is (= 1
+           (real-part (make-complex-from-real-imag 1 1)))))
+  (testing "real-part of a rational rectangular complex"
+    (is (= '(:rational (1 2))
+           (real-part (make-complex-from-real-imag (make-rational 1 2) 
+                                                   (make-rational 1 2))))))
+  (testing "real-part of a regular polar complex"
+    (is (= 0.5403023058681398
+           (real-part (make-complex-from-mag-ang 1 1)))))
+;  (testing "real-part of a rational polar complex"
+;    (is (= nil
+;           (real-part (make-complex-from-mag-ang (make-rational 1 1) (make-rational 1 1))))))
 )
+
+;; todo: track down references to Math/... above and debug here
