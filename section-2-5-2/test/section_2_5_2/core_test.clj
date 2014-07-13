@@ -308,11 +308,15 @@
         div-rat #(make-rat (* (numer %1) (denom %2))
                            (* (denom %1) (numer %2)))
         is-neg?-rat #(let [denom-is-neg? (lt (denom %1) 0)
-                           numer-is-neg? (lt (numer %1) 0)]
-                       (xor numer-is-neg? denom-is-neg?))
+                           numer-is-neg? (lt (numer %1) 0)
+                           ret (true? (xor numer-is-neg? denom-is-neg?))]
+                       (log "denom-is-neg? on " %1 " = " denom-is-neg?)
+                       (log "numer-is-neg? on " %1 " = " numer-is-neg?)
+                       (log "(is-neg-rat? " %1 ") = " ret)
+                       ret)
         lt-rat #(is-neg?-rat (sub-rat %1 %2))
         tag #(attach-tag :rational %)]
-    (put-op :lt '(:rational :rational) #(tag (lt-rat %1 %2)))
+    (put-op :lt '(:rational :rational) #(lt-rat %1 %2))
     (put-op :add '(:rational :rational) #(tag (add-rat %1 %2)))
     (put-op :sub '(:rational :rational) #(tag (sub-rat %1 %2)))
     (put-op :mul '(:rational :rational) #(tag (mul-rat %1 %2)))
@@ -410,7 +414,7 @@
     (put-op :sub '(:clj-number :clj-number) #(tag (- %1 %2)))
     (put-op :mul '(:clj-number :clj-number) #(tag (* %1 %2)))
     (put-op :div '(:clj-number :clj-number) #(tag (/ %1 %2)))
-    (put-op :lt '(:clj-number :clj-number) #(tag (< %1 %2)))
+    (put-op :lt '(:clj-number :clj-number) #(< %1 %2))
     (put-op :equ? '(:clj-number :clj-number) =)
     (put-op :exp '(:clj-number :clj-number) #(tag (math/expt %1 %2)))
     (put-op :=zero? '(:clj-number) #(= 0.0 %1))
