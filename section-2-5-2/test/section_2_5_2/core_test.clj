@@ -875,4 +875,3 @@
     (is (= 1
            (angle (make-complex-from-mag-ang (make-rational 1 1) (make-rational 1 1)))))))
 
-;; todo: track down references to Math/... above and debug here
