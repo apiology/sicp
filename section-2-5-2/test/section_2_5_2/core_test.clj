@@ -216,6 +216,9 @@
 (defn lt [x y] (let [ret (apply-generic-no-simplify :lt x y)]
                  (log "(lt " x " " y ") = " ret)
                  ret))
+(defn gte [x y] (let [ret (not (lt x y))]
+                  (log "(gte " x " " y ") = " ret)
+                  ret))
 (defn add [x y] (apply-generic :add x y))
 (defn sub [x y] (apply-generic :sub x y))
 (defn mul [x y] (apply-generic :mul x y))
@@ -227,7 +230,7 @@
 (defn square [x] (mul x x))
 
 (defn abs [x]
-  {:post [(>= % 0)]}
+  {:post [(gte % 0)]}
   (log "Calling (abs " x ")")
   (let [is-negative (lt x 0)]
     (log "is-negative on " x ": " is-negative)
