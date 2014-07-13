@@ -63,7 +63,9 @@
     datum
     (second datum)))
 
+(declare drop)
 (declare apply-generic)
+(declare apply-generic-no-simplify)
 (defn cant-resolve-op [op types]
   (throw (Exception. (str "Could not find op " op 
                           " with tags " (types-to-str types)
@@ -148,7 +150,7 @@
 
 (defn equ? [a b]
   (println (str "Call equ? on " a " and " b))
-  (apply-generic :equ? a b))
+  (apply-generic-no-simplify :equ? a b))
 
 (defn =zero? [num]
   (apply-generic :=zero? num))
@@ -172,6 +174,9 @@
       nil)))
 
 (defn apply-generic [op & args]
+  (drop (apply apply-generic-no-simplify op args)))
+
+(defn apply-generic-no-simplify [op & args]
   (loop [current-args args]
     (println (str "Trying " op " apply-generic with args " (apply str current-args)))
     (if (nil? current-args)
@@ -376,7 +381,7 @@
 
 (deftest test-adding-mixed
   (testing "FIXME, I fail."
-    (is (= (make-complex-from-real-imag (make-rational 6 1) 2) 
+    (is (= (make-complex-from-real-imag 6 2) 
            (add (make-complex-from-real-imag 1 2)
                 5)))))
 
@@ -599,3 +604,28 @@
   (testing "drop a complex unsuccessfully"
     (is (= nil
            (drop-item-one-step (make-complex-from-real-imag (make-rational 2 1) 1))))))
+
+(defn drop [num]
+  (if-let [next-step (drop-item-one-step num)]
+    (recur next-step)
+    num))
+
+(deftest test-drop
+  (testing "drop a clj-number unsuccessfully"
+    (is (= 5
+           (drop 5))))
+  (testing "drop a rational"
+    (is (= 5
+           (drop (make-rational 5 1)))))
+  (testing "drop a rational unsuccessfully"
+    (is (= (make-rational 5 2)
+           (drop (make-rational 5 2)))))
+;;  (testing "drop a complex to a rational"
+;;    (is (= '(:rational (1 2))
+;;           (drop (make-complex-from-real-imag (make-rational 1 2) 0)))))
+  (testing "drop a complex to a clj-number"
+    (is (= 2
+           (drop (make-complex-from-real-imag (make-rational 2 1) 0)))))
+  (testing "drop a complex unsuccessfully"
+    (is (= (make-complex-from-real-imag (make-rational 2 1) 1)
+           (drop (make-complex-from-real-imag (make-rational 2 1) 1))))))
