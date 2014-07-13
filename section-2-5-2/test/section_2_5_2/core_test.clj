@@ -45,6 +45,7 @@
         :else (throw (IllegalArgumentException. (str "Bad tagged dataum -- TYPE-TAG "
                                                      datum)))))
 
+
 (defn types-to-str [type-tags]
   (apply str (flatten (list type-tags))))
 
@@ -85,6 +86,32 @@
       nil ;; couldn't coerce at least one arg
       new-args)))
 
+(defn lower-type [type]
+  (if-let [fn (get-op :lower-type type)]
+    (fn)
+    nil))
+
+
+(defn is-lower-type? [type-1 type-2]
+  (if-let [lower-type-2 (lower-type type-2)]
+    (if (= type-1 lower-type-2)
+      true
+      (recur type-1 lower-type-2))
+    false))
+
+(defn type-comparator [type-1 type-2]
+  (if (= type-1 type-2)
+    0
+    (if (is-lower-type? type-1 type-2)
+      -1
+      1)))
+
+(defn find-lowest-type [type-tags]
+  (first (sort type-comparator type-tags)))
+
+(defn find-index-of-type-to-raise [type-tags]
+  (.indexOf type-tags (find-lowest-type type-tags)))
+
 (defn apply-generic-with-coercions [op type-tags args]
   (let [unique-types (set type-tags)]
     (loop [unified-type (first unique-types)
@@ -107,6 +134,13 @@
       (apply proc (map contents args))
       (apply-generic-with-coercions op type-tags args))))
 
+(defn apply-generic-or-nil [op & args]
+  (let [type-tags (map type-tag args)
+        proc (get-op op type-tags)]
+    (if proc
+      (apply proc (map contents args))
+      nil)))
+
 
 (defn real-part [z]
   (apply-generic :real-part z))
@@ -127,7 +161,19 @@
   (apply-generic :=zero? num))
 
 (defn raise [num]
-  (apply-generic :raise num))
+  (apply-generic-or-nil :raise num))
+
+(defn raise-one-step [args]
+  (let [type-tags-vec (vec (map type-tag args))
+        args-vec (vec args)
+        index-to-raise (find-index-of-type-to-raise type-tags-vec)
+        arg-to-raise (nth args index-to-raise nil)]
+    (if arg-to-raise
+      (if-let [raised-type (raise arg-to-raise)]
+        (let [ret (seq (assoc args-vec index-to-raise raised-type))]
+          ret)
+        nil)
+      nil)))
 
 (defn add [x y] (apply-generic :add x y))
 (defn sub [x y] (apply-generic :sub x y))
@@ -142,7 +188,6 @@
   (let [numer #(first %)
         denom #(second %)
         make-rat (fn [n d] (let [g (gcd n d)]
-                             (print (str "gcd of " n " and " d " is " g))
                              (list (/ n g) (/ d g))))
         add-rat #(make-rat (+ (* (numer %1) (denom %2))
                               (* (numer %2) (denom %1)))
@@ -161,6 +206,7 @@
     (put-op :div '(:rational :rational) #(tag (div-rat %1 %2)))
     (put-op :equ? '(:rational :rational) =)
     (put-op :=zero? '(:rational) #(= (numer %1) 0))
+    (put-op :lower-type :rational (fn [] :clj-number))
     (put-op :raise '(:clj-number) #(tag (make-rat %1 1)))
     (put-op :make :rational #(tag (make-rat %1 %2)))))
 
@@ -201,6 +247,7 @@
     (put-op :imag-part '(:complex) imag-part)
     (put-op :magnitude '(:complex) magnitude)
     (put-op :angle '(:complex) angle)
+    (put-op :lower-type :complex (fn [] :rational))
     (put-op :raise '(:rational) #(tag (make-from-real-imag (apply make-rational %1) 0)))
     'done))
 
@@ -354,3 +401,109 @@
     (is (= '(:complex (:rectangular ((:rational (3 1)) 0)))
            (raise (raise 3))))))
 
+
+;; Exercise 2.84
+
+;; Modify apply-generic so that it coerces its arguments to have the
+;; same type by the method of successive raisign.  Need to be able to
+;; test which of two types is higher.  Need to be "compatible" with
+;; rest of system and not lead to rpoblems adding new levels to tower.
+
+(deftest test-lower-type
+  (testing "lower-type one"
+    (is (= nil
+           (lower-type :clj-number))))
+  (testing "lower-type two"
+    (is (= :clj-number
+           (lower-type :rational))))
+  (testing "lower-type three"
+    (is (= :rational
+           (lower-type :complex)))))
+
+(deftest test-is-lower
+  (testing "is-lower-type? one"
+    (is (= false
+           (is-lower-type? :clj-number :clj-number))))
+  (testing "is-lower-type? two"
+    (is (= true
+           (is-lower-type? :clj-number :rational))))
+  (testing "is-lower-type? three"
+    (is (= true
+           (is-lower-type? :rational :complex))))
+  (testing "is-lower-type? three"
+    (is (= false
+           (is-lower-type? :rational :clj-number))))
+  (testing "is-lower-type? four"
+    (is (= true
+           (is-lower-type? :clj-number :complex)))))
+
+(deftest test-type-comparator
+  (testing "type-comparator one"
+    (is (= 0
+           (type-comparator :clj-number :clj-number))))
+  (testing "type-comparator two"
+    (is (= 0
+           (type-comparator :rational :rational))))
+  (testing "type-comparator three"
+    (is (= 0
+           (type-comparator :rational :rational))))
+  (testing "type-comparator three"
+    (is (= -1
+           (type-comparator :rational :complex))))
+  (testing "type-comparator four"
+    (is (= 1
+           (type-comparator :rational :clj-number)))))
+
+(deftest test-find-lowest-type
+  (testing "find-lowest-type one"
+    (is (= :clj-number
+           (find-lowest-type #{:clj-number}))))
+  (testing "find-lowest-type two"
+    (is (= :rational
+           (find-lowest-type #{:rational}))))
+  (testing "find-lowest-type three"
+    (is (= :rational
+           (find-lowest-type '(:rational :rational)))))
+  (testing "find-lowest-type three"
+    (is (= :rational
+           (find-lowest-type '(:rational :complex)))))
+  (testing "find-lowest-type four"
+    (is (= :clj-number
+           (find-lowest-type '(:rational :clj-number :complex))))))
+
+(deftest test-find-index-of-type-to-raise
+  (testing "find-index-of-type-to-raise one"
+    (is (= 0
+           (find-index-of-type-to-raise '(:clj-number)))))
+  (testing "find-index-of-type-to-raise two"
+    (is (= 0
+           (find-index-of-type-to-raise '(:rational)))))
+  (testing "find-index-of-type-to-raise three"
+    (is (= 0
+           (find-index-of-type-to-raise '(:rational :rational)))))
+  (testing "find-index-of-type-to-raise three"
+    (is (= 0
+           (find-index-of-type-to-raise '(:rational :complex)))))
+  (testing "find-index-of-type-to-raise four"
+    (is (= 1
+           (find-index-of-type-to-raise '(:rational :clj-number))))))
+
+(deftest test-raise-one-step
+  (testing "raise-one-step one"
+    (is (= '((:rational (2 1)))
+           (raise-one-step (list 2)))))
+  (testing "raise-one-step two"
+    (is (= '((:complex (:rectangular ((:rational (1 2)) 0))))
+           (raise-one-step (list (make-rational 1 2))))))
+  (testing "raise-one-step three"
+    (is (= '((:complex (:rectangular ((:rational (1 2)) 0))) (:rational (3 4)))
+           (raise-one-step (list (make-rational 1 2) (make-rational 3 4))))))
+  (testing "raise-one-step three"
+    (is (= '((:complex (:rectangular ((:rational (1 2)) 0))) (:complex (:rectangular (3 4))))
+           (raise-one-step (list (make-rational 1 2) (make-complex-from-real-imag 3 4))))))
+  (testing "raise-one-step four"
+    (is (= '((:rational (1 2)) (:rational (2 1)))
+           (raise-one-step (list (make-rational 1 2) 2)))))
+  (testing "raise-one-step five"
+    (is (= nil
+           (raise-one-step (list (make-complex-from-real-imag 3 4) (make-complex-from-real-imag 3 4)))))))
