@@ -245,15 +245,15 @@
         (log "(abs " x ") = " ret)
         ret))))
 
-(defn cube [x] (* x x x))
+(defn cube [x] (mul (mul x x) x))
 
 (defn p [x]
-  (- (* 3 x) (* 4 (cube x))))
+  (sub (mul 3 x) (mul 4 (cube x))))
 
 (defn sine [angle]
-  (if (not (> (abs angle) 0.1))
+  (if (not (gt (abs angle) 0.1))
     angle
-    (p (sine (/ angle 3.0)))))
+    (p (sine (div angle 3.0)))))
 
 (def pi 3.14159265359)
 
@@ -452,7 +452,7 @@
           (real-part [z]
             (mul (magnitude z) (cosine (angle z))))
           (imag-part [z]
-            (* (magnitude z) (Math/sin (angle z))))
+            (mul (magnitude z) (sine (angle z))))
           (make-from-real-imag [real imag]
             (cons (Math/sqrt (+ (square real) (square imag)))
                   (Math/atan2 imag real)))
@@ -837,7 +837,21 @@
            (real-part (make-complex-from-mag-ang 1 1)))))
   (testing "real-part of a rational polar complex"
     (is (= 0.5406248433479329
-           (real-part (make-complex-from-mag-ang (make-rational 1 1) (make-rational 1 1))))))
-)
+           (real-part (make-complex-from-mag-ang (make-rational 1 1) (make-rational 1 1)))))))
+
+(deftest test-complex-generic-ops-imag
+  (testing "imag-part of a regular rectangular complex"
+    (is (= 1
+           (imag-part (make-complex-from-real-imag 1 1)))))
+  (testing "imag-part of a rational rectangular complex"
+    (is (= '(:rational (1 2))
+           (imag-part (make-complex-from-real-imag (make-rational 1 2) 
+                                                   (make-rational 1 2))))))
+  (testing "imag-part of a regular polar complex"
+    (is (= 0.8415945650055845
+           (imag-part (make-complex-from-mag-ang 1 1)))))
+  (testing "imag-part of a rational polar complex"
+    (is (= '(:rational (3.407091745578266E91 4.048376602284329E91)
+           (imag-part (make-complex-from-mag-ang (make-rational 1 1) (make-rational 1 1))))))))
 
 ;; todo: track down references to Math/... above and debug here
