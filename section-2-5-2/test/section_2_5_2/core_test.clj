@@ -423,13 +423,42 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn install-polar-package []
+  (letfn [(magnitude [z] (first z))
+          (angle [z] (second z))
+          (make-from-mag-ang [mag ang]
+            (cons mag ang))
+          (real-part [z]
+            (* (magnitude z) (Math/cos (angle z))))
+          (imag-part [z]
+            (* (magnitude z) (Math/sin (angle z))))
+          (make-from-real-imag [real imag]
+            (cons (Math/sqrt (+ (square real) (square imag)))
+                  (Math/atan2 imag real)))
+          (tag [x] (attach-tag :polar x))
+          (make-from-mag-ang [r a] (list r a))
+          (=zero? [z] (= (magnitude z) 0))]
+    (put-op :equ? '(:polar :polar) =)
+    (put-op :=zero? '(:polar) #(= (magnitude %1) 0))
+    (put-op :real-part '(:polar) real-part)
+    (put-op :imag-part '(:polar) imag-part)
+    (put-op :magnitude '(:polar) magnitude)
+    (put-op :angle '(:polar) angle)
+    (put-op :make-from-real-imag :polar
+            (fn [x y] (tag (make-from-real-imag x y))))
+    (put-op :make-from-mag-ang :polar (fn [r a] (tag (make-from-mag-ang r a))))
+    :done))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;;;;;;;;;;;;;;;;;
 ;install packages
 ;;;;;;;;;;;;;;;;;;
 
 (install-clj-number-package)
-(install-complex-package)
 (install-rectangular-package)
+(install-polar-package)
+(install-complex-package)
 (install-rational-package)
 
 ;;;; test a little
@@ -767,10 +796,10 @@
     (is (= (sqrt (add (square (make-rational 1 2)) (square (make-rational 1 2))))
            (magnitude (make-complex-from-real-imag (make-rational 1 2) 
                                                    (make-rational 1 2))))))
-  ;;(testing "magnitude of a regular polar complex"
-  ;;  (is (= nil
-  ;;         (magnitude (make-complex-from-mag-ang 1 1)))))
-  ;; (testing "magnitude of a rational polar complex"
-  ;;   (is (= nil
-  ;;          (magnitude (make-complex-from-mag-ang 1 1)))))
+  (testing "magnitude of a regular polar complex"
+    (is (= 1
+           (magnitude (make-complex-from-mag-ang 1 1)))))
+  ;(testing "magnitude of a rational polar complex"
+  ;  (is (= nil
+  ;         (magnitude (make-complex-from-mag-ang 1 1)))))
 )
