@@ -3,6 +3,9 @@
             [section-2-5-2.core :refer :all]
             [clojure.math.numeric-tower :as math]))
 
+(defn log [& args]
+;  (println (apply str args))
+)
 
 ;; common stuff
 (defn gcd [x y]
@@ -152,18 +155,18 @@
   (apply-generic :angle z))
 
 (defn equ? [a b]
-;  (println (str "Call equ? on " a " and " b))
+  (log "Call equ? on " a " and " b)
   (apply-generic-no-simplify :equ? a b))
 
 (defn =zero? [num]
   (apply-generic :=zero? num))
 
 (defn raise [num]
-  (println (str "(raise " num ")"))
+  (log "(raise " num ")")
   (apply-generic-or-nil :raise num))
 
 (defn project-one-step [x] 
-  (println "(project-one-step " x ")")
+  (log "(project-one-step " x ")")
   (apply-generic-or-nil :project-one-step x))
 
 (defn raise-one-step [args]
@@ -171,14 +174,14 @@
         args-vec (vec args)
         index-to-raise (find-index-of-type-to-raise type-tags-vec)
         arg-to-raise (nth args index-to-raise nil)]
-    (println (str "type-tags-vec: " (apply str type-tags-vec)))
-    (println (str "arg-to-raise: " arg-to-raise))
+    (log "type-tags-vec: " (apply str type-tags-vec))
+    (log "arg-to-raise: " arg-to-raise)
     (if arg-to-raise
       (if-let [raised-arg (raise arg-to-raise)]
         (do
-          (println (str "raised-arg: " raised-arg))
+          (log "raised-arg: " raised-arg)
           (let [ret (seq (assoc args-vec index-to-raise raised-arg))]
-            (println (str "(raise-one-step " (apply str args) " is returning " (apply str ret)))
+            (log "(raise-one-step " (apply str args) " is returning " (apply str ret))
             ret))
         nil)
       nil)))
@@ -188,7 +191,7 @@
 
 (defn apply-generic-no-simplify [op & args]
   (loop [current-args args]
-    (println (str "Trying apply-generic for " op " with args " (apply str current-args)))
+    (log "Trying apply-generic for " op " with args " (apply str current-args))
     (if (nil? current-args)
       (cant-resolve-op op (map type-tag args))
       (let [type-tags (map type-tag current-args)
@@ -196,8 +199,8 @@
         (if proc
           (apply proc (map contents current-args))
           (do 
-            (println (str "Couldn't figure out an op with current args--raising one step "
-                          (apply str current-args)))
+            (log "Couldn't figure out an op with current args--raising one step "
+                 (apply str current-args))
             (let [next-args (raise-one-step current-args)]
               (recur next-args))))))))
 
@@ -208,21 +211,21 @@
 (defn div [x y] (apply-generic :div x y))
 (defn exp [x y] 
   (let [ret (apply-generic :exp x y)]
-    (println (str "exp returning " ret))
+    (log "exp returning " ret)
     ret))
 (defn square [x] (mul x x))
 
 (defn abs [x]
   {:post [(>= % 0)]}
-  (println (str "Calling (abs " x ")"))
+  (log "Calling (abs " x ")")
   (let [is-negative (lt x 0)]
-    (println (str "is-negative on " x ": " is-negative))
+    (log "is-negative on " x ": " is-negative)
     (if is-negative
       (let [ret (sub 0 x)]
-        (println (str "(abs " x ") = " ret))
+        (log "(abs " x ") = " ret)
         ret)
       (let [ret x]
-        (println (str "(abs " x ") = " ret))
+        (log "(abs " x ") = " ret)
         ret))))
 
 (def tolerance 0.00001)
@@ -232,15 +235,15 @@
   #(average % (f %)))
 
 (defn fixed-point [f first-guess]
-  (println (str "Trying fixed point of " f " given first guess of " first-guess))
+  (log "Trying fixed point of " f " given first guess of " first-guess)
   (defn close-enough? [v1 v2]
-    (println (str "Starting close-enough? with " v1 " " v2))
+    (log "Starting close-enough? with " v1 " " v2)
     (let [delta (sub v1 v2)]
-      (println (str "delta is " delta))
+      (log "delta is " delta)
       (let [adelta (abs delta)]
-        (println (str "adelta is " adelta))
+        (log "adelta is " adelta)
         (let [ret (lt adelta tolerance)]
-          (println (str "Close enough? " v1 " " v2 ": " ret))
+          (log "Close enough? " v1 " " v2 ": " ret)
           ret))))
   (defn my-try [guess]
     (let [next (f guess)]
@@ -249,7 +252,7 @@
         (recur next))))
   (my-try first-guess))
 (defn sqrt-damped [x]
-  (println (str "Trying to sqrt-damped of " x))
+  (log "Trying to sqrt-damped of " x)
   (fixed-point (average-damp #(div x %))
                1.0))
 (def sqrt sqrt-damped)
@@ -678,7 +681,7 @@
 (defn drop-item-one-step [num]
   (if-let [projected (project-one-step num)]
     (let [raised (raise projected)]
-;      (println (str "drop-item-one-step: Projected is " projected ", raised is " raised))
+;      (log "drop-item-one-step: Projected is " projected ", raised is " raised)
       (if (equ? num raised)
         projected
         nil))))
