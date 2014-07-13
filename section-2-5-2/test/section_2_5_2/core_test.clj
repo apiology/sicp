@@ -306,7 +306,7 @@
         mul-rat #(make-rat (* (numer %1) (numer %2))
                            (* (denom %1) (denom %2)))
         div-rat #(make-rat (* (numer %1) (denom %2))
-                           (* (denom %1) (denom %2)))
+                           (* (denom %1) (numer %2)))
         is-neg?-rat #(let [denom-is-neg? (lt (denom %1) 0)
                            numer-is-neg? (lt (numer %1) 0)]
                        (xor numer-is-neg? denom-is-neg?))
