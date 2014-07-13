@@ -149,7 +149,7 @@
   (apply-generic :angle z))
 
 (defn equ? [a b]
-  (println (str "Call equ? on " a " and " b))
+;  (println (str "Call equ? on " a " and " b))
   (apply-generic-no-simplify :equ? a b))
 
 (defn =zero? [num]
@@ -178,7 +178,7 @@
 
 (defn apply-generic-no-simplify [op & args]
   (loop [current-args args]
-    (println (str "Trying " op " apply-generic with args " (apply str current-args)))
+;    (println (str "Trying " op " apply-generic with args " (apply str current-args)))
     (if (nil? current-args)
       (cant-resolve-op op (map type-tag args))
       (let [type-tags (map type-tag current-args)
@@ -206,7 +206,7 @@
 
 (defn fixed-point [f first-guess]
   (defn close-enough? [v1 v2]
-    (println (str "Close enough? " v1 " " v2))
+;    (println (str "Close enough? " v1 " " v2))
     (let [delta (abs (sub v1 v2))]
       (<  delta tolerance)))
   (defn my-try [guess]
@@ -216,7 +216,7 @@
         (my-try next))))
   (my-try first-guess))
 (defn sqrt-damped [x]
-  (println (str "Trying to sqrt-damped of " sqrt-damped))
+;  (println (str "Trying to sqrt-damped of " sqrt-damped))
   (fixed-point (average-damp #(div x %))
                1.0))
 (def sqrt sqrt-damped)
@@ -580,7 +580,7 @@
 (defn drop-item-one-step [num]
   (if-let [projected (project-one-step num)]
     (let [raised (raise projected)]
-      (println (str "drop-item-one-step: Projected is " projected ", raised is " raised))
+;      (println (str "drop-item-one-step: Projected is " projected ", raised is " raised))
       (if (equ? num raised)
         projected
         nil))))
@@ -595,9 +595,9 @@
   (testing "drop a rational unsuccessfully"
     (is (= nil
            (drop-item-one-step (make-rational 5 2)))))
-;;  (testing "drop a complex to a rational"
-;;    (is (= '(:rational (1 2))
-;;           (drop-item-one-step (make-complex-from-real-imag (make-rational 1 2) 0)))))
+  (testing "drop a complex to a rational"
+    (is (= '(:rational (1 2))
+           (drop-item-one-step (make-complex-from-real-imag (make-rational 1 2) 0)))))
   (testing "drop a complex to a clj-number"
     (is (= (make-rational 2 1)
            (drop-item-one-step (make-complex-from-real-imag (make-rational 2 1) 0)))))
@@ -620,9 +620,9 @@
   (testing "drop a rational unsuccessfully"
     (is (= (make-rational 5 2)
            (drop (make-rational 5 2)))))
-;;  (testing "drop a complex to a rational"
-;;    (is (= '(:rational (1 2))
-;;           (drop (make-complex-from-real-imag (make-rational 1 2) 0)))))
+  (testing "drop a complex to a rational"
+    (is (= '(:rational (1 2))
+           (drop (make-complex-from-real-imag (make-rational 1 2) 0)))))
   (testing "drop a complex to a clj-number"
     (is (= 2
            (drop (make-complex-from-real-imag (make-rational 2 1) 0)))))
