@@ -854,4 +854,19 @@
     (is (= '(:rational (3.407091745578266E91 4.048376602284329E91)
            (imag-part (make-complex-from-mag-ang (make-rational 1 1) (make-rational 1 1))))))))
 
+(deftest test-complex-generic-ops-angle
+  (testing "angle of a regular rectangular complex"
+    (is (= 0.7853981633974483
+           (angle (make-complex-from-real-imag 1 1)))))
+;  (testing "angle of a rational rectangular complex"
+;    (is (= nil
+;           (angle (make-complex-from-real-imag (make-rational 1 2) 
+;                                               (make-rational 1 2))))))
+  (testing "angle of a regular polar complex"
+    (is (= 1
+           (angle (make-complex-from-mag-ang 1 1)))))
+  (testing "angle of a rational polar complex"
+    (is (= 1
+           (angle (make-complex-from-mag-ang (make-rational 1 1) (make-rational 1 1)))))))
+
 ;; todo: track down references to Math/... above and debug here
