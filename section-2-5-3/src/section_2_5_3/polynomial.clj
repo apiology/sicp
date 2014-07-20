@@ -17,7 +17,10 @@
           (variable [p] (first p))
           (term-list [p] (rest p))
           (variable? [x] (keyword? x))
-          (same-variable? [v1 v2] (and (variable? v1) (variable? v2) (= v1 v2)))
+          (same-variable? [v1 v2] (and (variable? v1) (variable? v2)
+                                       (or (= v1 :any)
+                                           (= v2 :any)
+                                           (= v1 v2))))
           (adjoin-term [term term-list] (if (=zero? (coeff term))
                                           term-list
                                           (cons term term-list)))
@@ -78,7 +81,13 @@
 ;          ]
     (put-op :add '(:polynomial :polynomial) #(tag (add-poly %1 %2)))
     (put-op :mul '(:polynomial :polynomial) #(tag (mul-poly %1 %2)))
-    (put-op :raise '(:complex) #(tag (make-poly :nothing (list 0 %1))))
+    (put-op :lower-type :polynomial (fn [] :complex))
+    (put-op :raise '(:complex) #(do
+                                  (log "Trying to raise a complex type: " %1)
+                                  (let [dropped-type (drop-type (attach-tag :complex %1))]
+                                    (log "raise on complex turned complex back into " 
+                                         dropped-type)
+                                    (tag (make-poly :any (list (list 0 dropped-type)))))))
     (put-op :make ':polynomial #(tag (make-poly %1 %2)))
     (put-op :=zero? '(:polynomial) #(= (order (term-list %1)) nil))
     :done))
