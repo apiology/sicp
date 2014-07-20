@@ -2,9 +2,6 @@
   (:gen-class)
   (require [clojure.string :as str]))
 
-(defn log [& args]
-;  (println (pretty-format args))
-)
 
 (defn coll-to-str [coll]
 ;  (println (str "Called coll-to-str on " (str/join " " coll)))
@@ -13,6 +10,9 @@
 ;    (println (str "...which is of type " (class ret)))
     ret))
 
+(defn log [& args]
+;  (println (coll-to-str args))
+)
 
 (defn types-to-str [type-tags]
   (if (seq? type-tags)
