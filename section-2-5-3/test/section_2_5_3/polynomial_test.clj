@@ -24,6 +24,7 @@
 ;; 5*x^2 + 2x
 (def poly2-in-x (make-polynomial :x '((2 5) (1 2))))
 (def zero-in-x (make-polynomial :x '()))
+;; 5*y^3 + 2y
 (def poly1-in-y (make-polynomial :y '((3 5) (1 2))))
 
 ;; Polynomials having just one variable is called a 'univariate
@@ -84,26 +85,34 @@
     (is (= 1
            (add rational-half rational-half)))))
 
-;(deftest add-polynomials-to-rationals
-;  (testing "adding polynomials with polynomial terms"
-;    (is (= :blah
-;           (add poly1-in-x rational-half)))))
+(deftest add-polynomials-to-rationals
+  (testing "adding polynomials with polynomial terms"
+    ;; (5*x^3 + 2x) + 1/2 =
+    ;; 5*x^3 + 2x + 1/2
+    (is (= '(:polynomial (:x (3 5) (1 2) (0 (:rational (1 2)))))
+           (add poly1-in-x rational-half)))))
 
+;; (5*y^3 + 2y)*x^3 + 2x
 (def poly3-in-x (make-polynomial :x (list (list 3 poly1-in-y) (list 1 2))))
 
 (deftest test-raise-one-step
   (testing "raise-one-step five"
-    (is (= '((:polynomial (:nothing 0 (:rectangular (3 4)))) 
+    (is (= '((:polynomial (:any 0 (:complex (:rectangular (3 4)))))
              (:complex (:rectangular (3 4))))
-           (raise-one-step (list (make-complex-from-real-imag 3 4) (make-complex-from-real-imag 3 4)))))))
+           (raise-one-step (list (make-complex-from-real-imag 3 4)
+                                 (make-complex-from-real-imag 3 4)))))))
 
 (deftest test-raise-one-step
   (testing "raise-one-step five"
-    (is (= '((:polynomial (:nothing 0 (:rectangular (3 4)))) 
+    (is (= '((:polynomial (:any (0 (:complex (:rectangular (3 4))))))
              (:complex (:rectangular (3 4))))
-           (raise-one-step (list (make-complex-from-real-imag 3 4) (make-complex-from-real-imag 3 4)))))))
+           (raise-one-step (list (make-complex-from-real-imag 3 4) 
+                                 (make-complex-from-real-imag 3 4)))))))
 
-;(deftest polynomials-with-polynomial-terms
-;  (testing "adding polynomials with polynomial terms"
-;    (is (= nil
-;           (add poly3-in-x poly1-in-x)))))
+(deftest polynomials-with-polynomial-terms
+  (testing "adding polynomials with polynomial terms"
+    ;; (5*y^3 + 2y)*x^3 + 2x + (5*x^3 + 2x) =
+    ;; (5*y^3 + 2y + 5)*x^3 + 4x
+    (is (= '(:polynomial (:x (3 (:polynomial (:y (3 5) (1 2) (0 5))))
+                             (1 4)))
+           (add poly3-in-x poly1-in-x)))))
