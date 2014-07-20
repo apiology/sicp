@@ -116,3 +116,10 @@
     (is (= '(:polynomial (:x (3 (:polynomial (:y (3 5) (1 2) (0 5))))
                              (1 4)))
            (add poly3-in-x poly1-in-x)))))
+
+;; Exercise 2.88
+
+(deftest simple-polynomial-subtraction
+  (testing "(5*x^2 + 2x) - (5*x^3 + 2x) = (-5*x^3 + 5*x^2)"
+    (is (= '(:polynomial (:x (3 -5) (2 5)))
+           (sub poly2-in-x poly1-in-x)))))
