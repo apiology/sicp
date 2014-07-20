@@ -79,11 +79,16 @@
 
 (declare equ?)
 (declare raise)
-(declare apply-generic-or-nil)
+
+(defn simple-apply-generic-or-nil [op & args]
+  (let [type-tags (map type-tag args)
+        proc (get-op op type-tags)]
+    (when proc
+      (apply proc (map contents args)))))
 
 (defn project-one-step [x] 
   (log "(project-one-step " x ")")
-  (apply-generic-or-nil :project-one-step x))
+  (simple-apply-generic-or-nil :project-one-step x))
 
 (defn drop-item-one-step [num]
   (if-let [projected (project-one-step num)]
@@ -128,20 +133,13 @@
                    (args-to-str current-args) " to " (args-to-str next-args))
               (recur next-args))))))))
 
-
-(defn apply-generic-or-nil [op & args]
-  (let [type-tags (map type-tag args)
-        proc (get-op op type-tags)]
-    (when proc
-      (apply proc (map contents args)))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; generic, non-math-specific virtual functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn raise [num]
   (log "Calling (raise " num ")")
-  (let [ret (apply-generic-or-nil :raise num)]
+  (let [ret (simple-apply-generic-or-nil :raise num)]
     (log "(raise " num ") = " ret)
     ret))
 
