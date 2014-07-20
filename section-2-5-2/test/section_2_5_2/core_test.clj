@@ -106,7 +106,6 @@
     (fn)
     nil))
 
-
 (defn is-lower-type? [type-1 type-2]
   (if-let [lower-type-2 (lower-type type-2)]
     (if (= type-1 lower-type-2)
