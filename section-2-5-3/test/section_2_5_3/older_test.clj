@@ -245,45 +245,45 @@
            (project-one-step (make-complex-from-real-imag 2 1))))))
 
 (deftest test-drop-item-one-step
-  (testing "drop a clj-number unsuccessfully"
+  (testing "drop-type a clj-number unsuccessfully"
     (is (= nil
            (drop-item-one-step 5))))
-  (testing "drop a rational"
+  (testing "drop-type a rational"
     (is (= 5
            (drop-item-one-step (make-rational 5 1)))))
-  (testing "drop a rational unsuccessfully"
+  (testing "drop-type a rational unsuccessfully"
     (is (= nil
            (drop-item-one-step (make-rational 5 2)))))
-  (testing "drop a complex to a rational"
+  (testing "drop-type a complex to a rational"
     (is (= '(:rational (1 2))
            (drop-item-one-step (make-complex-from-real-imag (make-rational 1 2) 0)))))
-  (testing "drop a complex to a clj-number"
+  (testing "drop-type a complex to a clj-number"
     (is (= (make-rational 2 1)
            (drop-item-one-step (make-complex-from-real-imag (make-rational 2 1) 0)))))
-  (testing "drop a complex unsuccessfully"
+  (testing "drop-type a complex unsuccessfully"
     (is (= nil
            (drop-item-one-step (make-complex-from-real-imag (make-rational 2 1) 1))))))
 
 
 (deftest test-drop
-  (testing "drop a clj-number unsuccessfully"
+  (testing "drop-type a clj-number unsuccessfully"
     (is (= 5
-           (drop 5))))
-  (testing "drop a rational"
+           (drop-type 5))))
+  (testing "drop-type a rational"
     (is (= 5
-           (drop (make-rational 5 1)))))
-  (testing "drop a rational unsuccessfully"
+           (drop-type (make-rational 5 1)))))
+  (testing "drop-type a rational unsuccessfully"
     (is (= (make-rational 5 2)
-           (drop (make-rational 5 2)))))
-  (testing "drop a complex to a rational"
+           (drop-type (make-rational 5 2)))))
+  (testing "drop-type a complex to a rational"
     (is (= '(:rational (1 2))
-           (drop (make-complex-from-real-imag (make-rational 1 2) 0)))))
-  (testing "drop a complex to a clj-number"
+           (drop-type (make-complex-from-real-imag (make-rational 1 2) 0)))))
+  (testing "drop-type a complex to a clj-number"
     (is (= 2
-           (drop (make-complex-from-real-imag (make-rational 2 1) 0)))))
-  (testing "drop a complex unsuccessfully"
+           (drop-type (make-complex-from-real-imag (make-rational 2 1) 0)))))
+  (testing "drop-type a complex unsuccessfully"
     (is (= (make-complex-from-real-imag (make-rational 2 1) 1)
-           (drop (make-complex-from-real-imag (make-rational 2 1) 1))))))
+           (drop-type (make-complex-from-real-imag (make-rational 2 1) 1))))))
 
 (deftest test-complex-generic-ops-magnitude
   (testing "magnitude of a regular rectangular complex"

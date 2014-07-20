@@ -43,10 +43,10 @@
     (second datum)))
 
 (declare apply-generic-no-simplify)
-(declare drop)
+(declare drop-type)
 
 (defn apply-generic [op & args]
-  (drop (apply apply-generic-no-simplify op args)))
+  (drop-type (apply apply-generic-no-simplify op args)))
 
 (defn cant-resolve-op [op types]
   (throw (Exception. (str "Could not find op " op 
@@ -93,7 +93,7 @@
         projected
         nil))))
 
-(defn drop [num]
+(defn drop-type [num]
   (if-let [next-step (drop-item-one-step num)]
     (recur next-step)
     num))
