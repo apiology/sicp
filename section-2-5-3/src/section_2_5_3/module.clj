@@ -88,12 +88,13 @@
 (defn drop-item-one-step [num]
   (if-let [projected (project-one-step num)]
     (let [raised (raise projected)]
-;      (log "drop-item-one-step: Projected is " projected ", raised is " raised)
+      (log "drop-item-one-step: For num=" num ", projected is " projected ", raised is " raised)
       (if (equ? num raised)
         projected
         nil))))
 
 (defn drop-type [num]
+  (log "(drop-type " num ")")
   (if-let [next-step (drop-item-one-step num)]
     (recur next-step)
     num))
@@ -122,9 +123,9 @@
         (if proc
           (apply proc (map contents current-args))
           (do 
-            (log "Couldn't figure out an op with current args--raising one step "
-                 (args-to-str current-args))
             (let [next-args (raise-one-step current-args)]
+              (log "Couldn't figure out an op with current args--raising one step from "
+                   (args-to-str current-args) " to " (args-to-str next-args))
               (recur next-args))))))))
 
 
@@ -139,8 +140,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn raise [num]
-  (log "(raise " num ")")
-  (apply-generic-or-nil :raise num))
+  (log "Calling (raise " num ")")
+  (let [ret (apply-generic-or-nil :raise num)]
+    (log "(raise " num ") = " ret)
+    ret))
 
 (defn equ? [a b]
   (log "Call equ? on " a " and " b)
