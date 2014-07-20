@@ -4,7 +4,7 @@
             [section-2-5-3.module :refer :all]))
 
 (defn =zero? [num]
-  (apply-generic :=zero? num))
+  (apply-generic-no-simplify :=zero? num))
 
 
 (defn lt [x y] (let [ret (apply-generic-no-simplify :lt x y)]
