@@ -27,6 +27,14 @@
 ;  (println (pretty-format args))
 )
 
+(defn coll-to-str [coll]
+  (str/join " " coll))
+
+(defn types-to-str [type-tags]
+  (coll-to-str type-tags))
+
+(defn args-to-str [args]
+  (coll-to-str args))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -67,9 +75,6 @@
 
 (defn apply-generic [op & args]
   (drop (apply apply-generic-no-simplify op args)))
-
-(defn types-to-str [type-tags]
-  (str/join " " type-tags))
 
 (defn cant-resolve-op [op types]
   (throw (Exception. (str "Could not find op " op 
@@ -118,7 +123,7 @@
 
 (defn apply-generic-no-simplify [op & args]
   (loop [current-args args]
-    (log "Trying apply-generic for " op " with args " (apply str current-args))
+    (log "Trying apply-generic for " op " with args " (args-to-str current-args))
     (if (nil? current-args)
       (cant-resolve-op op (map type-tag args))
       (let [type-tags (map type-tag current-args)
@@ -127,7 +132,7 @@
           (apply proc (map contents current-args))
           (do 
             (log "Couldn't figure out an op with current args--raising one step "
-                 (apply str current-args))
+                 (args-to-str current-args))
             (let [next-args (raise-one-step current-args)]
               (recur next-args))))))))
 
@@ -135,9 +140,8 @@
 (defn apply-generic-or-nil [op & args]
   (let [type-tags (map type-tag args)
         proc (get-op op type-tags)]
-    (if proc
-      (apply proc (map contents args))
-      nil)))
+    (when proc
+      (apply proc (map contents args)))))
 
 
 
@@ -208,9 +212,10 @@
   (sub (mul 3 x) (mul 4 (cube x))))
 
 (defn sine [angle]
-  (if (not (gt (abs angle) 0.1))
-    angle
-    (p (sine (div angle 3.0)))))
+  (if (gt (abs angle) 0.1)
+    (p (sine (div angle 3.0)))
+    angle))
+    
 
 (def pi 3.14159265359)
 
