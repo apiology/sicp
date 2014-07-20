@@ -119,11 +119,10 @@
           (log "(raise-one-step " (args-to-str args) " is returning " (coll-to-str ret))
           ret)))))
 
-(defn apply-generic-no-simplify [op & args]
+(defn apply-generic-no-simplify-or-nil [op & args]
   (loop [current-args args]
     (log "Trying apply-generic for " op " with args " (args-to-str current-args))
-    (if (nil? current-args)
-      (cant-resolve-op op (map type-tag args))
+    (if-not (nil? current-args)
       (let [type-tags (map type-tag current-args)
             proc (get-op op type-tags)]
         (if proc
@@ -133,6 +132,17 @@
               (log "Couldn't figure out an op with current args--raising one step from "
                    (args-to-str current-args) " to " (args-to-str next-args))
               (recur next-args))))))))
+
+(defn apply-generic-or-nil [op & args]
+  (let [unsimplified (apply apply-generic-no-simplify-or-nil op args)]
+    (if-not (nil? unsimplified)
+      (drop-type unsimplified))))
+
+(defn apply-generic-no-simplify [op & args]
+  (let [ret (apply apply-generic-no-simplify-or-nil op args)]
+    (if (nil? ret)
+      (cant-resolve-op op (map type-tag args))
+      ret)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; generic, non-math-specific virtual functions
