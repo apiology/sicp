@@ -1,6 +1,14 @@
 (ns section-2-5-3.core-test
   (:require [clojure.test :refer :all]
-            [section-2-5-3.core :refer :all]))
+            [section-2-5-3.log :refer :all]
+            [section-2-5-3.module :refer :all]
+            [section-2-5-3.math :refer :all]
+            [section-2-5-3.polynomial :refer :all]
+            [section-2-5-3.polar :refer :all]
+            [section-2-5-3.rational :refer :all]
+            [section-2-5-3.rectangular :refer :all]
+            [section-2-5-3.complex :refer :all]
+            [section-2-5-3.clj-number :refer :all]))
 
 (install-polynomial-package)
 (install-polar-package)
