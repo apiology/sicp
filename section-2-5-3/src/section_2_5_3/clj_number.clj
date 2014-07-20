@@ -19,6 +19,6 @@
     (put-op :equ? '(:clj-number :clj-number) =)
     (put-op :atan2 '(:clj-number :clj-number) #(Math/atan2 %1 %2))
     (put-op :exp '(:clj-number :clj-number) #(tag (math/expt %1 %2)))
-    (put-op :=zero? '(:clj-number) #(= 0.0 %1))
+    (put-op :=zero? '(:clj-number) #(zero? %1))
     (put-op :make :clj-number #(tag %)))
   :done)
