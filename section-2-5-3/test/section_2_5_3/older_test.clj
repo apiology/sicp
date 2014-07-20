@@ -1,4 +1,4 @@
-(ns section-2-5-3.core-test
+(ns section-2-5-3.older-test
   (:require [clojure.test :refer :all]
             [section-2-5-3.log :refer :all]
             [section-2-5-3.module :refer :all]
@@ -16,35 +16,6 @@
 (install-rectangular-package)
 (install-complex-package)
 (install-clj-number-package)
-
-;; common data for tests
-
-(def poly1-in-x (make-polynomial :x '((3 5) (1 2))))
-(def poly1-in-y (make-polynomial :y '((3 5) (1 2))))
-
-;; Polynomials having just one variable is called a 'univariate
-;; polynomial', which is what this will be dealing with.
-
-;; Polynomial is a sum of terms consisting of coefficient multiplying
-;; a power of the "indeterminate".
-
-;; 5x^3 + 3x * 7 ;; simple polynomial in x.
-
-;; (y^3 + 1)*x^3 + (2y)x + 1 ;; polnomial in x whose coefficients are
-;; polynomials in y.
-
-;; Doing arithmetic in polynomials.
-
-
-(deftest test-make-new-polynomial
-  (testing "FIXME, I fail."
-    (is (= '(:polynomial (:x (3 5) (1 2)))
-           poly1-in-x))))
-
-(deftest test-different-variable-assertions
-  (testing "FIXME, I fail."
-    (is (thrown? java.lang.AssertionError
-                 (add poly1-in-x poly1-in-y)))))
 
 (deftest test-types-to-str
   (testing 
