@@ -78,7 +78,9 @@
 ;          ]
     (put-op :add '(:polynomial :polynomial) #(tag (add-poly %1 %2)))
     (put-op :mul '(:polynomial :polynomial) #(tag (mul-poly %1 %2)))
+    (put-op :raise '(:complex) #(tag (make-poly :nothing (list 0 %1))))
     (put-op :make ':polynomial #(tag (make-poly %1 %2)))
+    (put-op :=zero? '(:polynomial) #(= (order (term-list %1)) nil))
     :done))
 
 (defn make-polynomial [var terms]

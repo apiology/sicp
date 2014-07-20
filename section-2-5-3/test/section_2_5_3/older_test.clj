@@ -220,9 +220,6 @@
   (testing "raise-one-step four"
     (is (= '((:rational (1 2)) (:rational (2 1)))
            (raise-one-step (list (make-rational 1 2) 2)))))
-  (testing "raise-one-step five"
-    (is (= nil
-           (raise-one-step (list (make-complex-from-real-imag 3 4) (make-complex-from-real-imag 3 4))))))
   (testing "raise-one-step six"
     (is (= '((:rational 0 1) (:rational (-0.5 1)))
            (raise-one-step '((:rational 0 1) -0.5))))))
