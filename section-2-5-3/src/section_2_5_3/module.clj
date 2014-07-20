@@ -93,7 +93,8 @@
 (defn drop-item-one-step [num]
   (if-let [projected (project-one-step num)]
     (let [raised (raise projected)]
-      (log "drop-item-one-step: For num=" num ", projected is " projected ", raised is " raised)
+      (log "drop-item-one-step: For num=" num ", projected is "
+           projected ", raised is " raised)
       (if (equ? num raised)
         projected
         nil))))
