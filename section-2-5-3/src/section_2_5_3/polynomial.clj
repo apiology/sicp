@@ -9,11 +9,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn install-polynomial-package []
- ;; internal procedures
-;;          ...
-          ;; representation of poly
-          
-  (letfn [(make-poly [variable term-list] (cons variable term-list))
+  
+  (letfn [;; representation of polynomial
+          (make-poly [variable term-list] (cons variable term-list))
           (variable [p] (first p))
           (term-list [p] (rest p))
           (variable? [x] (keyword? x))
@@ -21,13 +19,21 @@
                                        (or (= v1 :any)
                                            (= v2 :any)
                                            (= v1 v2))))
-          (adjoin-term [term term-list] (if (=zero? (coeff term))
-                                          term-list
-                                          (cons term term-list)))
+          ;; representation of term list
+          (adjoin-term [term term-list] 
+            (log "Calling adjoin-term on (" term "), with (" term-list ")")
+            (if (=zero? (coeff term))
+              (do
+                (log "coefficient was zero - skipping!")
+                term-list)
+              (do
+                (log "Turns out that " (coeff term) "-" (class (coeff term)) "-is not zero")
+                (cons term term-list))))
           (the-empty-termlist [] '())
           (first-term [term-list] (first term-list))
           (rest-terms [term-list] (rest term-list))
           (empty-termlist? [term-list] (empty? term-list))
+          ;; representation of term
           (make-term [order coeff] (list order coeff))
           (order [term] (first term))
           (coeff [term] (do
@@ -40,6 +46,7 @@
                                       nc (negate c)]
                                   (log "negate-term called with " term ", o=" o ", c=" c ", nc=" nc)
                                   (make-term o nc))))
+          ;; operations on term lists
           (negate-term-list [term-list] (map negate-term term-list))
           (mul-term-by-all-terms [t1 list1]
             (if (empty-termlist? list1)
@@ -54,25 +61,27 @@
               (the-empty-termlist)
               (add-terms (mul-term-by-all-terms (first-term list1) list2)
                          (mul-terms (rest-terms list1) list2))))
+          ;; operations on polynomials
           (add-poly [p1 p2]           
             {:pre [(same-variable? (variable p1) (variable p2))]}
             (make-poly (variable p1)
                        (add-terms (term-list p1)
                                   (term-list p2))))
           (mul-poly [p1 p2]
-             {:pre [(same-variable? (variable p1) (variable p2))]}
-             (make-poly (variable p1)
-                        (mul-terms (term-list p1)
-                                   (term-list p2))))
+            {:pre [(same-variable? (variable p1) (variable p2))]}
+            (make-poly (variable p1)
+                       (mul-terms (term-list p1)
+                                  (term-list p2))))
           (add-terms [list1 list2]
-             (cond (empty-termlist? list1) list2
-                   (empty-termlist? list2) list1
-                   :else
+            (log "Calling add-terms on (" list1 "), and (" list2 ")")
+            (cond (empty-termlist? list1) list2
+                  (empty-termlist? list2) list1
+                  :else
                   (let [t1 (first-term list1)
                         t2 (first-term list2)]
                     (cond (> (order t1) (order t2))
                           (adjoin-term t1 (add-terms (rest-terms list1) list2))
-                               
+                          
                           (< (order t1) (order t2))
                           (adjoin-term t2 (add-terms list1 (rest-terms list2)))
 
@@ -83,13 +92,10 @@
                            (add-terms (rest-terms list1)
                                       (rest-terms list2)))))))
           (tag [p] (attach-tag :polynomial p))]
-          ;; representation of terms and term lists
-          ;; procedures adjoin-term and coeff from text below
-;          add-poly [p]
-;          ]
     (put-op :add '(:polynomial :polynomial) #(tag (add-poly %1 %2)))
     (put-op :mul '(:polynomial :polynomial) #(tag (mul-poly %1 %2)))
-    (put-op :negate '(:polynomial) #(tag (make-poly (variable %1) (negate-term-list (term-list %1)))))
+    (put-op :negate '(:polynomial) #(tag (make-poly (variable %1) 
+                                                    (negate-term-list (term-list %1)))))
     (put-op :lower-type :polynomial (fn [] :complex))
     (put-op :raise '(:complex) #(do
                                   (log "Trying to raise a complex type: " %1)
