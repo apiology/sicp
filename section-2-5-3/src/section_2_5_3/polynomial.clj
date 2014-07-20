@@ -63,17 +63,17 @@
                   (let [t1 (first-term list1)
                         t2 (first-term list2)]
                     (cond (> (order t1) (order t2))
-                               (adjoin-term t1 (add-terms (rest-terms list1) list2))
+                          (adjoin-term t1 (add-terms (rest-terms list1) list2))
+                               
+                          (< (order t1) (order t2))
+                          (adjoin-term t2 (add-terms list1 (rest-terms list2)))
 
-                              (< (order t1) (order t2))
-                              (adjoin-term t2 (add-terms list1 (rest-terms list2)))
-
-                              :else
-                              (adjoin-term
-                               (make-term (order t1)
-                                          (add (coeff t1) (coeff t2)))
-                               (add-terms (rest-terms list1)
-                                          (rest-terms list2)))))))
+                          :else
+                          (adjoin-term
+                           (make-term (order t1)
+                                      (add (coeff t1) (coeff t2)))
+                           (add-terms (rest-terms list1)
+                                      (rest-terms list2)))))))
           (tag [p] (attach-tag :polynomial p))]
           ;; representation of terms and term lists
           ;; procedures adjoin-term and coeff from text below
