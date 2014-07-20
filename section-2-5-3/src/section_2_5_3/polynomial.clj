@@ -33,6 +33,14 @@
           (coeff [term] (do
                           (log "Calling coeff on" term)
                           (second term)))
+          (negate-term [term] (do
+                                (log "Starting negate-term on " term)
+                                (let [o (order term)
+                                      c (coeff term)
+                                      nc (negate c)]
+                                  (log "negate-term called with " term ", o=" o ", c=" c ", nc=" nc)
+                                  (make-term o nc))))
+          (negate-term-list [term-list] (map negate-term term-list))
           (mul-term-by-all-terms [t1 list1]
             (if (empty-termlist? list1)
               (the-empty-termlist)
@@ -81,6 +89,7 @@
 ;          ]
     (put-op :add '(:polynomial :polynomial) #(tag (add-poly %1 %2)))
     (put-op :mul '(:polynomial :polynomial) #(tag (mul-poly %1 %2)))
+    (put-op :negate '(:polynomial) #(tag (make-poly (variable %1) (negate-term-list (term-list %1)))))
     (put-op :lower-type :polynomial (fn [] :complex))
     (put-op :raise '(:complex) #(do
                                   (log "Trying to raise a complex type: " %1)

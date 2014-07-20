@@ -10,6 +10,7 @@
 (defn install-clj-number-package []
   (let [tag #(attach-tag :clj-number %)]
     (put-op :add '(:clj-number :clj-number) #(tag (+ %1 %2)))
+    (put-op :negate '(:clj-number) #(tag (- %1)))
     (put-op :sub '(:clj-number :clj-number) #(tag (- %1 %2)))
     (put-op :mul '(:clj-number :clj-number) #(tag (* %1 %2)))
     (put-op :div '(:clj-number :clj-number) #(tag (/ %1 %2)))

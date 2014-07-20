@@ -17,7 +17,14 @@
                   (log "(gte " x " " y ") = " ret)
                   ret))
 (defn add [x y] (apply-generic :add x y))
-(defn sub [x y] (apply-generic :sub x y))
+(defn negate [x]
+  (log "Calling negate on " x)
+  (apply-generic :negate x))
+(defn sub [x y] 
+  (log "Calling sub on " x " and " y)
+  (if-let [ret (apply-generic-or-nil :sub x y)]
+    ret
+    (add x (negate y))))
 (defn mul [x y] (apply-generic :mul x y))
 (defn div [x y] (apply-generic :div x y))
 (defn atan2 [x y] (apply-generic :atan2 x y))
