@@ -1,6 +1,7 @@
 (ns section-2-5-3.polynomial
   (:gen-class)
   (:require [section-2-5-3.math :refer :all]
+            [section-2-5-3.log :refer :all]
             [section-2-5-3.module :refer :all]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -26,7 +27,9 @@
           (empty-termlist? [term-list] (empty? term-list))
           (make-term [order coeff] (list order coeff))
           (order [term] (first term))
-          (coeff [term] (second term))
+          (coeff [term] (do
+                          (log "Calling coeff on" term)
+                          (second term)))
           (mul-term-by-all-terms [t1 list1]
             (if (empty-termlist? list1)
               (the-empty-termlist)
