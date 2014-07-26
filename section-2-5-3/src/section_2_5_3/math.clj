@@ -95,3 +95,8 @@
   (fixed-point (average-damp #(div x %))
                1.0))
 (def sqrt sqrt-damped)
+
+(defn sicp-number? [number]
+  (or (number? number)
+      (and (seq? number)
+           (keyword? (first number)))))
