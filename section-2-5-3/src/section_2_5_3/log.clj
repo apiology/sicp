@@ -8,7 +8,7 @@
     (pr-str coll)
     (str coll)))
 ;  (println (str "Called coll-to-str on " (str/join " " coll)))
-  (let [ret (str/join " " (flatten coll))]
+;  (let [ret (str/join " " (flatten coll))]
 ;    (println (str "Returning " ret))
 ;    (println (str "...which is of type " (class ret)))
     ret))
