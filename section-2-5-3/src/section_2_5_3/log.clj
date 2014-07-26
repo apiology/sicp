@@ -14,7 +14,7 @@
 ;    ret))
 
 (defn log [& args]
-;  (println (coll-to-str args))
+;  (println (str/join " " (map coll-to-str args)))
 )
 
 (defn types-to-str [type-tags]
