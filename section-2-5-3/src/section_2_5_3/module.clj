@@ -46,11 +46,13 @@
 (declare drop-type)
 
 (defn apply-generic [op & args]
+  (log "(apply-generic " op args ")")
   (drop-type (apply apply-generic-no-simplify op args)))
 
 (defn cant-resolve-op [op types]
   (throw (Exception. (str "Could not find op " op 
-                          " with tags " (types-to-str types) " (class " (class types)
+                          " with tags " (types-to-str types) ".  Note that type of that is "
+                          (class types)
                           ").  Valid tags would be " (keys @operations)))))
 
 (defn lower-type [type]
