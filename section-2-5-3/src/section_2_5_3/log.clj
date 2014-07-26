@@ -13,6 +13,10 @@
 ;    (println (str "...which is of type " (class ret)))
 ;    ret))
 
+(defn warn [& args]
+;  (println (str/join " " (map coll-to-str args)))
+)
+
 (defn log [& args]
 ;  (println (str/join " " (map coll-to-str args)))
 )
