@@ -42,29 +42,31 @@
 ;; GENERIC TERMLIST FUNCTIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn valid-termlist? [term-list] (apply-generic-no-simplify :valid-termlist? term-list))
-(defn empty-termlist? [term-list] (apply-generic-no-simplify :empty-termlist? term-list))
+(defn empty-termlist? [term-list] 
+  (log "(empty-termlist? " term-list ")")
+  (apply-generic-no-simplify :empty-termlist? term-list))
 (defn first-term [term-list] (apply-generic-no-simplify :first-term term-list))
 (defn rest-terms [term-list] (apply-generic-no-simplify :rest-terms term-list))
 (defn adjoin-term [term term-list]
   ((get-op-or-fail :adjoin-term (type-tag term-list)) term (contents term-list)))
 ;; XXX how do I as a consumer pick between representations?
-(defn the-empty-termlist [] ((get-op-or-fail :the-empty-termlist :dense-termlist)))
+
+(defn valid-termlist? [term-list]
+  {:pre [(keyword? (first term-list))]}
+  (log "(valid-termlist?" term-list ")")
+  (let [ret (or (empty-termlist? term-list)
+                (and 
+                 (valid-term? (first-term term-list))
+                 (valid-termlist? (rest-terms term-list))))]
+    (log "(valid-termlist? " term-list ") = " ret)
+    ret))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DENSE TERMLIST MODULE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn install-dense-termlist-package []
-  (letfn [(empty-termlist? [term-list] (empty? term-list))          
-          (valid-termlist? [term-list]
-            (log "(valid-termlist?" term-list ")")
-            (let [ret (or (empty-termlist? term-list)
-                          (and 
-                           (valid-term? (first-term term-list))
-                           (valid-termlist? (rest term-list))))]
-              (log "(valid-termlist? " term-list ") = " ret)
-              ret))
+  (letfn [(empty-termlist? [term-list] (empty? term-list))
           (expand-to-order [new-order term-list]
             (log "(expand-to-order " new-order term-list ")")
             (if (and (not (empty-termlist? term-list))
@@ -73,7 +75,7 @@
               (recur new-order (cons 0 term-list))))
           (adjoin-term [term term-list] 
             {:pre [(valid-term? term)
-                   (valid-termlist? term-list)]}
+                   (valid-termlist? (tag term-list))]}
             (log "(adjoin-term " term " " term-list ")")
             (let [term-order (order term)
                   term-coeff (coeff term)
@@ -111,8 +113,8 @@
                 (log "(first-term " term-list ") = " ret)
                 ret)))
           (rest-terms [term-list]
-            {:pre [(valid-termlist? term-list)]
-             :post [#(valid-termlist? %)]}
+            {:pre [(valid-termlist? (tag term-list))]
+             :post [#(valid-termlist? (tag %))]}
             (rest term-list))
           (tag [p] (attach-tag :dense-termlist p))]
     (put-op :the-empty-termlist :dense-termlist #(tag (the-empty-termlist)))
@@ -120,10 +122,53 @@
     (put-op :valid-termlist? '(:dense-termlist) #(valid-termlist? %))
     (put-op :first-term '(:dense-termlist) #(first-term %))
     (put-op :rest-terms '(:dense-termlist) #(tag (rest-terms %)))
-    (put-op :adjoin-term :dense-termlist #(tag (adjoin-term %1 %2)))))
+    (put-op :adjoin-term :dense-termlist #(tag (adjoin-term %1 %2))))
+  (defn the-empty-termlist [] ((get-op-or-fail :the-empty-termlist :dense-termlist))))
 
   
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SPARSE TERMLIST MODULE
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn install-sparse-termlist-package []
+  (letfn [(empty-termlist? [term-list] (empty? term-list))          
+          (adjoin-term [term term-list] 
+            (log "Calling adjoin-term on (" term "), with (" term-list ")")
+            (if (=zero? (coeff term))
+              (do
+                (log "coefficient was zero - skipping!")
+                term-list)
+              (do
+                (log "Turns out that " (coeff term) "-" (class (coeff term)) 
+                     "-is not zero")
+                (cond
+                 (empty-termlist? term-list)
+                 (list term)
+
+                 (< (order term) (order (first-term term-list)))
+                 (cons (first-term term-list) (adjoin-term term (rest-terms term-list)))
+
+                 (> (order term) (order (first-term term-list)))
+                 (cons term term-list)
+
+                 :else
+                 (cons (make-term (order term)
+                                  (add (coeff term) (coeff (first-term term-list))))
+                       (rest-terms term-list))))))
+            
+          (the-empty-termlist [] '())
+          (first-term [term-list] (first term-list))
+          (rest-terms [term-list]
+            {:post [#(valid-termlist? (tag %))]}
+            (rest term-list))
+          (tag [p] (attach-tag :sparse-termlist p))]
+    (put-op :the-empty-termlist :sparse-termlist #(tag (the-empty-termlist)))
+    (put-op :empty-termlist? '(:sparse-termlist) #(empty-termlist? %))
+    (put-op :valid-termlist? '(:sparse-termlist) #(valid-termlist? %))
+    (put-op :first-term '(:sparse-termlist) #(first-term %))
+    (put-op :rest-terms '(:sparse-termlist) #(tag (rest-terms %)))
+    (put-op :adjoin-term :sparse-termlist #(tag (adjoin-term %1 %2))))
+  (defn the-empty-termlist [] ((get-op-or-fail :the-empty-termlist :sparse-termlist))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; POLYNOMIAL MODULE
@@ -147,28 +192,6 @@
           (valid-poly? [poly]
             (log "(valid-poly?" poly ")")
             (valid-termlist? (term-list poly)))
-          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-          ;; SPARSE TERM LIST REPRESENTATION
-          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-          ;;
-          ;; (adjoin-term [term term-list] 
-          ;;   (log "Calling adjoin-term on (" term "), with (" term-list ")")
-          ;;   (if (=zero? (coeff term))
-          ;;     (do
-          ;;       (log "coefficient was zero - skipping!")
-          ;;       term-list)
-          ;;     (do
-          ;;       (log "Turns out that " (coeff term) "-" (class (coeff term)) 
-          ;;            "-is not zero")
-          ;;       (cons term term-list))))
-          ;; (the-empty-termlist [] '())
-          ;; (first-term [term-list] (first term-list))
-          ;; (rest-terms [term-list] (rest term-list))
-          ;; (empty-termlist? [term-list] (empty? term-list))
-          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-          ;; DENSE TERM LIST REPRESENTATION
-          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
           ;; operations on term lists
           (negate-term-list [term-list]
             (if (empty-termlist? term-list)
