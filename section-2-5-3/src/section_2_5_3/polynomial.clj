@@ -22,7 +22,71 @@
                                        (or (= v1 :any)
                                            (= v2 :any)
                                            (= v1 v2))))
-          ;; representation of term list
+          (valid-poly? [poly]
+            (valid-termlist? (term-list poly)))
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;; TERM REPRESENTATION
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          (make-term [order coeff] (list order coeff))
+          (order [term] 
+            (first term))
+          (coeff [term] 
+            (do
+              (log "Calling coeff on" term)
+              (second term)))
+          (negate-term [term] 
+            {:pre [(valid-term? term)]}
+            (do
+              (log "Starting negate-term on " term)
+              (let [o (order term)
+                    c (coeff term)
+                    nc (negate c)]
+                (log "negate-term called with " term ", o=" o ", c=" c 
+                     ", nc=" nc)
+                (make-term o nc))))
+          (valid-term? [term]
+            (let [ret (and 
+                       (= 2 (count term))
+                       (number? (order term))
+                       (sicp-number? (coeff term)))]
+              (log "(valid-term? " term ") = " ret)
+              ret))
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;; SPARSE TERM LIST REPRESENTATION
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;;
+          ;; (adjoin-term [term term-list] 
+          ;;   (log "Calling adjoin-term on (" term "), with (" term-list ")")
+          ;;   (if (=zero? (coeff term))
+          ;;     (do
+          ;;       (log "coefficient was zero - skipping!")
+          ;;       term-list)
+          ;;     (do
+          ;;       (log "Turns out that " (coeff term) "-" (class (coeff term)) 
+          ;;            "-is not zero")
+          ;;       (cons term term-list))))
+          ;; (the-empty-termlist [] '())
+          ;; (first-term [term-list] (first term-list))
+          ;; (rest-terms [term-list] (rest term-list))
+          ;; (empty-termlist? [term-list] (empty? term-list))
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;; DENSE TERM LIST REPRESENTATION
+          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          (empty-termlist? [term-list] (empty? term-list))          
+          (expand-to-order [new-order term-list]
+            (log "(expand-to-order " new-order term-list ")")
+            (if (and (not (empty-termlist? term-list))
+                     (>= (order (first-term term-list)) new-order))
+              term-list
+              (recur new-order (cons 0 term-list))))
+          (valid-termlist? [term-list]
+            (log "(valid-termlist?" term-list ")")
+            (let [ret (or (empty-termlist? term-list)
+                          (and 
+                           (valid-term? (first-term term-list))
+                           (valid-termlist? (rest term-list))))]
+              (log "(valid-termlist? " term-list ") = " ret)
+              ret))
           (adjoin-term [term term-list] 
             {:pre [(valid-term? term)
                    (valid-termlist? term-list)]}
@@ -68,7 +132,10 @@
             (rest term-list))
           ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
           ;; operations on term lists
-          (negate-term-list [term-list] (map negate-term term-list))
+          (negate-term-list [term-list]
+            (if (empty-termlist? term-list)
+              term-list
+              (adjoin-term (negate-term (first-term term-list)) (negate-term-list (rest-terms term-list)))))
           (mul-term-by-all-terms [t1 list1]
             (log "mul-term-by-all-terms")
             (if (empty-termlist? list1)

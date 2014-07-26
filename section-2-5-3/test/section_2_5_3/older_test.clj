@@ -19,12 +19,12 @@
 
 (deftest test-types-to-str
   (testing 
-    (is (= ":clojure-number :polynomial :alien-technology"
+    (is (= "(:clojure-number :polynomial :alien-technology)"
            (types-to-str '(:clojure-number :polynomial :alien-technology))))))
 
 (deftest test-type-tag
   (testing 
-    (is (= ":clojure-number :polynomial :alien-technology"
+    (is (= "(:clojure-number :polynomial :alien-technology)"
            (types-to-str '(:clojure-number :polynomial :alien-technology))))))
 
 (deftest test-lt
