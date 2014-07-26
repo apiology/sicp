@@ -10,7 +10,8 @@
 
 (defn install-polynomial-package []
   
-  (letfn [;; representation of polynomial
+  (letfn [;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          ;; POLYNOMIAL REPRESENTATION
           (make-poly [variable term-list] (cons variable term-list))
           (variable [p] (first p))
           (term-list [p] (rest p))
