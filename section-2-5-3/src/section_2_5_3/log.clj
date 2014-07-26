@@ -4,6 +4,9 @@
 
 
 (defn coll-to-str [coll]
+  (if (seq? coll)
+    (pr-str coll)
+    (str coll)))
 ;  (println (str "Called coll-to-str on " (str/join " " coll)))
   (let [ret (str/join " " (flatten coll))]
 ;    (println (str "Returning " ret))
