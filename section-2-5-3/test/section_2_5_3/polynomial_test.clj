@@ -16,6 +16,7 @@
 (install-rectangular-package)
 (install-complex-package)
 (install-clj-number-package)
+(install-dense-termlist-package)
 
 ;; common data for tests
 
