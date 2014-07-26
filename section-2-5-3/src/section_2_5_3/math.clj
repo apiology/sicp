@@ -16,7 +16,11 @@
 (defn gte [x y] (let [ret (not (lt x y))]
                   (log "(gte " x " " y ") = " ret)
                   ret))
-(defn add [x y] (apply-generic :add x y))
+(defn add [x y] 
+  (log "class of x is " (class x))
+  (log "class of y is " (class y))
+  (log "(add " x y ")")
+  (apply-generic :add x y))
 (defn negate [x]
   (log "Calling negate on " x)
   (apply-generic :negate x))
