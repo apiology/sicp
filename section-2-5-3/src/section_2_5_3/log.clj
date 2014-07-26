@@ -11,7 +11,7 @@
 ;  (let [ret (str/join " " (flatten coll))]
 ;    (println (str "Returning " ret))
 ;    (println (str "...which is of type " (class ret)))
-    ret))
+;    ret))
 
 (defn log [& args]
 ;  (println (coll-to-str args))
