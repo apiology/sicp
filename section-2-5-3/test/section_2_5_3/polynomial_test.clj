@@ -131,3 +131,20 @@
   (testing "(5*x^2 + 2x) - (5*x^3 + 2x) = (-5*x^3 + 5*x^2)"
     (is (= (make-polynomial :x '((3 -5) (2 5)))
            (sub poly2-in-x poly1-in-x)))))
+
+;; Exercise 2.90 done above by switching whether we import dense or sparse
+
+;; Exercise 2.91
+
+;   X / Y
+;   X is dividend
+;   Y is divisor
+
+
+(deftest simple-polynomial-division
+  (testing "(x^5-1) / (x^2-1) = quotient x^3+x) remainder x-1"
+    (is (= [(make-polynomial :x '((3 1) (1 1)))
+            (make-polynomial :x '((1 1) (0 -1)))]
+           (div-poly (make-polynomial :x '((5 1) (0 -1)))
+                     (make-polynomial :x '((2 1) (0 -1))))))))
+                                  
