@@ -1,3 +1,4 @@
+(define false #f)
 (define (make-table)
   (let ((local-table (list '*table*)))
     (define (lookup key-1 key-2)
