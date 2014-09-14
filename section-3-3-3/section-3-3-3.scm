@@ -40,6 +40,11 @@
 ;= ok
 (lookup tbl 1 2)
 ;= "1-2"
-
+(insert! tbl 3 4 "3-4")
+;= ok
+(lookup tbl 1 2)
+;= "1-2"
+(lookup tbl 3 4)
+;= "3-4"
 
 ;; Exercise 3.24
