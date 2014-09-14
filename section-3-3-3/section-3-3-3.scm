@@ -28,3 +28,18 @@
           ((eq? m 'insert-proc!) insert!)
           (else (error "Unknown operation -- TABLE" m))))
   dispatch))
+
+(define tbl (make-table))
+(define (lookup table key-1 key-2)
+  ((table 'lookup-proc) key-1 key-2))
+(define (insert! table key-1 key-2 value)
+  ((table 'insert-proc!) key-1 key-2 value))
+(lookup tbl 1 2)
+;= #f
+(insert! tbl 1 2 "1-2")
+;= ok
+(lookup tbl 1 2)
+;= "1-2"
+
+
+;; Exercise 3.24
