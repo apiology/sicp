@@ -22,9 +22,9 @@
                       (cons (list key-1
                                   (cons key-2 value))
                             (cdr local-table)))))
-    ’ok)
+    'ok)
   (define (dispatch m)
-    (cond ((eq? m ’lookup-proc) lookup)
-          ((eq? m ’insert-proc!) insert!)
+    (cond ((eq? m 'lookup-proc) lookup)
+          ((eq? m 'insert-proc!) insert!)
           (else (error "Unknown operation -- TABLE" m))))
   dispatch))
