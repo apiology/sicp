@@ -233,3 +233,7 @@
 (lookup tbl '(3 4))
 ;= "3-4"
 
+
+;; Exercise 3.26
+
+;; see paper
