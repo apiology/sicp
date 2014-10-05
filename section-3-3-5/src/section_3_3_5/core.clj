@@ -380,12 +380,43 @@
     (multiplier x y z)
     z))
 
-(defn c/ [x y]
+(defn cdiv [x y]
   (let [z (make-connector)]
     (multiplier z y x)
     z))
 
 (defn cv [n]
-  (let [x (make-connector)])
-  (constant n x)
-  x)
+  (let [x (make-connector)]
+    (constant n x)
+    x))
+
+(defn celsius-fahrenheit-converter [x]
+  (c+ (c* (cdiv (cv 9) (cv 5))
+          x)
+      (cv 32)))
+
+
+(def C (make-connector))
+(def F (celsius-fahrenheit-converter C))
+;= :ok
+
+(probe "Celcius temp" C)
+(probe "Fahrenheit temp" F)
+
+(set-value! C 25 :user)
+;= Probe: Celsius temp = 25
+;= Probe: Fahrenheit temp = 77
+;= :done
+
+; (set-value! F 212 :user)
+;= Error! Contradiction (77 212)
+
+(forget-value! C :user)
+;= Probe: Celsius temp = ?
+;= Probe: Fahrenheit temp = ?
+;= :done
+
+(set-value! F 212 :user)
+;= Probe: Celsius temp = 212
+;= Probe: Fahrenheit temp = 100
+;= :done
