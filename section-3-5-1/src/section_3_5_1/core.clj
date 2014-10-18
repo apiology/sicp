@@ -34,11 +34,11 @@
     (fn []
       (let [state @state-atom
             already-run (already-run? state)
-            result-of-last-run (result-of-last-run state)]
+            result (result-of-last-run state)]
         (if (not already-run)
           (do (reset! state-atom [true (proc)])
               (result-of-last-run @state-atom))
-          result-of-last-run)))))
+          result)))))
 
 (defn sum-primes [a b]
   (loop [count a accum 0]
@@ -82,8 +82,9 @@
 (def the-empty-stream '())
 
 (defmacro my-delay [a]
-  `(fn []
-     ~a))
+  `(memo-proc 
+    (fn []
+      ~a)))
 
 (defmacro cons-stream [a b]
   `(list ~a (my-delay ~b)))
@@ -145,6 +146,7 @@
 
 (def y (stream-enumerate-interval 0 10))
 (def x (stream-map show (stream-enumerate-interval 0 10)))
+
 
 (stream-ref y 5)
 (stream-ref x 5)
