@@ -83,7 +83,7 @@
   (if (stream-null? s1)
     s2
     (cons-stream (stream-car s1)
-                 (interleave s2 (stream-cdr s1)))))
+                 (stream-interleave s2 (stream-cdr s1)))))
 
 (defn stream-filter [pred stream]
   (cond (stream-null? stream) the-empty-stream
