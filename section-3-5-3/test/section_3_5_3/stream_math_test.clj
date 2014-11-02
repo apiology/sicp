@@ -8,8 +8,26 @@
     (is (= '(1 1) (stream-ref int-pairs 0)))
     (is (= '(1 2) (stream-ref int-pairs 1)))
     (is (= '(2 2) (stream-ref int-pairs 2)))
-    ;; (is (= '(1 2) (stream-ref int-pairs 3))) ;; FAILS
+    (is (= '(1 3) (stream-ref int-pairs 3)))
     ))
+
+;; need plan to fix this:
+;; DONE-1) break components into correct namespaces
+;; 2) come up with list of things that int-pairs uses
+;;    pairs
+;;      cons-stream
+;;      stream-car
+;;      stream-cdr
+;;      stream-interleave <-- probably the problem
+;;      stream-map
+;;    integers
+;;      integers-starting-from
+;; 3) come up with unit tests for each until I have problem fixed
+;; 4) Come up with emacs workflow that works with all of this
+
+
+;; (stream-ref int-pairs 3) ; XXX this blows up
+
 
 (def sqrt-2 (sqrt-stream 2))
 
@@ -19,7 +37,6 @@
 ; (stream-ref sqrt-2 3)
 ; (stream-ref sqrt-2 4)
 ; (stream-ref sqrt-2 5)
-
 
   ; (pairs s t)
 
@@ -31,8 +48,3 @@
 (stream-ref int-pairs 1)
 ; (stream-ref int-pairs 2) ; XXX this blows up
 
-;; need plan to fix this:
-;; 1) break components into correct namespaces
-;; 2) come up with list of things that int-pairs uses
-;; 3) come up with unit tests for each until I have problem fixed
-;; (stream-ref int-pairs 3) ; XXX this blows up
