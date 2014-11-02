@@ -150,3 +150,23 @@
 
 (stream-ref y 5)
 (stream-ref x 5)
+(stream-ref x 7)
+
+;; ex 3.52
+
+(def sum (atom 0))
+(defn accum [x]
+  (swap! sum + x)
+  @sum)
+(def seq (stream-map accum (stream-enumerate-interval 1 20)))
+(def y (stream-filter even? seq))
+(defn remainder [a b]
+  (rem a b))
+(def z (stream-filter #(= (remainder % 5) 0)
+                      seq))
+(stream-ref y 7)
+(display-stream z)
+(display-stream seq)
+
+
+
