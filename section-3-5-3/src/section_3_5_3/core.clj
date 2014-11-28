@@ -121,11 +121,6 @@
 
 
 ;; x^2 + y^2 = z^2
-; (finite 3 sm/int-triples)
-; (finite 1 sm/pythagorean-triples)
+; (finite 10 sm/int-triples)
+; (finite 2 sm/pythagorean-triples)
 
-(map square (filter even? [1 2 3 4 5]))
-
-(->> [1 2 3 4 5]
-     (filter even?)
-     (map square))

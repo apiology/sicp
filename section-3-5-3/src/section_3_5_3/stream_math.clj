@@ -88,6 +88,18 @@
     (stream-map #(list % (stream-car t)) (stream-cdr s)) ;; #3
     (pairs-on-or-above-diagonal (stream-cdr s) (stream-cdr t))))) ;; #4
 
+(defn- three-d-6 [i j k]
+    (stream-map #(list (first %) (stream-car j) (second %)) ;; # 6
+                (pairs-on-or-above-diagonal
+                 (stream-filter #(<= % (stream-car j)) (stream-cdr i))
+                 (stream-filter #(>= % (stream-car j)) (stream-cdr k)))))
+
+;; (finite 3 (pairs-on-or-above-diagonal (stream-cdr integers) (stream-cdr integers)))
+;; (finite 3 (three-d-6 integers integers integers))
+;;=> ((2 1 2) (2 1 3) (3 1 3))
+
+;; (finite 10 (three-d-7 integers integers integers))
+
 (defn three-d-pairs-on-or-above-diagonal
   "Given three infinite stream of items, visualized as a three
   dimensional array infinite on both axes, produce all triplits which lie
@@ -101,10 +113,7 @@
     (stream-map #(list (stream-car i) (stream-car j) %) ;; #4
                 (stream-cdr k)) ;; #4
     ;; #5 did not make the cut
-    (stream-map #(list (first %) (stream-car j) (second %)) ;; # 6
-                (pairs-on-or-above-diagonal
-                 (stream-cdr i)
-                 (stream-filter #(>= % (stream-car j)) (stream-cdr k))))
+    ;; #6 did not make the cut
     (stream-map #(list (stream-car i) (first %) (second %))  ;; # 7
                 (pairs-on-or-above-diagonal
                  (stream-filter #(>= % (stream-car i)) (stream-cdr j))
