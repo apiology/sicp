@@ -22,8 +22,11 @@
 
 ;; ex 3.63 - alyssa is right.  yes, this relies on memo-proc working.
 
+;; [done to here]
+
 ;; ex 3.64
 
+;; see stream-limit and (sqrt)
 
 ;; (sm/sqrt 2 0.00000000000001)
 
@@ -41,10 +44,22 @@
 ;; Infinite streams of pairs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-;; int-pairs - all integers i, j where i<= j
-
+;; int-pairs - all integers (i, j) where i<= j
+;;
 ;; s and t are the infinite series that i and j are pulled from....
+
+;; see sm/prime-sum-pairs-stream
+
+;; convenience for repl
+
+; (stream-take 5 sm/prime-sum-pairs-stream)
+; (finite 5 sm/prime-sum-pairs-stream)
+; (finite 5 sm/int-pairs)
+
+; (finite 200 (sm/pairs-on-or-above-diagonal sm/integers sm/integers))
+
+;; (stream->seq (stream-take 5 sm/prime-sum-pairs-stream))
+
 ;;
 ;; composed of three parts:
 ;; 1) s0, t0
@@ -60,5 +75,57 @@
 ;             (stream-cdr t))
 
   
+;; Exercise 3.66
+
+;; first element grows very slowly
+;; about 200 preceed 1,100
 
 
+;; (stream-find-index-of '(1 100) (sm/pairs-on-or-above-diagonal sm/integers sm/integers))
+;;=> 197
+
+;; (stream-find-index-of '(2 100) (sm/pairs-on-or-above-diagonal sm/integers sm/integers))
+;;=> 392
+
+;; (stream-find-index-of '(3 100) (sm/pairs-on-or-above-diagonal sm/integers sm/integers))
+;;=> 778
+
+;; (stream-find-index-of '(4 100) (sm/pairs-on-or-above-diagonal sm/integers sm/integers))
+;;=> 1542
+
+;; (stream-find-index-of '(n 100) (sm/pairs-on-or-above-diagonal sm/integers sm/integers))
+;;=>200^n
+
+; (stream-find-index-of '(99 100) (sm/pairs-on-or-above-diagonal sm/integers sm/integers))
+;;=>200^100
+
+;; Exercise 3.67
+
+;; see (finite 50 (sm/all-pairs sm/integers sm/integers))
+
+;; Exercise 3.68
+
+(defn probably-bad-pairs [s t]
+  (stream-interleave
+   (stream-map #(list (stream-car s) %) t)
+   (probably-bad-pairs (stream-cdr s) (stream-cdr t))))
+
+;; there's no base case to the recursion - it recurses forever.
+;; 
+;; (finite 50 (probably-bad-pairs sm/integers sm/integers))
+;;;=> StackOverflow
+
+;; Exercise 3.69
+
+;; see (three-d-pairs-on-or-above-diagonal)
+
+
+;; x^2 + y^2 = z^2
+; (finite 3 sm/int-triples)
+; (finite 1 sm/pythagorean-triples)
+
+(map square (filter even? [1 2 3 4 5]))
+
+(->> [1 2 3 4 5]
+     (filter even?)
+     (map square))

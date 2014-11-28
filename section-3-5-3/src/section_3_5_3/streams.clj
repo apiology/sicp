@@ -19,7 +19,6 @@
 (defn my-force [delayed-object]
   (delayed-object))
 
-
 (defn stream-cdr [stream]
   (if (empty? (rest stream))
     '()
@@ -42,11 +41,8 @@
       (proc (stream-car s))
       (stream-for-each proc (stream-cdr s)))))
 
-(defn display-stream [s]
-  (stream-for-each display-line s))
-
-;; take the stream of sums of more and more terms
 (defn scale-stream [stream factor]
+  "mulitply each value in stream by factor"
   (stream-map #(* % factor)
               stream))
 
@@ -54,6 +50,8 @@
   (stream-map + s1 s2))
 
 (defn partial-sums [s]
+  "Takes a stream and returns the stream whose elements are s_0,
+   s_0+s_1, s_0+s_1+s_2, etc."
   (cons-stream (stream-car s)
                (add-streams (stream-cdr s)
                             (partial-sums s))))
@@ -72,18 +70,26 @@
     (stream-car s)
     (recur (stream-cdr s) (dec n))))
 
-(defn stream-limit [s tolerance]
+(defn stream-limit
+  "Examines stream until two successive elements differ less than
+  tolerance and returns the second of the elements"
+  [s tolerance]
   (let [s0 (stream-ref s 0)
         s1 (stream-ref s 1)]
     (if (< (abs (- s1 s0)) tolerance)
       s1
       (recur (stream-cdr s) tolerance))))
 
-(defn stream-interleave [s1 s2]
-  (if (stream-null? s1)
-    s2
-    (cons-stream (stream-car s1)
-                 (stream-interleave s2 (stream-cdr s1)))))
+(defn stream-interleave
+  ([s1 s2]
+     (if (stream-null? s1)
+       s2
+       (cons-stream (stream-car s1)
+                    (stream-interleave s2 (stream-cdr s1)))))
+  ([s1 s2 & r]
+     (stream-interleave
+      s1
+      (apply stream-interleave s2 r))))
 
 (defn stream-filter [pred stream]
   (cond (stream-null? stream) the-empty-stream
@@ -91,10 +97,34 @@
                                                 (stream-filter pred (stream-cdr stream)))
         :else (stream-filter pred (stream-cdr stream))))
 
-(defn pairs [s t]
-  (cons-stream
-   (list (stream-car s) (stream-car t)) ;; #1
-   (stream-interleave
-    (stream-map #(list (stream-car s) %)
-                (stream-cdr t))
-    (pairs (stream-cdr s) (stream-cdr t)))))
+(defn stream-take [n s]
+  (if (= n 0) the-empty-stream
+      (cons-stream (stream-car s)
+                   (stream-take (dec n) (stream-cdr s)))))
+
+(defn display-stream
+  ([s] (stream-for-each display-line s))
+  ([n s] (display-stream (stream-take n s))))
+
+(defn stream->seq
+  ([s]
+     (if (stream-null? s)
+       '()
+       (cons (stream-car s) (lazy-seq (stream->seq (stream-cdr s)))))))
+
+(defn finite
+  "Convert an infinite stream into a finite stream of n items"
+  [n s]
+  (->> s
+       stream->seq
+       (take n)))
+
+(defn stream-find-index-of [item stream]
+  "Find the zero-indexed index of the stream item equal to 'item' in the stream"
+  (loop [index 0
+         stream stream]
+    (if (stream-null? stream)
+      nil
+      (if (= item (stream-car stream))
+        index
+        (recur (inc index) (stream-cdr stream))))))
