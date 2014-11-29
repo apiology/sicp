@@ -158,7 +158,7 @@
     the-empty-stream
     (let [first-item (stream-car stream)
           second-item (stream-car (stream-cdr stream))
-          third-item (stream-car (stream-car (stream-cdr stream)))]
+          third-item (stream-car (stream-cdr (stream-cdr stream)))]
       (if (pred first-item second-item third-item)
         (cons-stream (list first-item second-item third-item)
                      (stream-filter-triplets pred (stream-cdr stream)))
