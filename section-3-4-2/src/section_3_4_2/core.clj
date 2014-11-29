@@ -29,13 +29,13 @@
 ; (parallel-execute (lambda () (set! x (* x x)))
 ;                   (lambda () (set! x (* x x x))))
 
-a1 = access
-a2 = access
-a3 = set
-b1 = access
-b2 = access
-b3 = access
-b4 = set
+;; a1 = access
+;; a2 = access
+;; a3 = set
+;; b1 = access
+;; b2 = access
+;; b3 = access
+;; b4 = set
 
 ;; a1=10 a2=10 a3 (100) b1 b2 b3 b4 (1,000,000)
 ;; b1=10 b2=10 b3=10 b4 (1000) a1 a2 a3 (1,000,000)

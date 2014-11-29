@@ -1,4 +1,4 @@
-(ns section-3-5-3.streams
+>(ns section-3-5-3.streams
   (:require [section-3-5-3.memo-proc :as mp]
             [section-3-5-3.display :refer :all]
             [section-3-5-3.math :refer :all]))
@@ -128,3 +128,19 @@
       (if (= item (stream-car stream))
         index
         (recur (inc index) (stream-cdr stream))))))
+
+(defn stream-merge-weighted [s1 s2 weight]
+  (cond (stream-null? s1) s2
+        (stream-null? s2) s1
+        :else (let [s1car (stream-car s1)
+                    s2car (stream-car s2)
+                    s1weight (weight s1car)
+                    s2weight (weight s2car)]
+                (cond (< s1weight s2weight)
+                      (cons-stream s1car (stream-merge-weighted (stream-cdr s1) s2 weight))
+
+                      (> s1weight s2weight)
+                      (cons-stream s2car (stream-merge-weighted s1 (stream-cdr s2 weight)))
+                      
+                      :else
+                      (cons-stream s1car (stream-merge-weighted (stream-cdr s1) (stream-cdr s2) weight))))))

@@ -122,5 +122,43 @@
 
 ;; x^2 + y^2 = z^2
 ; (finite 10 sm/int-triples)
-; (finite 2 sm/pythagorean-triples)
+                                        ; (finite 2 sm/pythagorean-triples)
+;; Exercise 3.70
+
+;; see stream-merge-weighted
+
+;; a:
+
+(def positive-ints-by-sum
+  (sm/pairs-on-or-above-diagonal sm/int-pairs
+                                 sm/int-pairs
+                                 (fn [s1 s2]
+                                   (stream-merge-weighted s1 s2 #(+ (first %) (second %))))))
+
+(defn divisible-by [n divisor]
+  (= 0
+     (mod n divisor)))
+
+(defn not-divisible-by-2-3-or-5 [n]
+  (not (or (divisible-by n 2)
+            (divisible-by n 3)
+            (divisible-by n 5))))
+
+(def ints-but-not-divisible-by-2-3-or-5
+  (stream-filter not-divisible-by-2-3-or-5 sm/integers))
+
+(def weird
+  (sm/pairs-on-or-above-diagonal ints-but-not-divisible-by-2-3-or-5
+                                 ints-but-not-divisible-by-2-3-or-5
+                                 (fn [s1 s2]
+                                   (stream-merge-weighted s1 s2 #(+ (* 2 (first %))
+                                                                    (* 3 (second %))
+                                                                    (* 5 (* (first %)
+                                                                            (second %))))))))
+
+(finite 3 weird)
+
+
+  
+
 

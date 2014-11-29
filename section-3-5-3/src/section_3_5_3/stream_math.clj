@@ -64,13 +64,15 @@
   "Given two infinite stream of items, visualized as a two dimensional
   array infinite on both axes, produce all pairs which lie on or above
   the diagonal"
-  [s t]
-  (cons-stream
-   (list (stream-car s) (stream-car t)) ;; #1
-   (stream-interleave
-    (stream-map #(list (stream-car s) %) ;; E2
-                (stream-cdr t))
-    (pairs-on-or-above-diagonal (stream-cdr s) (stream-cdr t)))))
+  ([s t]
+   (pairs-on-or-above-diagonal s t stream-interleave))
+  ([s t merge-fn]
+   (cons-stream
+    (list (stream-car s) (stream-car t)) ;; #1
+    (merge-fn
+     (stream-map #(list (stream-car s) %) ;; E2
+                 (stream-cdr t))
+     (pairs-on-or-above-diagonal (stream-cdr s) (stream-cdr t))))))
 
 (def int-pairs
   "sequence of all pairs of integers (i,j) with i<=j"
@@ -89,10 +91,10 @@
     (pairs-on-or-above-diagonal (stream-cdr s) (stream-cdr t))))) ;; #4
 
 (defn- three-d-6 [i j k]
-    (stream-map #(list (first %) (stream-car j) (second %)) ;; # 6
-                (pairs-on-or-above-diagonal
-                 (stream-filter #(<= % (stream-car j)) (stream-cdr i))
-                 (stream-filter #(>= % (stream-car j)) (stream-cdr k)))))
+  (stream-map #(list (first %) (stream-car j) (second %)) ;; # 6
+              (pairs-on-or-above-diagonal
+               (stream-filter #(<= % (stream-car j)) (stream-cdr i))
+               (stream-filter #(>= % (stream-car j)) (stream-cdr k)))))
 
 ;; (finite 3 (pairs-on-or-above-diagonal (stream-cdr integers) (stream-cdr integers)))
 ;; (finite 3 (three-d-6 integers integers integers))
@@ -119,7 +121,7 @@
                  (stream-filter #(>= % (stream-car i)) (stream-cdr j))
                  (stream-filter #(>= % (stream-car i)) (stream-cdr k))))
     (three-d-pairs-on-or-above-diagonal (stream-cdr i) (stream-cdr j) (stream-cdr k))))) ;; #8
-    
+
 
 (def int-triples
   "sequence of all tirples of integers (i,j,k) with i<=j<=k"
@@ -134,5 +136,7 @@
       (square (second triple)))
    (square (third triple))))
 
-; (def pythagorean-triples (stream-filter is-pythagorean-triple? int-triples))
+(def pythagorean-triples (stream-filter is-pythagorean-triple? int-triples))
 
+(defn stream-merge [s1 s2]
+  (stream-merge-weighted s1 s2 <))
