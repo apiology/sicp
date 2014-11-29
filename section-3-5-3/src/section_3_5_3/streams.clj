@@ -1,4 +1,4 @@
->(ns section-3-5-3.streams
+(ns section-3-5-3.streams
   (:require [section-3-5-3.memo-proc :as mp]
             [section-3-5-3.display :refer :all]
             [section-3-5-3.math :refer :all]))
@@ -136,11 +136,30 @@
                     s2car (stream-car s2)
                     s1weight (weight s1car)
                     s2weight (weight s2car)]
-                (cond (< s1weight s2weight)
+                (if (<= s1weight s2weight)
                       (cons-stream s1car (stream-merge-weighted (stream-cdr s1) s2 weight))
+                      (cons-stream s2car (stream-merge-weighted s1 (stream-cdr s2) weight))))))
 
-                      (> s1weight s2weight)
-                      (cons-stream s2car (stream-merge-weighted s1 (stream-cdr s2 weight)))
-                      
-                      :else
-                      (cons-stream s1car (stream-merge-weighted (stream-cdr s1) (stream-cdr s2) weight))))))
+(defn stream-filter-pairs [pred stream]
+  (if (or (stream-null? stream) (stream-null? (stream-cdr stream)))
+    the-empty-stream
+    (let [first-item (stream-car stream)
+          second-item (stream-car (stream-cdr stream))]
+      (if (pred first-item second-item)
+        (cons-stream (list first-item second-item)
+                     (stream-filter-pairs pred (stream-cdr stream)))
+        (stream-filter-pairs pred (stream-cdr stream))))))
+
+(defn stream-filter-triplets [pred stream]
+  (if (or
+       (stream-null? stream)
+       (stream-null? (stream-cdr stream))
+       (stream-null? (stream-cdr (stream-cdr stream))))
+    the-empty-stream
+    (let [first-item (stream-car stream)
+          second-item (stream-car (stream-cdr stream))
+          third-item (stream-car (stream-car (stream-cdr stream)))]
+      (if (pred first-item second-item third-item)
+        (cons-stream (list first-item second-item third-item)
+                     (stream-filter-triplets pred (stream-cdr stream)))
+        (recur pred (stream-cdr stream))))))

@@ -72,7 +72,7 @@
     (merge-fn
      (stream-map #(list (stream-car s) %) ;; E2
                  (stream-cdr t))
-     (pairs-on-or-above-diagonal (stream-cdr s) (stream-cdr t))))))
+     (pairs-on-or-above-diagonal (stream-cdr s) (stream-cdr t) merge-fn)))))
 
 (def int-pairs
   "sequence of all pairs of integers (i,j) with i<=j"
