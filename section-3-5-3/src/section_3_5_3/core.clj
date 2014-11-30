@@ -299,4 +299,44 @@
 
 (def example-rc-circuit (rc 5 1 0.5))
 
+;; Exercise 3.74
 
+;; (defn make-zero-crossings [input-stream last-value]
+;;  (cons-stream
+;;   (sign-change-detector (stream-car input-stream) last-value)
+;;   (make-zero-crossings (stream-cdr input-stream)
+;;                        (stream-car input-stream))))
+
+;; (def zero-crossings-1 (make-zero-crossings sense-data 0))
+
+;; (def zero-crossings-2 (stream-map sign-change-detector sense-data (stream-cdr sense-data)))
+
+;; Exercise 3.75
+
+;; (defn make-zero-crossings-2 [input-stream last-value]
+;;  (let [avpt (/ (+ (stream-car input-stream) last-value)
+;;                2)]
+;;    (cons-stream (sign-change-detector avpt last-value)
+;;                 (make-zero-crossings (stream-cdr input-stream)
+;;                                      avpt))))
+
+
+;; (defn make-zero-crossings-3 [input-stream last-value last-avpt]
+;;  (let [value (stream-car input-stream)
+;;        avpt (/ (+ value last-value) 2)]
+;;    (cons-stream (sign-change-detector avpt last-avpt)
+;;                 (make-zero-crossings (stream-cdr input-stream)
+;;                                      value
+;;                                      avpt))))
+;; Exercise 3.76
+
+;; (defn average [a b]
+;;  (/ (+ a b) 2))
+
+;; to deal with the first value, you could either add it as the first eleement, or not.
+;; (defn smooth [input-stream]
+;;   (stream-map average input-stream (stream-cons 0 input-stream)))
+
+;; (make-zero-crossings (smooth input-stream) 0)
+
+;; Section 3.5.4
