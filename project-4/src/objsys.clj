@@ -510,29 +510,29 @@
 (declare display-net-message)
 (declare display-message)
 (defn screen [self]
-  (let [deity-mode (atom true)
-        network-mode (atom false)
-        me (atom false)
+  (let [deity-mode-atom (atom true)
+        network-mode-atom (atom false)
+        me-atom (atom nil)
         root-part (root-object self)]
     (make-handler
      'SCREEN
      (make-methods
       'TYPE   (fn [] (type-extend 'screen root-part))
       'NAME   (fn [] 'THE-SCREEN)
-      'SET-ME (fn [new-me] (reset! me new-me))
+      'SET-ME (fn [new-me] (reset! me-atom new-me))
       'TELL-ROOM    (fn [room msg]
-                      (if (or @deity-mode
-                              (= room (safe-ask false @me 'location)))
-                        (if @network-mode
+                      (if (or @deity-mode-atom
+                              (= room (safe-ask false @me-atom 'location)))
+                        (if @network-mode-atom
                           (display-net-message msg)
                           (display-message msg))))
       'TELL-WORLD   (fn [msg]
-                      (if @network-mode
+                      (if @network-mode-atom
                         (display-net-message msg)
                         (display-message msg)))
-      'DEITY-MODE   (fn [value] (reset! deity-mode value))
-      'NETWORK-MODE (fn [value] (reset! network-mode value))
-      'DEITY-MODE?  (fn [] deity-mode))
+      'DEITY-MODE   (fn [value] (reset! deity-mode-atom value))
+      'NETWORK-MODE (fn [value] (reset! network-mode-atom value))
+      'DEITY-MODE?  (fn [] @deity-mode-atom))
      root-part)))
 
 (def screen
@@ -719,19 +719,19 @@
 
 (defn container [self]
   (let [root-part (root-object self)
-        things (atom '())]
+        things-atom (atom '())]
     (make-handler
      'CONTAINER
      (make-methods
-      'THINGS      (fn [] @things)
+      'THINGS      (fn [] @things-atom)
       'HAVE-THING? (fn [thing]
-                     (some #{thing} @things))
+                     (some #{thing} @things-atom))
       'ADD-THING   (fn [thing]
                      (if (not (ask self 'HAVE-THING? thing))
-                       (swap! things conj thing))
+                       (swap! things-atom conj thing))
                      'DONE)
       'DEL-THING   (fn [thing]
-                     (swap! things remove #{thing})
+                     (swap! things-atom remove #{thing})
                      'DONE))
      root-part)))
 
@@ -808,20 +808,20 @@
 (defn place [self name]
   (let [named-part (named-object self name)
         container-part (container self)
-        exits (atom '())]
+        exits-atom (atom '())]
     (make-handler
      'PLACE
      (make-methods
-      'EXITS (fn [] @exits)
+      'EXITS (fn [] @exits-atom)
       'EXIT-TOWARDS
       (fn [direction]
-        (find-exit-in-direction @exits direction))
+        (find-exit-in-direction @exits-atom direction))
       'ADD-EXIT
       (fn [exit]
         (let [direction (ask exit 'DIRECTION)]
           (if (ask self 'EXIT-TOWARDS direction)
             (error (list name "already has exit" direction))
-            (swap! exits conj exit))
+            (swap! exits-atom conj exit))
           'DONE)))
      container-part named-part)))
 
