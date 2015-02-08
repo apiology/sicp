@@ -784,7 +784,7 @@
       (fn [new-location]
         (ask @location-atom 'DEL-THING self)
         (ask new-location 'ADD-THING self)
-        (reset! location new-location))
+        (reset! location-atom new-location))
       'ENTER-ROOM    (fn [] true)
       'LEAVE-ROOM    (fn [] true)
       'CREATION-SITE (fn [] (ask thing-part 'LOCATION)))
