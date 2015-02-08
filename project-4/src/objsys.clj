@@ -381,7 +381,7 @@
         (reset! removed-callbacks-atom '())
         (doseq [x (reverse @callbacks-atom)]
           (if (not (some #{x} @removed-callbacks-atom))
-            (ask x 'activate)))
+            (ask x 'ACTIVATE)))
         (swap! the-time-atom inc))
       'ADD-CALLBACK
       (fn [cb]
@@ -460,7 +460,7 @@
   (cond (= n 0) 'DONE
         :else
         (do
-          (ask clock 'tick)
+          (ask clock 'TICK)
           ;; remember that this activates each item in callback list
           (recur (dec n)))))
 
@@ -522,7 +522,7 @@
       'SET-ME (fn [new-me] (reset! me-atom new-me))
       'TELL-ROOM    (fn [room msg]
                       (if (or @deity-mode-atom
-                              (= room (safe-ask false @me-atom 'location)))
+                              (= room (safe-ask false @me-atom 'LOCATION)))
                         (if @network-mode-atom
                           (display-net-message msg)
                           (display-message msg))))
@@ -789,7 +789,7 @@
         (reset! location new-location))
       'ENTER-ROOM    (fn [] true)
       'LEAVE-ROOM    (fn [] true)
-      'CREATION-SITE (fn [] (ask thing-part 'location)))
+      'CREATION-SITE (fn [] (ask thing-part 'LOCATION)))
      thing-part)))
 
 ;;--------------------
@@ -850,7 +850,7 @@
       'USE
       (fn [whom]
         (ask whom 'LEAVE-ROOM)
-        (ask screen 'TELL-ROOM (ask whom 'location)
+        (ask screen 'TELL-ROOM (ask whom 'LOCATION)
              (list (ask whom 'NAME)
                    "moves from"
                    (ask (ask whom 'LOCATION) 'NAME)
@@ -903,7 +903,7 @@
       'HEALTH (fn [] @health-atom)
       'SAY
       (fn [list-of-stuff]
-              (ask screen 'TELL-ROOM (ask self 'location)
+              (ask screen 'TELL-ROOM (ask self 'LOCATION)
                    (concat (list "At" (ask (ask self 'LOCATION) 'NAME)
                                  (ask self 'NAME) "says --")
                            list-of-stuff))
