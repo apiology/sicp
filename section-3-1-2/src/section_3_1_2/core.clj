@@ -26,7 +26,7 @@
     (gcd b (remainder a b))))
 
 (defn cesaro-test []
-  (= (gcd (rand) (rand)) 1))o
+  (= (gcd (rand) (rand)) 1))
 
 (defn monte-carlo [trials experiment]
   (println (str "Starting monte-carlo with " trials " trials"))
