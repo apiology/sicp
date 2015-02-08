@@ -1377,17 +1377,179 @@
 
 ;; Some useful example expressions...
 
-(setup 'ben-bitdiddle)
+;; (setup 'ben-bitdiddle)
 ;; (run-clock 5)
-;; (ask screen 'DEITY-MODE #f)
-;; (ask screen 'DEITY-MODE #t)
-;; (ask me 'look-around)
-;; (ask me 'take (thing-named 'engineering-book))
-;; (ask me 'go 'up)
-;; (ask me 'go 'down)
-;; (ask me 'go 'north)
+;; (ask screen 'DEITY-MODE false)
+;; (ask screen 'DEITY-MODE true)
+;; (ask @me-atom 'LOOK-AROUND)
+;; (ask @me-atom 'TAKE (thing-named 'engineering-book))
+;; (ask @me-atom 'GO 'up)
+;; (ask @me-atom 'GO 'down)
+;; (ask @me-atom 'GO 'north)
 ;;
 ;; (show me)
 ;; (show screen)
 ;; (show clock)
 ;; (pp me)
+
+;; Warmup Exercise 1:
+
+;;;; This returns an instance of an object of type place, which is
+;;;; a '('instance (atom handler))
+
+;; (ask (ask @me-atom 'LOCATION) 'METHODS)
+
+;; Place can (as mentioned) be sent 'NAME, but also 'EXITS, 'ADD-EXIT, 'EXIT-TOWARDS,  'THINGS, 'HAVE-THING? 'ADD-THING DEL-THING 'NAME, 'INSTALL, 'DESTROY 'IS-A 'TYPE 'METHODS
+
+;; Warmup Exercise 2
+
+;; clock
+;;   root-object
+
+;; named-object
+;;   root-object
+
+;; container
+;;   root-object
+
+;; thing
+;;   named-object
+;;     root-object
+
+;; mobile-thing
+;;   thing
+;;     named-object
+;;       root-object
+
+;; place
+;;   named-object
+;;     root-object
+;;   container
+;;     root-object
+
+;; exit
+;;   named-object
+;;     root-object
+
+;; person
+;;   mobile-thing
+;;     thing
+;;       named-object
+;;         root-object
+;;   container
+;;     root-object
+
+;; autonomous-person
+;;   person
+;;     mobile-thing
+;;       thing
+;;         named-object
+;;           root-object
+;;     container
+;;       root-object
+
+;; hall-monitor
+;;   autonomous-person
+;;     person
+;;       mobile-thing
+;;         thing
+;;           named-object
+;;             root-object
+;;       container
+;;         root-object
+
+;; troll
+;;   autonomous-peron
+;;     person
+;;       mobile-thing
+;;         thing
+;;           named-object
+;;             root-object
+;;       container
+;;         root-object
+
+;; spell
+;;   mobile-thing
+;;     thing
+;;       named-object
+;;         root-object
+
+
+;; avatar
+;;   person
+;;     mobile-thing
+;;       thing
+;;         named-object
+;;           root-object
+;;     container
+;;       root-object
+
+
+;; Warmup Exercise 3
+
+;; See notepad
+
+;; Warmup Exercise 4
+
+;; characters:
+
+;;;; populate-players creates autonomous-person objects in random
+;;;; rooms with random stats named:
+;;;;;;  ben-bitdiddle alyssa-hacker course-6-frosh lambda-man
+;;;; hall-monitors named:
+;;;;;;   dr-evil mr-bigglesworth
+;;;; trolls named:
+;;;;;;   grendel registrar
+
+;; sorts of things:
+;;;; blackbords, trees, flag poles (stationary)
+;;;; code, problem sets, recitation problems, sicp, engineering book, disploma... (mobile things)
+
+;; randomly from the 'rooms' collection
+
+;; Warmup Exercise 5
+
+;; (setup 'apiology)
+;; (run-clock 1)
+;; (ask @me-atom 'LOOK-AROUND)
+;; (ask @me-atom 'GO 'up)
+;; (ask @me-atom 'LOOK-AROUND)
+;; (ask @me-atom 'TAKE (thing-named 'boil-spell))
+;; (ask @me-atom 'GO 'south)
+;; (ask @me-atom 'LOOK-AROUND)
+;; (ask @me-atom 'DROP (thing-named 'boil-spell))
+
+
+;; --- THE-CLOCK Tick 0 --- 
+;; You are in grendels-den 
+;; You are not holding anything. 
+;; You see stuff in the room: slug-spell 
+;; There are no other people around you. 
+;; The exits are in directions: up 
+;; No exit in down direction 
+
+;; apiology moves from grendels-den to lobby-10 
+;; --- THE-CLOCK Tick 1 --- 
+
+;; You are in lobby-10 
+;; You are not holding anything. 
+;; You see stuff in the room: boil-spell 
+;; There are no other people around you. 
+;; The exits are in directions: south north west down up 
+;; IllegalStateException I don't know how to make a handler from  boil-spell  sun.reflect.NativeConstructorAccessorImpl.newInstance0 (NativeConstructorAccessorImpl.java:-2)
+
+;; At lobby-10 apiology says -- I take boil-spell from lobby-10 
+
+;; apiology moves from lobby-10 to great-court 
+;; --- THE-CLOCK Tick 2 --- 
+
+;; You are in great-court 
+;; You are holding: boil-spell 
+;; You see stuff in the room: slug-spell flag-pole lovely-trees 
+;; There are no other people around you. 
+;; The exits are in directions: up west north 
+
+;; At great-court apiology says -- I drop boil-spell at great-court 
+
+
+;; 
