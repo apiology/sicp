@@ -562,18 +562,16 @@
   (flush-output server-port)
   'MESSAGE-DISPLAYED)
 
-(declare me)
-
 ;; Grab any kind of thing from avatar's location,
 ;; given its name.  The thing may be in the possession of
 ;; the place, or in the possession of a person at the place.
 ;; THING-NAMED SHOULD NEVER BE USED IN OBJTYPES OR ANY OBJECT
 ;; YOU CREATE.
 (defn thing-named [name]
-  (let [place (ask me 'LOCATION)
+  (let [place (ask @me-atom 'LOCATION)
         things (ask place 'THINGS)
-        peek-stuff (ask me 'PEEK-AROUND)
-        my-stuff (ask me 'THINGS)
+        peek-stuff (ask @me-atom 'PEEK-AROUND)
+        my-stuff (ask @me-atom 'THINGS)
         all-things (concat things (concat my-stuff peek-stuff))
         things-named (filter (fn [x] (= name (ask x 'NAME)))
                              all-things)]
