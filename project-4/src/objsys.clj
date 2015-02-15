@@ -927,6 +927,16 @@
         (let [in-room (ask (ask self 'LOCATION) 'THINGS)
               stuff (filter (fn [x] (not (ask x 'IS-A 'PERSON))) in-room)]
           stuff))
+      'HAS-A
+      (fn [type]
+        (let [things (ask self 'THINGS)]
+          (filter #(some #{type} (ask % 'TYPE))
+                  things)))
+      'HAS-A-THING-NAMED
+      (fn [name]
+        (let [things (ask self 'THINGS)]
+          (filter #(= name (ask % 'NAME))
+                  things)))
       'PEEK-AROUND          ; other people's stuff...
       (fn []
         (let [people (ask self 'PEOPLE-AROUND)]
@@ -1756,4 +1766,24 @@
 
 ;; Computer Exercise 2:
 
-;;(ask @me-atom 'HAS-A 'spell)
+;; (setup 'apiology)
+;; (ask @me-atom 'LOOK-AROUND)
+;; (ask @me-atom 'TAKE (thing-named 'boil-spell))
+;; (ask @me-atom 'METHODS)
+
+;; (let [my-things (ask @me-atom 'THINGS)]
+;;   (if (seq my-things)
+;;     (ask @me-atom 'DROP (first my-things))))
+
+;;(ask @me-atom 'DROP
+;;     (thing-named 'boil-spell))
+
+
+;;(ask @me-atom 'HAS-A 'SPELL)
+
+;; (ask @me-atom 'THINGS)
+;; (ask (ask @me-atom 'LOCATION) 'THINGS)
+
+;; (ask @me-atom 'HAS-A-THING-NAMED 'boil-spell)
+
+;; Computer Exercise 3
