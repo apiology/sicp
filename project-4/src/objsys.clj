@@ -1209,6 +1209,13 @@
                  ;; heaven is only place with no exits
                  '("There are no exits... you are dead and gone to heaven!")))
           'OK))
+      'FEEL-THE-FORCE
+      (fn []
+        (doseq [person (all-people)]
+          (let [name (ask person 'NAME)
+                location (ask person 'LOCATION)
+                location-name (ask location 'NAME)]
+            (displayln name "is at" location-name))))
       'GO
       (fn [direction]  ; Shadows person's GO
         (let [success? (ask person-part 'GO direction)]
@@ -1786,3 +1793,5 @@
 ;; (ask @me-atom 'HAS-A-THING-NAMED 'boil-spell)
 
 ;; Computer Exercise 3
+(ask @me-atom 'FEEL-THE-FORCE)
+
