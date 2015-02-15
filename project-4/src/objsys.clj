@@ -335,9 +335,8 @@
                                      lst)))))
 
 ;; utility for finding all the people in the world
-(declare all-rooms)
 (defn all-people []
-  (mapcat #(find-all % 'person) all-rooms))
+  (mapcat #(find-all % 'PERSON) @all-rooms-atom))
 
 
 ;;------------------------------------------------------------
