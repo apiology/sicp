@@ -961,10 +961,12 @@
 
       'DROP
       (fn [thing]
-        (ask self 'SAY (list "I drop" (ask thing 'NAME)
-                             "at" (ask (ask self 'LOCATION) 'NAME)))
-        (ask thing 'CHANGE-LOCATION (ask self 'LOCATION)))
-
+        (if (nil? thing)
+          (error "Must pass 'DROP an object")
+          (do
+            (ask self 'SAY (list "I drop" (ask thing 'NAME)
+                                 "at" (ask (ask self 'LOCATION) 'NAME)))
+            (ask thing 'CHANGE-LOCATION (ask self 'LOCATION)))))
       'GO-EXIT
       (fn [exit] (ask exit 'USE self))
       'GO
