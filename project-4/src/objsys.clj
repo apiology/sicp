@@ -1655,7 +1655,7 @@
         (handler? x) (show-handler x)
         :else (error "Not sure what this is: " x)))
 
-(show @me-atom)
+;; (show @me-atom)
 
 ;; Turn in a copy of the show procedure output corresponding to the
 ;; thing-part of the avatar object.  You'll need to go up the
@@ -1672,8 +1672,8 @@
     (recur (superclass-handler handler (first path))
            (rest path))))
 
-(show (parent-class-handler-by-path (->handler @me-atom)
-                                    ['PERSON 'MOBILE-THING 'THING]))
+;; (show (parent-class-handler-by-path (->handler @me-atom)
+;;                                    ['PERSON 'MOBILE-THING 'THING]))
 
 
  ;; HANDLER: #<objsys$make_handler$fn__49246 objsys$make_handler$fn__49246@5146d288>
@@ -1691,8 +1691,8 @@
 ;; Turn in a copy of the show procedure output corresponding to the
 ;; container-part of the place where the avatar resides
 
-(show (parent-class-handler-by-path (->handler (ask @me-atom 'LOCATION))
-                                    ['CONTAINER]))
+;; (show (parent-class-handler-by-path (->handler (ask @me-atom 'LOCATION))
+;;                                    ['CONTAINER]))
 
  ;; HANDLER: #<objsys$make_handler$fn__49246 objsys$make_handler$fn__49246@5e656918>
  ;; TYPE: CONTAINER
@@ -1711,8 +1711,8 @@
 
 
 
-(setup 'apiology)
-(run-clock 1)
+;; (setup 'apiology)
+;; (run-clock 1)
 
 ;; --- THE-CLOCK Tick 0 ---
 
@@ -1729,9 +1729,9 @@
 ;; apiology moves from lobby-10 to grendels-den 
 ;; --- THE-CLOCK Tick 1 --- 
 
-(ask
-  (ask @me-atom 'LOCATION)
-  'NAME)
+;; (ask
+;;   (ask @me-atom 'LOCATION)
+;;   'NAME)
 ;; ; => grendels-den
 
 (defn cast [obj path]
@@ -1739,17 +1739,17 @@
         target-handler (parent-class-handler-by-path (->handler obj) path)]
     (set-instance-handler! instance target-handler)))
 
-(ask
-  (ask (cast @me-atom ['PERSON 'MOBILE-THING 'THING])
-       'LOCATION)
-  'NAME)
+;; (ask
+;;   (ask (cast @me-atom ['PERSON 'MOBILE-THING 'THING])
+;;        'LOCATION)
+;;   'NAME)
 ;; lobby-10
 
 
-(ask
-  (ask (cast @me-atom ['PERSON 'MOBILE-THING])
-       'LOCATION)
-  'NAME)
+;; (ask
+;;   (ask (cast @me-atom ['PERSON 'MOBILE-THING])
+;;        'LOCATION)
+;;   'NAME)
 ;; => grendels-den
 
 
