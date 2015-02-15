@@ -310,15 +310,15 @@
         :else
         (cons (first lst) (delq item (rest lst)))))
 
-(defn filter [predicate lst]
-  (cond (empty? lst)
-        '()
+;; (defn filter [predicate lst]
+;;   (cond (empty? lst)
+;;         '()
 
-        (predicate (first lst))
-        (cons (first lst) (filter predicate (rest lst)))
+;;         (predicate (first lst))
+;;         (cons (first lst) (filter predicate (rest lst)))
         
-        :else
-        (filter predicate (rest lst))))
+;;         :else
+;;         (filter predicate (rest lst))))
 
 (defn fold-right [op init lst]
   (if (empty? lst)
