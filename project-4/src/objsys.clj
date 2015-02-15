@@ -1361,9 +1361,9 @@
                                     (random-number 3)))
                     '(grendel registrar))]
 
-    (concat students
+    (doall (concat students
 ;;    profs        ;uncomment after writing wit-professor
-            monitors trolls)))
+            monitors trolls))))
 
 (def me-atom (atom 'will-be-set-by-setup))
 (def all-rooms-atom (atom 'will-be-set-by-setup))
