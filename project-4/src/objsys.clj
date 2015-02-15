@@ -729,7 +729,7 @@
       'THINGS      (fn [] @things-atom)
       'HAVE-THING? (fn
                      ([thing]
-                      (boolean (some #{thing} @things-atom))
+                      (boolean (some #{thing} @things-atom)))
                      ([] (error "Must pass an argument to 'HAVE-THING?")))
       'ADD-THING   (fn [thing]
                      (if (not (ask self 'HAVE-THING? thing))
