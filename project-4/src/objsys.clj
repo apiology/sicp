@@ -60,7 +60,7 @@
 ;; procedure that it contains.
 ;;
 
-(defn make-instancexo []
+(defn make-instance []
   "An instance is a list of the tag 'instance, and then an atom
   holding the handler function."
   (list 'instance (atom nil)))
