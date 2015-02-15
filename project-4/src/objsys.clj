@@ -542,8 +542,12 @@
 ;; Utilities for our simulation world
 ;;
 
-(defn display [x]
-  (print x))
+(defn display [& stuff]
+  (apply print stuff))
+
+(defn displayln [& stuff]
+  (apply display stuff)
+  (display "\n"))
 
 (defn display-message [list-of-stuff]
   (if (not (empty? list-of-stuff)) (newline))
@@ -562,6 +566,7 @@
   (flush-output server-port)
   'MESSAGE-DISPLAYED)
 
+(declare me-atom)
 ;; Grab any kind of thing from avatar's location,
 ;; given its name.  The thing may be in the possession of
 ;; the place, or in the possession of a person at the place.
@@ -597,43 +602,34 @@
 ;; Treat these as gifts from the (Scheme) Gods.
 ;; Don't try to understand these procedures!
 
-;; (declare show-handler)
-;; (defn show [obj]
-;;   (let [show-guts (fn [obj]
-;;                     (format true "INSTANCE ~A~% TYPE: ~A~%" obj (ask obj 'TYPE))
-;;                     (show-handler (->handler obj))
-;;                     'instance)]
-;;     (if (instance? obj)
-;;       (show-guts obj)
-;;       (show-handler obj))))
-
 ;; (defn show-handler [proc]
 ;;   (let [show-frame (fn [frame depth]
 ;;                      (define *max-frame-depth* 1)
 ;;                      (if (global-environment? frame)
 ;;                        (display (env-name frame))
-;;                        (let* ((bindings (environment-bindings frame))
-;;                               (parent   (environment-parent frame))
-;;                               (names    (cons "Parent frame"
-;;                                               (map symbol->string (map car bindings))))
-;;                               (values   (cons (env-name parent)
-;;                                               (map cadr bindings)))
-;;                               (width    (reduce max 0 (map string-length names))))
-;;                              (for-each (fn [n v] (pp-binding n v width depth))
-;;                                        names values)
-;;                              (if (and (not (global-environment? parent))
-;;                                       (< depth *max-frame-depth*))
-;;                                (show-frame parent (+ depth 1))))))
+;;                        (let [bindings (environment-bindings frame)
+;;                              parent   (environment-parent frame)
+;;                              names    (cons "Parent frame"
+;;                                             (map symbol->string (map car bindings)))
+;;                              values   (cons (env-name parent)
+;;                                             (map cadr bindings))
+;;                              width    (reduce max 0 (map string-length names))]
+;;                          (doseq [n names
+;;                                  v values]
+;;                            (pp-binding n v width depth))
+;;                          (if (and (not (global-environment? parent))
+;;                                   (< depth *max-frame-depth*))
+;;                            (recur parent (+ depth 1))))))
 ;;         global-environment? (fn [frame]
 ;;                               (environment->package frame))
 ;;         env-name (fn [env]
 ;;                    (if (global-environment? env) 'GLOBAL-ENVIRONMENT env))
 ;;         pp-binding (fn [name value width depth]
-;;                      (let ((value* (with-string-output-port
-;;                                      (fn [port]
-;;                                        (if (pair? value)
-;;                                          (pretty-print value port false (+ width 2))
-;;                                          (display value port))))))
+;;                      (let [value* (with-string-output-port
+;;                                     (fn [port]
+;;                                       (if (pair? value)
+;;                                         (pretty-print value port false (+ width 2))
+;;                                         (display value port))))]
 ;;                        (display-spaces (* 2 (+ depth 1)))
 ;;                        (display name) (display ": ")
 ;;                        (display (make-string (- width (string-length name)) " "))
@@ -642,7 +638,7 @@
 ;;                          (display value*))
 ;;                        (newline)))
 ;;         display-spaces (fn [num]
-;;                          (if (> num 0) (begin (display " ") (display-spaces (- num 1)))))]
+;;                          (if (> num 0) (do (display " ") (display-spaces (- num 1)))))]
 ;;     (if (handler? proc)
 ;;       (fluid-let ((*unparser-list-depth-limit* 5)
 ;;                   (*unparser-list-breadth-limit* 6))
@@ -664,6 +660,14 @@
 ;;                    'handler))
 ;;       'not-a-handler)))
 
+;; (defn show [obj]
+;;   (let [show-guts (fn [obj]
+;;                     (format true "INSTANCE ~A~% TYPE: ~A~%" obj (ask obj 'TYPE))
+;;                     (show-handler (->handler obj))
+;;                     'instance)]
+;;     (if (instance? obj)
+;;       (show-guts obj)
+;;       (show-handler obj))))
 
 
 ;;; OBJTYPES.SCM
@@ -1371,7 +1375,7 @@
 ;;       (random-number 3) (random-number 3))
 
     (reset! me-atom (create-avatar name (pick-random rooms)))
-    (ask screen 'SET-ME me)
+    (ask screen 'SET-ME @me-atom)
     (reset! all-rooms-atom rooms)
     'ready))
 
@@ -1551,5 +1555,91 @@
 
 ;; At great-court apiology says -- I drop boil-spell at great-court 
 
+;; Computer Exercise 1
 
-;; 
+(setup 'apiology)
+
+(declare show-handler)
+
+(defn private-field [obj name]
+  (let [field (.getDeclaredField (class obj) name)]
+    (.setAccessible field true)
+    (.get field obj)))
+
+(defn direct-java-methods [obj]
+  (map #(.getName %) (.getDeclaredMethods (class obj))))
+
+(defn direct-java-fields [obj]
+  (map #(.getName %) (.getDeclaredFields (class obj))))
+
+
+;; definitions:
+;;   handler - just a printout of the lambda of the handler
+;;   parent frame - the superclass of the class of the lambda of the handler
+;;   part - this is another handler with the same identity that is dispatched to
+;;   bindings - the arguemnts passed into the handler lambda, as divined via JVM voodoo
+
+(defn indent [n]
+  (display (apply str (repeat n " "))))
+
+
+(defn super-part-handlers [handler]
+  (let [handlers (private-field handler "super_parts")
+        typenames (map #(str (private-field % "typename")) handlers)]
+            (zipmap typenames handlers)))
+
+(super-part-handlers (->handler @me-atom))
+
+(defn handler-binding-names [handler]
+  (filter #(not (or (.contains % "__")
+                    (= "super_parts" %)))
+          ;;(fn [x] true)
+          (direct-java-fields handler)))
+
+(defn handler-bindings [handler]
+  (let [fields (handler-binding-names handler)
+        values (map #(private-field handler %) fields)]
+    (zipmap fields values)))
+
+(defn show-frame [handler indent-level]
+  (let [d (fn [& stuff] (do
+                          (indent indent-level)
+                          (apply display stuff)))
+        dln (fn [& stuff] (do
+                            (apply d stuff)
+                            (displayln)))
+        clazz (class handler)
+        superclazz (.getSuperclass clazz)]
+    (do 
+;;      (dln "Parent frame: " superclazz)
+      (doseq [[super-part-name super-part-handler] (super-part-handlers handler)]
+        (dln (str super-part-name ":") super-part-handler)
+        (show-frame super-part-handler (+ 2 indent-level)))
+      (doseq [[binding-name binding-value] (handler-bindings handler)]
+        (dln (str binding-name ": ") binding-value))
+      )))
+
+
+(defn show-handler [handler]
+  (displayln " HANDLER: " handler)
+  (displayln " TYPE: " (private-field handler "typename"))
+  ;; (displayln (private-field handler "methods"))
+  (show-frame handler 1)
+  (displayln "   Parent frame (class): " (class handler))
+  ;; (displayln " JAVA METHODS: " (direct-java-methods handler))
+  )
+
+
+
+(defn show-instance [instance]
+  (displayln "INSTANCE " instance)
+  (displayln " TYPE " (ask instance 'TYPE))
+  (show-handler (->handler instance))
+  'instance)
+
+(defn show [x]
+  (cond (instance? x) (show-instance x)
+        (handler? x) (show-handler x)
+        :else (error "Not sure what this is: " x)))
+
+(show @me-atom)
