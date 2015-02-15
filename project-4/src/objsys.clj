@@ -60,7 +60,7 @@
 ;; procedure that it contains.
 ;;
 
-(defn make-instance []
+(defn make-instancexo []
   "An instance is a list of the tag 'instance, and then an atom
   holding the handler function."
   (list 'instance (atom nil)))
@@ -748,9 +748,9 @@
 (declare thing)
 
 (defn create-thing [name location]    ; symbol, location -> thing
-  (create-instance thing name (atom location)))
+  (create-instance thing name location))
 
-(defn thing [self name location-atom]
+(defn thing [self name location]
   (let [named-part (named-object self name)]
     (make-handler
      'THING
@@ -758,7 +758,7 @@
       'INSTALL  (fn []
                   (ask named-part 'INSTALL)
                   (ask (ask self 'LOCATION) 'ADD-THING self))
-      'LOCATION (fn [] @location-atom)
+      'LOCATION (fn [] location)
       'DESTROY  (fn []
                   (ask (ask self 'LOCATION) 'DEL-THING self))
       'EMIT     (fn [text]
@@ -779,7 +779,7 @@
 
 (defn mobile-thing [self name location]
   (let [location-atom (atom location)
-        thing-part (thing self name location-atom)]
+        thing-part (thing self name location)]
     (make-handler
      'MOBILE-THING
      (make-methods
@@ -1611,21 +1611,19 @@
         clazz (class handler)
         superclazz (.getSuperclass clazz)]
     (do 
-;;      (dln "Parent frame: " superclazz)
       (doseq [[super-part-name super-part-handler] (super-part-handlers handler)]
         (dln (str super-part-name ":") super-part-handler)
         (show-frame super-part-handler (+ 2 indent-level)))
       (doseq [[binding-name binding-value] (handler-bindings handler)]
-        (dln (str binding-name ": ") binding-value))
-      )))
+        (dln (str binding-name ":") binding-value)))))
 
 
 (defn show-handler [handler]
-  (displayln " HANDLER: " handler)
-  (displayln " TYPE: " (private-field handler "typename"))
+  (displayln " HANDLER:" handler)
+  (displayln " TYPE:" (private-field handler "typename"))
   ;; (displayln (private-field handler "methods"))
   (show-frame handler 1)
-  (displayln "   Parent frame (class): " (class handler))
+  (displayln "   Parent frame (class):" (class handler))
   ;; (displayln " JAVA METHODS: " (direct-java-methods handler))
   )
 
@@ -1643,3 +1641,114 @@
         :else (error "Not sure what this is: " x)))
 
 (show @me-atom)
+
+;; Turn in a copy of the show procedure output corresponding to the
+;; thing-part of the avatar object.  You'll need to go up the
+;; inheritance tree a little ways to find it.
+
+(defn superclass-handler [handler superclass-sym]
+  (let [super-parts (super-part-handlers handler)]
+;;    (displayln "super-parts" super-parts)
+    (super-parts (str superclass-sym))))
+
+(defn parent-class-handler-by-path [handler path]
+  (if (empty? path)
+    handler
+    (recur (superclass-handler handler (first path))
+           (rest path))))
+
+(show (parent-class-handler-by-path (->handler @me-atom)
+                                    ['PERSON 'MOBILE-THING 'THING]))
+
+
+ ;; HANDLER: #<objsys$make_handler$fn__49246 objsys$make_handler$fn__49246@5146d288>
+ ;; TYPE: THING
+ ;; NAMED-OBJECT: #<objsys$make_handler$fn__49246 objsys$make_handler$fn__49246@30166f07>
+ ;;   ROOT: #<objsys$make_handler$fn__49246 objsys$make_handler$fn__49246@2adfcf35>
+ ;;     methods: (methods {IS-A #<objsys$root_object$fn__49267 objsys$root_object$fn__49267@6bdfa640>})
+ ;;     typename: ROOT
+ ;;   methods: (methods {DESTROY #<objsys$named_object$fn__49388 objsys$named_object$fn__49388@2545773f>, INSTALL #<objsys$named_object$fn__49386 objsys$named_object$fn__49386@488cd547>, NAME #<objsys$named_object$fn__49384 objsys$named_object$fn__49384@728a9958>})
+ ;;   typename: NAMED-OBJECT
+ ;; methods: (methods {EMIT #<objsys$thing$fn__49410 objsys$thing$fn__49410@3ebc7fb7>, DESTROY #<objsys$thing$fn__49408 objsys$thing$fn__49408@23b27f61>, LOCATION #<objsys$thing$fn__49406 objsys$thing$fn__49406@4b9f05c2>, INSTALL #<objsys$thing$fn__49404 objsys$thing$fn__49404@5da2fbe0>})
+ ;; typename: THING
+ ;;   Parent frame (class): objsys$make_handler$fn__49246
+
+;; Turn in a copy of the show procedure output corresponding to the
+;; container-part of the place where the avatar resides
+
+(show (parent-class-handler-by-path (->handler (ask @me-atom 'LOCATION))
+                                    ['CONTAINER]))
+
+ ;; HANDLER: #<objsys$make_handler$fn__49246 objsys$make_handler$fn__49246@5e656918>
+ ;; TYPE: CONTAINER
+ ;; ROOT: #<objsys$make_handler$fn__49246 objsys$make_handler$fn__49246@1731a6bc>
+ ;;   methods: (methods {IS-A #<objsys$root_object$fn__49267 objsys$root_object$fn__49267@52687810>})
+ ;;   typename: ROOT
+ ;; methods: (methods {DEL-THING #<objsys$container$fn__49400 objsys$container$fn__49400@64316ba>, ADD-THING #<objsys$container$fn__49398 objsys$container$fn__49398@5c4f8fc4>, HAVE-THING? #<objsys$container$fn__49396 objsys$container$fn__49396@69d250a2>, THINGS #<objsys$container$fn__49394 objsys$container$fn__49394@786b0d70>})
+ ;; typename: CONTAINER
+ ;;   Parent frame (class): objsys$make_handler$fn__49246
+
+
+;; After your avatar has moved from its birthplace, use the show
+;; procedure to demonstrate what you discovered in warmup exercise 6
+;; about the values of the location variables in thing and
+;; mobile-thing
+
+
+
+(setup 'apiology)
+(run-clock 1)
+
+;; --- THE-CLOCK Tick 0 ---
+
+;; (ask @me-atom 'LOOK-AROUND)
+
+;; You are in lobby-10 
+;; You are not holding anything. 
+;; You see stuff in the room: boil-spell 
+;; There are no other people around you. 
+;; The exits are in directions: south north west down up 
+
+;; (ask @me-atom 'GO 'down)
+
+;; apiology moves from lobby-10 to grendels-den 
+;; --- THE-CLOCK Tick 1 --- 
+
+(ask
+  (ask @me-atom 'LOCATION)
+  'NAME)
+;; ; => grendels-den
+
+(defn cast [obj path]
+  (let [instance (make-instance)
+        target-handler (parent-class-handler-by-path (->handler obj) path)]
+    (set-instance-handler! instance target-handler)))
+
+(ask
+  (ask (cast @me-atom ['PERSON 'MOBILE-THING 'THING])
+       'LOCATION)
+  'NAME)
+;; lobby-10
+
+
+(ask
+  (ask (cast @me-atom ['PERSON 'MOBILE-THING])
+       'LOCATION)
+  'NAME)
+;; => grendels-den
+
+
+;; Finally, investigate all the superclass handlers in the avatar
+;; object.  Does the value o the self variable ever change?  If it
+;; does change, what other thing(s) does it point to?  If it doesn't,
+;; what does it always point to?
+
+;; it always points to ('instance (atom <the top level handler>)) -
+;; i.e., the vtable for the object, which specifies the dispatch for
+;; it.  it doesn't vary for any of the superclasses, so that when they
+;; call a method, they could end up calling a subclass method (virtual
+;; method dispatch)
+
+;; Computer Exercise 2:
+
+;;(ask @me-atom 'HAS-A 'spell)
