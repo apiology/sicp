@@ -554,6 +554,7 @@
   (doseq [s list-of-stuff]
     (display s)
     (display " "))
+  (displayln)
   'MESSAGE-DISPLAYED)
 
 (declare server-port)
