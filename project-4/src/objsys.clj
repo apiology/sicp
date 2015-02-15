@@ -735,7 +735,7 @@
                        (swap! things-atom conj thing))
                      'DONE)
       'DEL-THING   (fn [thing]
-                     (swap! things-atom remove #{thing})
+                     (swap! things-atom #(remove #{thing} %))
                      'DONE))
      root-part)))
 
