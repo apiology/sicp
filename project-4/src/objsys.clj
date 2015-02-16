@@ -762,6 +762,7 @@
                   (ask named-part 'INSTALL)
                   (ask (ask self 'LOCATION) 'ADD-THING self))
       'LOCATION (fn [] location)
+      'VISIBLE? (fn [] true)
       'DESTROY  (fn []
                   (ask (ask self 'LOCATION) 'DEL-THING self))
       'EMIT     (fn [text]
