@@ -301,7 +301,8 @@
     (nth lst (random (count lst)))))
 
 (defn find-all [source type]
-  (filter (fn [x] (ask x 'IS-A type))
+  (filter (fn [x] (and (ask x 'IS-A type)
+                       (ask x 'VISIBLE?)))
           (ask source 'THINGS)))
 
 (defn delq [item lst]
@@ -791,10 +792,27 @@
         (ask @location-atom 'DEL-THING self)
         (ask new-location 'ADD-THING self)
         (reset! location-atom new-location))
+      'BLOCKS-PERSON-VISIBILITY? (fn [] false)
       'ENTER-ROOM    (fn [] true)
       'LEAVE-ROOM    (fn [] true)
       'CREATION-SITE (fn [] (ask thing-part 'LOCATION)))
      thing-part)))
+
+(declare ring-of-obfuscation)
+
+(defn create-ring-of-obfuscation [location]
+;;  location -> ring-of-obfuscation
+  (create-instance ring-of-obfuscation location))
+
+
+(defn ring-of-obfuscation [self location]
+  (let [mobile-thing-part (mobile-thing self 'ring-of-obfuscation location)]
+    (make-handler
+     'RING-OF-OBFUSCATION
+     (make-methods
+      'BLOCKS-PERSON-VISIBILITY? (fn [] true))
+     mobile-thing-part)))
+
 
 ;;--------------------
 ;; place
@@ -920,7 +938,10 @@
       'PEOPLE-AROUND        ; other people in room...
       (fn []
         (delq self (find-all (ask self 'LOCATION) 'PERSON)))
-      
+      'VISIBLE?
+      (fn []
+        (boolean (not (some #(ask % 'BLOCKS-PERSON-VISIBILITY?)
+                            (ask self 'THINGS)))))
       'STUFF-AROUND         ; stuff (non people) in room...
       (fn []
         (let [in-room (ask (ask self 'LOCATION) 'THINGS)
@@ -1293,9 +1314,11 @@
     (create-thing 'flag-pole great-court)
     (create-mobile-thing 'tons-of-code baker)
     (create-mobile-thing 'problem-set ten-250)
+    (create-ring-of-obfuscation ten-250)
     (create-mobile-thing 'recitation-problem ten-250)
     (create-mobile-thing 'sicp stata-center)
     (create-mobile-thing 'engineering-book barker-library)
+    (create-ring-of-obfuscation barker-library)
     (create-mobile-thing 'diploma graduation-stage)
 
     (list ten-250 lobby-10 grendels-den barker-library lobby-7
@@ -1795,3 +1818,20 @@
 ;; Computer Exercise 3
 (ask @me-atom 'FEEL-THE-FORCE)
 
+
+;; Computer Exercise 4
+
+;; (setup 'apiology)
+;; (ask @me-atom 'LOOK-AROUND)
+;; (ask @me-atom 'TAKE (thing-named 'ring-of-obfuscation))
+;; (ask @me-atom 'METHODS)
+
+;; (let [my-things (ask @me-atom 'THINGS)]
+;;   (if (seq my-things)
+;;     (ask @me-atom 'DROP (first my-things))))
+
+;;(ask @me-atom 'DROP
+;;     (thing-named 'boil-spell))
+
+(ask @me-atom 'VISIBLE?)
+(ask @me-atom 'FEEL-THE-FORCE)
