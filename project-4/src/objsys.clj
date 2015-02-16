@@ -1871,7 +1871,7 @@
 ;; (ask @me-atom 'HAS-A-THING-NAMED 'boil-spell)
 
 ;; Computer Exercise 3
-(ask @me-atom 'FEEL-THE-FORCE)
+;; (ask @me-atom 'FEEL-THE-FORCE)
 
 
 ;; Computer Exercise 4
