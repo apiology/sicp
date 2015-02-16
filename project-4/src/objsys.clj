@@ -1419,6 +1419,15 @@
          (let [hits (random-number 2)]
            (ask target 'SUFFER hits caster))
          (ask target 'DESTROY))))
+    (create-spell
+     'brownian-motion-spell
+     chamber
+     "wubwubwubwub"
+     (fn [caster target]
+       (let [possible-targets (delq (ask target 'LOCATION) @all-rooms-atom)
+             target-room (pick-random possible-targets)]
+         (ask target 'EMIT (list (ask target 'NAME) "is teleported to" (ask target-room 'NAME)))
+         (ask target 'CHANGE-LOCATION target-room))))
     chamber))
 
 (declare chamber-of-stata-atom)
@@ -2070,3 +2079,27 @@
 ;; An earth-shattering, soul-piercing scream is heard...
 
  
+;; (setup 'apiology)
+;; (ask @me-atom 'LOOK-AROUND)
+;; (ask @me-atom 'TAKE (thing-named 'brownian-motion-spell))
+;; (ask @me-atom 'TAKE (thing-named 'wand-of-freedom6))
+;; (ask @me-atom 'LOOK-AROUND)
+;; (ask (thing-named 'wand-of-freedom6) 'ZAP (thing-named 'diploma))
+;; At graduation-stage apiology is waving wand-of-freedom6 wand at diploma 
+
+;; At graduation-stage wubwubwubwub 
+
+;; At graduation-stage diploma is teleported to lobby-7 
+
+
+;; (ask @me-atom 'LOOK-AROUND)
+;; (ask (thing-named 'wand-of-freedom6) 'ZAP (thing-named 'ben-bitdiddle))
+;; (ask @me-atom 'LOOK-AROUND)
+
+
+;; At graduation-stage apiology is waving wand-of-freedom6 wand at ben-bitdiddle 
+
+;; At graduation-stage wubwubwubwub 
+
+;; At graduation-stage ben-bitdiddle is teleported to eecs-ug-office 
+
