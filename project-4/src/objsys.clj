@@ -1366,14 +1366,14 @@
     (create-mobile-thing 'sicp stata-center)
     (create-mobile-thing 'engineering-book barker-library)
     (create-ring-of-obfuscation barker-library)
-    (create-wand 'wand-of-freedom barker-library)
+    (create-wand 'wand-of-freedom1 barker-library)
     (create-mobile-thing 'diploma graduation-stage)
     (create-wand 'wand-of-nothing edgerton-hall)
-    (create-wand 'wand-of-freedom thirtyfour-301)
-    (create-wand 'wand-of-freedom great-court)
-    (create-wand 'wand-of-freedom eecs-ug-office)
-    (create-wand 'wand-of-freedom sixthousandandone-lab)
-    (create-wand 'wand-of-freedom graduation-stage)
+    (create-wand 'wand-of-freedom2 thirtyfour-301)
+    (create-wand 'wand-of-freedom3 great-court)
+    (create-wand 'wand-of-freedom4 eecs-ug-office)
+    (create-wand 'wand-of-freedom5 sixthousandandone-lab)
+    (create-wand 'wand-of-freedom6 graduation-stage)
      
 
     (list ten-250 lobby-10 grendels-den barker-library lobby-7
