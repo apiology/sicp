@@ -1192,7 +1192,7 @@
       (fn []
               (if (= (random hunger) 0)
                 (let [people (ask self 'PEOPLE-AROUND)]
-                  (if people
+                  (if (seq people)
                     (let [victim (pick-random people)]
                       (ask self 'EMIT
                            (list (ask self 'NAME) "takes a bite out of"
