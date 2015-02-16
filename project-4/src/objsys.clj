@@ -815,6 +815,51 @@
      mobile-thing-part)))
 
 
+(declare wand)
+
+(defn create-wand [name location]
+;;  name, location -> wand
+  (create-instance wand name location))
+
+
+(defn wand [self name location]
+  (let [mobile-thing-part (mobile-thing self name location)]
+    (make-handler
+     'WAND
+     (make-methods
+      'ZAP (fn [target]
+             (let [person (ask self 'LOCATION)]
+               (if (not (ask person 'IS-A 'PERSON))
+                 (ask person 'SAY "You must pick up a wand to wave it.")
+                 (let [spells (find-all person 'SPELL)
+                       spell (pick-random spells)]
+                   (if (nil? spell)
+                     (do
+                       (displayln "spells: " spells)
+                       (ask person 'EMIT
+                            (list (ask person 'NAME) "is waving" (ask self 'NAME)
+                                  ", but nothing is happening")))
+                     (do
+                       (ask person 'EMIT (list (ask person 'NAME) "is waving"
+                                               (ask self 'NAME) "wand at"
+                                               (ask target 'NAME)))
+                       (ask person 'EMIT (list (ask spell 'INCANT)))
+                       (ask spell 'USE person target)))))))
+      'WAVE (fn []
+             (let [person (ask self 'LOCATION)]
+               (if (not (ask person 'IS-A 'PERSON))
+                 (ask screen 'TELL-ROOM person
+                      (list "You must pick up a wand to wave it."))
+                 (let [location (ask person 'LOCATION)
+                       possible-targets (delq person (find-all location 'PERSON))
+                       target (pick-random possible-targets)]
+                   (if (nil? target)
+                     (ask person 'EMIT (list "It's just me here."))
+                     (ask self 'ZAP target)))))))
+     mobile-thing-part)))
+
+
+
 ;;--------------------
 ;; place
 ;;
@@ -1316,11 +1361,20 @@
     (create-mobile-thing 'tons-of-code baker)
     (create-mobile-thing 'problem-set ten-250)
     (create-ring-of-obfuscation ten-250)
+    (create-wand 'wand-of-nothing ten-250)
     (create-mobile-thing 'recitation-problem ten-250)
     (create-mobile-thing 'sicp stata-center)
     (create-mobile-thing 'engineering-book barker-library)
     (create-ring-of-obfuscation barker-library)
+    (create-wand 'wand-of-freedom barker-library)
     (create-mobile-thing 'diploma graduation-stage)
+    (create-wand 'wand-of-nothing edgerton-hall)
+    (create-wand 'wand-of-freedom thirtyfour-301)
+    (create-wand 'wand-of-freedom great-court)
+    (create-wand 'wand-of-freedom eecs-ug-office)
+    (create-wand 'wand-of-freedom sixthousandandone-lab)
+    (create-wand 'wand-of-freedom graduation-stage)
+     
 
     (list ten-250 lobby-10 grendels-den barker-library lobby-7
           eecs-hq eecs-ug-office edgerton-hall thirtyfour-301 sixthousandandone-lab
@@ -1834,5 +1888,36 @@
 ;;(ask @me-atom 'DROP
 ;;     (thing-named 'boil-spell))
 
-(ask @me-atom 'VISIBLE?)
-(ask @me-atom 'FEEL-THE-FORCE)
+
+;; (ask @me-atom 'VISIBLE?)
+;; (ask @me-atom 'FEEL-THE-FORCE)
+
+;; Computer Exercise 5
+
+;; (setup 'apiology)
+;; (ask @me-atom 'LOOK-AROUND)
+
+;; ...
+
+;; (ask (thing-named 'wand-of-freedom) 'WAVE)
+
+;; You must pick up a wand to wave it.
+
+;; (ask @me-atom 'TAKE (thing-named 'wand-of-freedom))
+
+;; At graduation-stage apiology says -- I take wand-of-freedom from graduation-stage 
+
+;; (ask (thing-named 'wand-of-freedom) 'WAVE)
+
+;; At graduation-stage apiology is waving wand-of-freedom , but nothing is happening 
+
+;; (ask @me-atom 'TAKE (thing-named 'slug-spell))
+
+;; At graduation-stage apiology says -- I take slug-spell from graduation-stage
+
+;; (ask (thing-named 'wand-of-freedom) 'WAVE)
+
+;; At graduation-stage dagnabbit   ekaterin 
+
+;; At graduation-stage A slug comes out of registrar 's mouth. 
+
