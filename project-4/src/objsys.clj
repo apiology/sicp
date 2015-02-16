@@ -1394,15 +1394,31 @@
      chamber
      "habooic katarnum"
      (fn [caster target]
-       (ask target 'EMIT
-            (list (ask target 'NAME) "grows boils on their nose"))))
+       (if (ask target 'IS-A 'PERSON)
+         (ask target 'EMIT
+              (list (ask target 'NAME) "grows boils on their nose"))
+         (ask target 'EMIT
+              (list "Nothing happens.")))))
     (create-spell
      'slug-spell
      chamber
      "dagnabbit ekaterin"
      (fn [caster target]
-       (ask target 'EMIT (list "A slug comes out of" (ask target 'NAME) "'s mouth."))
-       (create-mobile-thing 'slug (ask target 'LOCATION))))
+       (if (ask target 'IS-A 'PERSON)
+         (do
+           (ask target 'EMIT (list "A slug comes out of" (ask target 'NAME) "'s mouth."))
+           (create-mobile-thing 'slug (ask target 'LOCATION)))
+         (ask target 'EMIT
+              (list "Nothing happens.")))))
+    (create-spell
+     'wind-of-doom
+     chamber
+     "dagnabbit ekaterin"
+     (fn [caster target]
+       (if (ask target 'IS-A 'PERSON)
+         (let [hits (random-number 2)]
+           (ask target 'SUFFER hits caster))
+         (ask target 'DESTROY))))
     chamber))
 
 (declare chamber-of-stata-atom)
@@ -1921,3 +1937,136 @@
 
 ;; At graduation-stage A slug comes out of registrar 's mouth. 
 
+
+;; Computer Exercise 6
+
+;; (setup 'apiology)
+;; (ask @me-atom 'LOOK-AROUND)
+;; (ask @me-atom 'TAKE (thing-named 'wand-of-freedom))
+;; At barker-library apiology says -- I take wand-of-freedom from barker-library
+;; (ask @me-atom 'TAKE (thing-named 'slug-spell))
+;; At barker-library apiology says -- I take slug-spell from barker-library
+;; (ask @me-atom 'TAKE (thing-named 'slug-spell))
+;; (ask (thing-named 'wand-of-freedom) 'ZAP (thing-named 'ring-of-obfuscation))
+
+;; At barker-library apiology is waving wand-of-freedom wand at ring-of-obfuscation 
+;; At barker-library dagnabbit ekaterin 
+;; At barker-library Nothing happens.
+
+
+;; (setup 'apiology)
+;; (ask @me-atom 'LOOK-AROUND)
+
+;; You are in barker-library 
+
+;; You are not holding anything. 
+
+;; You see stuff in the room: wind-of-doom wand-of-freedom ring-of-obfuscation engineering-book 
+
+;; There are no other people around you. 
+
+;; The exits are in directions: down 
+
+;; (ask @me-atom 'TAKE (thing-named 'wind-of-doom))
+
+;; At barker-library apiology says -- I take wind-of-doom from barker-library 
+
+;; (ask @me-atom 'TAKE (thing-named 'wand-of-freedom))
+
+;; At barker-library apiology says -- I take wand-of-freedom from barker-library
+
+;; (ask (thing-named 'wand-of-freedom) 'ZAP (thing-named 'engineering-book))
+
+;; At barker-library apiology is waving wand-of-freedom wand at engineering-book 
+
+;; At barker-library dagnabbit ekaterin
+
+;; (ask @me-atom 'LOOK-AROUND)
+
+;; You are in barker-library 
+
+;; You are holding: wand-of-freedom wind-of-doom 
+
+;; You see stuff in the room: ring-of-obfuscation 
+
+;; There are no other people around you. 
+
+;; The exits are in directions: down 
+
+;; (ask @me-atom 'TAKE (thing-named 'wind-of-doom))
+
+;; At eecs-ug-office apiology says -- I take wind-of-doom from eecs-ug-office 
+
+;; (ask @me-atom 'TAKE (thing-named 'wand-of-freedom4))
+
+;; At eecs-ug-office apiology says -- I take wand-of-freedom4 from eecs-ug-office 
+
+;; ;; (ask @me-atom 'GO 'east)
+;; (ask @me-atom 'LOOK-AROUND)
+;; ;; (ask @me-atom 'GO 'up)
+;; (ask @me-atom 'LOOK-AROUND)
+;; ;; (ask @me-atom 'GO 'down)
+;; (ask @me-atom 'LOOK-AROUND)
+;; ;; (ask @me-atom 'GO 'down)
+;; (ask @me-atom 'LOOK-AROUND)
+;; ;; (ask @me-atom 'GO 'down)
+;; (ask @me-atom 'LOOK-AROUND)
+;; ;; (ask @me-atom 'GO 'north)
+;; (ask @me-atom 'LOOK-AROUND)
+;; ;; (ask @me-atom 'GO 'east)
+;; (ask @me-atom 'LOOK-AROUND)
+;; ;; (ask @me-atom 'GO 'up)
+;; (ask @me-atom 'LOOK-AROUND)
+;; ;; (ask @me-atom 'GO 'down)
+;; (ask @me-atom 'LOOK-AROUND)
+;; ;; (ask @me-atom 'GO 'north)
+;; (ask @me-atom 'LOOK-AROUND)
+
+;; (setup 'apiology)
+;; (ask @me-atom 'LOOK-AROUND)
+;; ;; (ask @me-atom 'GO 'down)
+;; (ask @me-atom 'LOOK-AROUND)
+;; ;; (ask @me-atom 'GO 'up)
+;; (ask @me-atom 'LOOK-AROUND)
+;; ;; (ask @me-atom 'GO 'east)
+;; (ask @me-atom 'LOOK-AROUND)
+;; ;; (ask @me-atom 'GO 'down)
+;; (ask @me-atom 'LOOK-AROUND)
+;; (ask @me-atom 'TAKE (thing-named 'wand-of-freedom2))
+;; (ask @me-atom 'LOOK-AROUND)
+;; ;; (ask @me-atom 'GO 'east)
+;; (ask @me-atom 'LOOK-AROUND)
+;; (ask @me-atom 'TAKE (thing-named 'wind-of-doom))
+;; (ask @me-atom 'TAKE (thing-named 'wand-of-freedom2))
+;; (ask @me-atom 'LOOK-AROUND)
+;; (ask (thing-named 'wand-of-freedom2) 'ZAP (thing-named 'grendel))
+
+;; At stata-center apiology is waving wand-of-freedom2 wand at grendel 
+;; At stata-center dagnabbit ekaterin 
+;; At stata-center grendel says -- Ouch! 1 hits is more than I want!
+
+;; (ask (thing-named 'wand-of-freedom2) 'ZAP (thing-named 'grendel))
+
+;; At stata-center apiology is waving wand-of-freedom2 wand at grendel 
+
+;; At stata-center dagnabbit ekaterin 
+
+;; At stata-center grendel says -- Ouch! 1 hits is more than I want! 
+
+;; ;; (ask (thing-named 'wand-of-freedom2) 'ZAP (thing-named 'grendel))
+
+;; At stata-center apiology is waving wand-of-freedom2 wand at grendel 
+
+;; At stata-center dagnabbit ekaterin 
+
+;; At stata-center grendel says -- Ouch! 1 hits is more than I want! 
+
+;; At stata-center grendel says -- SHREEEEK!  I, uh, suddenly feel very faint... 
+
+;; At stata-center grendel says -- I lose wand-of-nothing 
+
+;; At stata-center grendel says -- Yaaaah! I am upset! 
+
+;; An earth-shattering, soul-piercing scream is heard...
+
+ 
