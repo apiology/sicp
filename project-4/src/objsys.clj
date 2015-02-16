@@ -1413,7 +1413,7 @@
     (create-spell
      'wind-of-doom
      chamber
-     "dagnabbit ekaterin"
+     "pluuuuuuubbbbt"
      (fn [caster target]
        (if (ask target 'IS-A 'PERSON)
          (let [hits (random-number 2)]
