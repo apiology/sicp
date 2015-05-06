@@ -1,6 +1,6 @@
 (ns section-4-1-2.assignment
   (:require [section-4-1-2.util :as util])
-  (:refer-clojure :only [defn symbol? nth]))
+  (:refer-clojure :only [defn nth symbol?]))
 
 (defn variable? [exp]
   (symbol? exp))
