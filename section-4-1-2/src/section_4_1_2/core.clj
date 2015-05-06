@@ -1,8 +1,8 @@
 (ns section-4-1-2.core
-  (:refer-clojure :only [ns seq println str declare cond->
-                         number? string? symbol? list? = first
-                         second nth cons rest not nil? list
-                         empty? let comment if-not cond defn]))
+  (:refer-clojure :only
+                  [= comment cond cons declare defn empty? first if-not
+                     let list list? nil? not ns nth number? println
+                     rest second seq str string? symbol?]))
 
 (defn foo
   "I don't do a whole lot."
@@ -70,8 +70,8 @@
     ;; variable definition
     (nth exp 2)
     ;; procedure definition
-    (make-lambda (rest (nth exp 1) ;; formal parameters
-                       (nth exp 2))))) ;; body
+    (make-lambda (rest (nth exp 1)) ;; formal parameters
+                 (nth exp 2)))) ;; body
 
 (defn if? [exp]
   (tagged-list? exp 'if))
@@ -105,9 +105,9 @@
   (cons 'begin seq))
 
 (defn sequence->exp [seq]
-  (cond-> seq
-    (empty?) seq
-    (last-exp?) (first-exp seq)
+  (cond 
+    (empty? seq) seq
+    (last-exp? seq) (first-exp seq)
     :else (make-begin seq)))
 
 (defn application? [exp]
@@ -202,8 +202,8 @@
   "Used for (begin) and for the body of a function--can be more than
   one expression in a row"
   [exps env]
-  (cond-> exps
-    (last-exp?) (eval (first-exp exps) env)
+  (cond 
+    (last-exp? exps) (eval (first-exp exps) env)
     :else (do
             (eval (first-exp exps) env)
             (eval-sequence (rest-exps exps) env))))
@@ -221,7 +221,7 @@
 (defn define-variable! [symbol value env]
   (error "define-variable! not yet implemented"))
 
-(defn lookup-variable-value [symbol value env]
+(defn lookup-variable-value [symbol env]
   (error "lookup-variable-value not yet implemented"))
 
 
@@ -258,30 +258,30 @@
 
 
 (defn apply [procedure arguments]
-  (cond-> procedure
-    (primitive-procedure?) (apply-primitive-procedure procedure arguments)
-    (compound-procedure?) (eval-sequence
-                           (procedure-body procedure)
-                           (extend-environment
-                            (procedure-parameters procedure)
-                            arguments
-                            (procedure-environment procedure)))
+  (cond
+    (primitive-procedure? procedure) (apply-primitive-procedure procedure arguments)
+    (compound-procedure? procedure) (eval-sequence
+                                     (procedure-body procedure)
+                                     (extend-environment
+                                      (procedure-parameters procedure)
+                                      arguments
+                                      (procedure-environment procedure)))
     :else (error "Unknown procedure type -- APPLY" procedure)))
 
 (defn eval [exp env]
-  (cond-> exp
-    (self-evaluating?) exp
-    (variable?) (lookup-variable-value exp env)
-    (quoted?) (text-of-quotation exp)
+  (cond
+    (self-evaluating? exp) exp
+    (variable? exp) (lookup-variable-value exp env)
+    (quoted? exp) (text-of-quotation exp)
     (assignment? exp) (eval-assignment exp env)
-    (definition?) (eval-definition exp env)
-    (if?) (eval-if exp env)
-    (lambda?) (make-procedure (lambda-parameters exp)
+    (definition? exp) (eval-definition exp env)
+    (if? exp) (eval-if exp env)
+    (lambda? exp) (make-procedure (lambda-parameters exp)
                               (lambda-body exp)
                               env)
-    (begin?) (eval-sequence (begin-actions exp) env)
-    (cond?) (eval (cond->if exp) env)
-    (application?) (apply (eval (operator exp) env)
+    (begin? exp) (eval-sequence (begin-actions exp) env)
+    (cond? exp) (eval (cond->if exp) env)
+    (application? exp) (apply (eval (operator exp) env)
                           (list-of-values (operands exp) env))
     :else (error "unknown expression type -- EVAL" exp)))
 
@@ -327,3 +327,4 @@
                                     (list-of-values (operands exp) env))
           :else (error "unknown expression type -- EVAL" exp)))
 )
+
