@@ -1,7 +1,7 @@
 (ns section-4-1-2.cond
-  (:require [section-4-1-2.util :as util]
-            [section-4-1-2.begin :as begin]
-            [section-4-1-2.if :as if]))
+  (:require [section-4-1-2.begin :as begin]
+            [section-4-1-2.if :as if]
+            [section-4-1-2.util :as util]))
 
 (defn cond? [exp]
   (util/tagged-list? exp 'cond))

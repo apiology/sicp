@@ -1,6 +1,6 @@
 (ns section-4-1-2.definition
-  (:require [section-4-1-2.util :as util]
-            [section-4-1-2.lambda :as lambda]))
+  (:require [section-4-1-2.lambda :as lambda]
+            [section-4-1-2.util :as util]))
 
 (defn definition? [exp]
   (util/tagged-list? exp 'define))

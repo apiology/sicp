@@ -1,22 +1,23 @@
 (ns section-4-1-2.core
-  (:refer-clojure :only
-                  [= comment cond cons declare defn empty? first if-not
-                   let list list? nil? not ns nth number? println
-                   rest second seq str string? symbol? atom filter
-                   -> ->> if-let swap! conj fn > count or reset!])
-  (:require [section-4-1-2.primitive :as primitive]
-            [section-4-1-2.boolean :as boolean]
+  (:require [section-4-1-2.and :as and]
+            [section-4-1-2.application :as application]
             [section-4-1-2.assignment :as assignment]
-            [section-4-1-2.util :as util]
-            [section-4-1-2.quote :as quote]
-            [section-4-1-2.lambda :as lambda]
+            [section-4-1-2.begin :as begin]
+            [section-4-1-2.boolean :as boolean]
+            [section-4-1-2.cond :as cond]
             [section-4-1-2.definition :as definition]
             [section-4-1-2.if :as if]
+            [section-4-1-2.lambda :as lambda]
             [section-4-1-2.or :as or]
-            [section-4-1-2.and :as and]
-            [section-4-1-2.begin :as begin]
-            [section-4-1-2.application :as application]
-            [section-4-1-2.cond :as cond]))
+            [section-4-1-2.primitive :as primitive]
+            [section-4-1-2.quote :as quote]
+            [section-4-1-2.util :as util])
+  (:refer-clojure :only
+                  [-> ->> = > atom comment cond conj cons count declare
+                      defn empty? filter first fn if-let if-not let
+                      list list? nil? not ns nth number? or println
+                      reset! rest second seq str string? swap!
+                      symbol?]))
 
 (defn foo
   "I don't do a whole lot."

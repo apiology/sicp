@@ -1,5 +1,5 @@
 (ns section-4-1-2.application
-  (:refer-clojure :only [defn list? first rest empty? cons let]))
+  (:refer-clojure :only [cons defn empty? first let list? rest]))
 
 (defn application? [exp]
   (list? exp))

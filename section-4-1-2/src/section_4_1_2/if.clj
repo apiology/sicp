@@ -1,6 +1,5 @@
 (ns section-4-1-2.if
-  (:require [section-4-1-2.util :as util]
-            [section-4-1-2.boolean :as boolean]))
+  (:require [section-4-1-2.util :as util]))
 
 (defn if? [exp]
   (util/tagged-list? exp 'if))

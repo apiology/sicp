@@ -1,6 +1,6 @@
 (ns section-4-1-2.begin
-  (:refer-clojure :only [defn cons cond rest])
-  (:require [section-4-1-2.util :as util]))
+  (:require [section-4-1-2.util :as util])
+  (:refer-clojure :only [cond cons defn rest]))
 
 (defn begin? [exp]
   (util/tagged-list? exp 'begin))
