@@ -3,7 +3,7 @@
                   [= comment cond cons declare defn empty? first if-not
                    let list list? nil? not ns nth number? println
                    rest second seq str string? symbol? atom filter
-                   -> if-let swap! conj fn]))
+                   -> ->> if-let swap! conj fn]))
 
 (defn foo
   "I don't do a whole lot."
@@ -342,7 +342,7 @@
   (if (pred exp) action))
 
 (defn action-for-exp [exp]
-  (if-let [[pred action] (-> @forms
+  (if-let [[pred action] (->> @forms
                              (filter #((first %) exp))
                              first)]
     action))
