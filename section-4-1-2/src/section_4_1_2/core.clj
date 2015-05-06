@@ -1,8 +1,9 @@
 (ns section-4-1-2.core
   (:refer-clojure :only
                   [= comment cond cons declare defn empty? first if-not
-                     let list list? nil? not ns nth number? println
-                     rest second seq str string? symbol?]))
+                   let list list? nil? not ns nth number? println
+                   rest second seq str string? symbol? atom filter
+                   -> if-let swap! conj fn]))
 
 (defn foo
   "I don't do a whole lot."
@@ -268,22 +269,23 @@
                                       (procedure-environment procedure)))
     :else (error "Unknown procedure type -- APPLY" procedure)))
 
-(defn eval [exp env]
-  (cond
-    (self-evaluating? exp) exp
-    (variable? exp) (lookup-variable-value exp env)
-    (quoted? exp) (text-of-quotation exp)
-    (assignment? exp) (eval-assignment exp env)
-    (definition? exp) (eval-definition exp env)
-    (if? exp) (eval-if exp env)
-    (lambda? exp) (make-procedure (lambda-parameters exp)
-                              (lambda-body exp)
-                              env)
-    (begin? exp) (eval-sequence (begin-actions exp) env)
-    (cond? exp) (eval (cond->if exp) env)
-    (application? exp) (apply (eval (operator exp) env)
-                          (list-of-values (operands exp) env))
-    :else (error "unknown expression type -- EVAL" exp)))
+(comment original - see below for new
+  (defn eval [exp env]
+    (cond
+      (self-evaluating? exp) exp
+      (variable? exp) (lookup-variable-value exp env)
+      (quoted? exp) (text-of-quotation exp)
+      (assignment? exp) (eval-assignment exp env)
+      (definition? exp) (eval-definition exp env)
+      (if? exp) (eval-if exp env)
+      (lambda? exp) (make-procedure (lambda-parameters exp)
+                                    (lambda-body exp)
+                                    env)
+      (begin? exp) (eval-sequence (begin-actions exp) env)
+      (cond? exp) (eval (cond->if exp) env)
+      (application? exp) (apply (eval (operator exp) env)
+                                (list-of-values (operands exp) env))
+      :else (error "unknown expression type -- EVAL" exp))))
 
 ;; Exercise 4.2
 
@@ -309,22 +311,44 @@
 
 ;; Exercise 4.3
 
+(def forms (atom []))
 
-(comment
-  (defn eval [exp env]
-    (cond (self-evaluating? exp) exp
-          (variable? exp) (lookup-variable-value exp env)
-          (quoted? exp) (text-of-quotation exp)
-          (assignment? exp) (eval-assignment exp env)
-          (definition? exp) (eval-definition exp env)
-          (if? exp) (eval-if exp env)
-          (lambda? exp) (make-procedure (lambda-parameters exp)
-                                        (lambda-body exp)
-                                        env)
-          (begin? exp) (eval-sequence (begin-actions exp) env)
-          (cond? exp) (eval (cond->if exp) env)
-          (application? exp) (apply (eval (operator exp) env)
-                                    (list-of-values (operands exp) env))
-          :else (error "unknown expression type -- EVAL" exp)))
-)
+(defn add-form [pred action]
+  (swap! forms conj [pred action]))
 
+(defn install-all-forms []
+  (add-form self-evaluating? (fn [exp env] exp))
+  (add-form variable? lookup-variable-value)
+  (add-form quoted? (fn [exp env] (text-of-quotation exp)))
+  (add-form assignment? eval-assignment)
+  (add-form definition? eval-definition)
+  (add-form if? eval-if)
+  (add-form lambda? (fn [exp env]
+                      (make-procedure (lambda-parameters exp)
+                                      (lambda-body exp)
+                                      env)))
+  (add-form begin? (fn [exp env]
+                     (eval-sequence (begin-actions exp) env)))
+  (add-form cond? (fn [exp env]
+                    (eval (cond->if exp) env)))
+  (add-form application? (fn [exp env]
+                           (apply (eval (operator exp) env)
+                                  (list-of-values (operands exp) env)))))
+
+
+(install-all-forms)
+
+(defn responds-to-exp [exp pred action]
+  (if (pred exp) action))
+
+(defn action-for-exp [exp]
+  (if-let [[pred action] (-> @forms
+                             (filter #((first %) exp))
+                             first)]
+    action))
+
+
+(defn eval [exp env]
+  (if-let [action (action-for-exp exp)]
+    (action exp env)
+    (error "unknown expression type -- EVAL" exp)))
