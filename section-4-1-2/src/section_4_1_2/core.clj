@@ -27,25 +27,8 @@
 (declare eval)
 ;; XXX selective import of clojure forms
 
-(defn set-variable-value! [symbol value env]
-  (util/error "set-variable-value! not yet implemented"))
-
-(defn eval-assignment [exp env]
-  ;; XXX I think this is a scheme primitive
-  (set-variable-value! (assignment/assignment-variable exp)
-                       (eval (assignment/assignment-value exp) env)
-                       env)
-  :ok)
-
-(defn define-variable! [symbol value env]
-  (util/error "define-variable! not yet implemented"))
-
-(defn lookup-variable-value [symbol env]
-  (util/error "lookup-variable-value not yet implemented"))
-
-
 (defn eval-definition [exp env]
-  (define-variable! (definition/definition-variable exp)
+  (assignment/define-variable! (definition/definition-variable exp)
     (eval (definition/definition-value exp) env)
     env)
   :ok)
@@ -149,9 +132,9 @@
 (defn install-all-forms []
   (reset! forms [])
   (add-form primitive/self-evaluating? (fn [exp env] exp))
-  (add-form assignment/variable? lookup-variable-value)
+  (add-form assignment/variable? assignment/lookup-variable-value)
   (add-form quote/quoted? (fn [exp env] (quote/text-of-quotation exp)))
-  (add-form assignment/assignment? eval-assignment)
+  (add-form assignment/assignment? (fn [exp env] (assignment/eval-assignment exp env eval)))
   (add-form definition/definition? eval-definition)
   (add-form if/if? eval-if)
   ;; Exercise 4.5
