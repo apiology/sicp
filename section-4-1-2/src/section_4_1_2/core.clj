@@ -18,8 +18,17 @@
 ;; false not bound in global environment yet--waiting patiently for
 ;; section 4.1.4, but in the meantime, this helps test the rest
 (defn boolean? [exp]
-  (or (= true exp)
-      (= false exp)))
+  (or (clojure.core/true? exp)
+      (clojure.core/false? exp)))
+
+(defn true? [cond]
+  (if (number? cond)
+    (clojure.core/pos? cond)
+    (if (clojure.core/true? cond)
+      true
+      (if (clojure.core/false? cond)
+        false
+        (error "true? not implemented on " cond)))))
 
 (defn self-evaluating? [exp]
   (cond
@@ -233,15 +242,6 @@
     (let [rest-values (list-of-values (rest-operands exps) env)]
       (let [left-value (eval (first-operand exps) env)]
         (cons left-value rest-values)))))
-
-(defn true? [cond]
-  (if (number? cond)
-    (> cond 0)
-    (if (= true cond)
-      true
-      (if (= false cond)
-        false
-        (error "true? not implemented on " cond)))))
 
 (defn eval-if [exp env]
   (if (true? (eval (if-predicate exp) env))
