@@ -125,6 +125,37 @@
                                       (procedure-environment procedure)))
     :else (util/error "Unknown procedure type -- APPLY" procedure)))
 
+
+(defn eval-and [exp env]
+  (let [exps (and/and-exps exp)]
+    (if (empty? exps)
+      'true
+      (let [left (first exps)
+            rest-exps (rest exps)
+            left-value (eval left env)]
+        (if (boolean/true? left-value)
+          (if (empty? rest-exps)
+            left-value
+            (recur (cons 'and rest-exps) env))
+          false)))))
+
+
+(defn eval-if [exp env]
+  (if (boolean/true? (eval (if/if-predicate exp) env))
+    (eval (if/if-consequent exp) env)
+    (eval (if/if-alternative exp) env)))
+
+
+(defn eval-or [exp env]
+  (let [exps (or/or-exps exp)]
+    (if (empty? exps)
+      'false
+      (let [left (first exps)
+            left-value (eval left env)]
+        (if (boolean/true? left-value)
+          left-value
+          (eval-or (cons 'or (rest exps)) env))))))
+
 ;; Exercise 4.2
 
 ;; a
@@ -161,10 +192,10 @@
   (add-form quote/quoted? (fn [exp env] (quote/text-of-quotation exp)))
   (add-form assignment/assignment? eval-assignment)
   (add-form definition/definition? eval-definition)
-  (add-form if/if? if/eval-if)
+  (add-form if/if? eval-if)
   ;; Exercise 4.5
-  (add-form and/and? and/eval-and)
-  (add-form or/or? or/eval-or)
+  (add-form and/and? eval-and)
+  (add-form or/or? eval-or)
   (add-form lambda/lambda? (fn [exp env]
                              (make-procedure (lambda/lambda-parameters exp)
                                              (lambda/lambda-body exp)

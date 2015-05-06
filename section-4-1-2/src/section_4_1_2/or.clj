@@ -7,14 +7,3 @@
 
 (defn or-exps [exp]
   (rest exp))
-
-(defn eval-or [exp env]
-  (let [exps (or-exps exp)]
-    (if (empty? exps)
-      'false
-      (let [left (first exps)
-            left-value (eval left env)]
-        (if (boolean/true? left-value)
-          left-value
-          (eval-or (cons 'or (rest exps)) env))))))
-
