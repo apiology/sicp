@@ -114,6 +114,25 @@
         (if (true? left-value)
           left-value
           (eval-or (cons 'or (rest exps)) env))))))
+
+(defn and? [exp]
+  (tagged-list? exp 'and))
+
+(defn and-exps [exp]
+  (rest exp))
+
+(defn eval-and [exp env]
+  (let [exps (and-exps exp)]
+    (if (empty? exps)
+      'true
+      (let [left (first exps)
+            rest-exps (rest exps)
+            left-value (eval left env)]
+        (if (true? left-value)
+          (if (empty? rest-exps)
+            left-value
+            (recur (cons 'and rest-exps) env))
+          false)))))
     
 (defn begin? [exp]
   (tagged-list? exp 'begin))
@@ -347,13 +366,15 @@
   (swap! forms conj [pred action]))
 
 (defn install-all-forms []
+  (reset! forms [])
   (add-form self-evaluating? (fn [exp env] exp))
   (add-form variable? lookup-variable-value)
   (add-form quoted? (fn [exp env] (text-of-quotation exp)))
   (add-form assignment? eval-assignment)
   (add-form definition? eval-definition)
   (add-form if? eval-if)
-  ;; (add-form and? eval-and)
+  ;; Exercise 4.5
+  (add-form and? eval-and)
   (add-form or? eval-or)
   (add-form lambda? (fn [exp env]
                       (make-procedure (lambda-parameters exp)
@@ -370,7 +391,7 @@
 
 (install-all-forms)
 
-;; (reset! forms [])
+;; 
 
 (defn action-for-exp [exp]
   (if-let [[pred action] (->> @forms
