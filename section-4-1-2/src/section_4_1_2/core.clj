@@ -6,7 +6,17 @@
                    -> ->> if-let swap! conj fn > count or reset!])
   (:require [section-4-1-2.primitive :as primitive]
             [section-4-1-2.boolean :as boolean]
-            [section-4-1-2.util :as util]))
+            [section-4-1-2.assignment :as assignment]
+            [section-4-1-2.util :as util]
+            [section-4-1-2.quote :as quote]
+            [section-4-1-2.lambda :as lambda]
+            [section-4-1-2.definition :as definition]
+            [section-4-1-2.if :as if]
+            [section-4-1-2.or :as or]
+            [section-4-1-2.and :as and]
+            [section-4-1-2.begin :as begin]
+            [section-4-1-2.application :as application]
+            [section-4-1-2.cond :as cond]))
 
 (defn foo
   "I don't do a whole lot."
@@ -16,234 +26,28 @@
 (declare eval)
 ;; XXX selective import of clojure forms
 
-(defn variable? [exp]
-  (symbol? exp))
-
-(defn tagged-list? [exp tag]
-  (if (list? exp)
-    (= (first exp) tag)
-    false))
-
-(defn quoted? [exp]
-  (tagged-list? exp 'quote))
-
-(defn text-of-quotation [exp]
-  (second exp))
-
-(defn assignment? [exp]
-  (tagged-list? exp 'set!))
-
-(defn assignment-variable [exp]
-  (nth exp 1))
-
-(defn assignment-value [exp]
-  (nth exp 2))
-
-(defn lambda? [exp]
-  (tagged-list? exp 'lambda))
-
-(defn lambda-parameters [exp]
-  (nth exp 1))
-
-(defn lambda-body [exp]
-  (nth exp 2))
-
-(defn make-lambda [parameters body]
-  (cons 'lambda (cons parameters body)))
-
-(defn definition? [exp]
-  (tagged-list? exp 'define))
-
-(defn definition-variable [exp]
-  (if (symbol? (second exp))
-    ;; variable definition
-    (second exp)
-    ;; procedure definition
-    (first (second exp))))
-
-(defn definition-value [exp]
-  (if (symbol? (second exp))
-    ;; variable definition
-    (nth exp 2)
-    ;; procedure definition
-    (make-lambda (rest (nth exp 1)) ;; formal parameters
-                 (nth exp 2)))) ;; body
-
-(defn if? [exp]
-  (tagged-list? exp 'if))
-
-(defn if-predicate [exp]
-  (nth exp 1))
-
-(defn if-consequent [exp]
-  (nth exp 2))
-
-(defn if-alternative [exp]
-  (if (> (count exp) 3)
-    (nth exp 3)
-    false))
-;; (if-alternative '(if 1 true))
-
-(defn make-if [predicate consequent alternative]
-  (list 'if predicate consequent alternative))
-
-(defn or? [exp]
-  (tagged-list? exp 'or))
-
-(defn or-exps [exp]
-  (rest exp))
-
-(defn eval-or [exp env]
-  (let [exps (or-exps exp)]
-    (if (empty? exps)
-      'false
-      (let [left (first exps)
-            left-value (eval left env)]
-        (if (boolean/true? left-value)
-          left-value
-          (eval-or (cons 'or (rest exps)) env))))))
-
-(defn and? [exp]
-  (tagged-list? exp 'and))
-
-(defn and-exps [exp]
-  (rest exp))
-
-(defn eval-and [exp env]
-  (let [exps (and-exps exp)]
-    (if (empty? exps)
-      'true
-      (let [left (first exps)
-            rest-exps (rest exps)
-            left-value (eval left env)]
-        (if (boolean/true? left-value)
-          (if (empty? rest-exps)
-            left-value
-            (recur (cons 'and rest-exps) env))
-          false)))))
-    
-(defn begin? [exp]
-  (tagged-list? exp 'begin))
-
-(defn begin-actions [exp] (rest exp))
-
-(defn last-exp? [seq] (empty? (rest seq)))
-
-(defn first-exp [seq] (first seq))
-
-(defn rest-exps [seq] (rest seq))
-
-(defn make-begin [seq]
-  (cons 'begin seq))
-
-(defn sequence->exp [seq]
-  (cond 
-    (empty? seq) seq
-    (last-exp? seq) (first-exp seq)
-    :else (make-begin seq)))
-
-(defn application? [exp]
-  (list? exp))
-
-(defn operator [exp]
-  (first exp))
-
-(defn operands [exp]
-  (rest exp))
-
-(defn no-operands? [ops]
-  (empty? ops))
-
-(defn first-operand [ops]
-  (first ops))
-
-(defn rest-operands [ops]
-  (rest ops))
-
-(defn cond? [exp]
-  (tagged-list? exp 'cond))
-
-(defn cond-clauses [exp]
-  (rest exp))
-
-(defn cond-predicate [clause]
-  (first clause))
-
-(defn cond-else-clause? [clause]
-  (= (cond-predicate clause) 'else))
-
-(defn cond-actions [clause]
-  (rest clause))
-
-(defn expand-clauses [clauses]
-  (if (empty? clauses)
-    'false
-    (let [first-clause (first clauses)
-          rest-clauses (rest clauses)]
-      (if (cond-else-clause? first)
-        (if (empty? rest-clauses)
-          (sequence->exp (cond-actions first-clause))
-          (util/error "ELSE clause isn't last -- COND->IF" clauses))
-        (make-if (cond-predicate first)
-                 (sequence->exp (cond-actions first))
-                 (expand-clauses rest-clauses))))))
-
-(defn cond->if [exp]
-  (expand-clauses (cond-clauses exp)))
-
-(defn list-of-values
-  "Evaluates each item in the list of expressions and returns a list
-  of values back"
-  [exps env]
-  (if (no-operands? exps)
-    '()
-    (cons (eval (first-operand exps) env)
-          (list-of-values (rest-operands exps) env))))
-
-;; Exercise 4.1
-(defn list-of-values-left-eval
-  "Evaluates each item in the list of expressions and returns a list
-  of values back"
-  [exps env]
-  (if (no-operands? exps)
-    '()
-    (let [left-value (eval (first-operand exps) env)]
-      (let [rest-values (list-of-values (rest-operands exps) env)]
-        (cons left-value rest-values)))))
-
-;; Exercise 4.1
-(defn list-of-values-right-eval
-  "Evaluates each item in the list of expressions and returns a list
-  of values back"
-  [exps env]
-  (if (no-operands? exps)
-    '()
-    (let [rest-values (list-of-values (rest-operands exps) env)]
-      (let [left-value (eval (first-operand exps) env)]
-        (cons left-value rest-values)))))
-
 (defn eval-if [exp env]
-  (if (boolean/true? (eval (if-predicate exp) env))
-    (eval (if-consequent exp) env)
-    (eval (if-alternative exp) env)))
+  (if (boolean/true? (eval (if/if-predicate exp) env))
+    (eval (if/if-consequent exp) env)
+    (eval (if/if-alternative exp) env)))
 
 (defn eval-sequence
   "Used for (begin) and for the body of a function--can be more than
   one expression in a row"
   [exps env]
   (cond 
-    (last-exp? exps) (eval (first-exp exps) env)
+    (util/last-exp? exps) (eval (util/first-exp exps) env)
     :else (do
-            (eval (first-exp exps) env)
-            (eval-sequence (rest-exps exps) env))))
+            (eval (util/first-exp exps) env)
+            (eval-sequence (util/rest-exps exps) env))))
 
 (defn set-variable-value! [symbol value env]
   (util/error "set-variable-value! not yet implemented"))
 
 (defn eval-assignment [exp env]
   ;; XXX I think this is a scheme primitive
-  (set-variable-value! (assignment-variable exp)
-                       (eval (assignment-value exp) env)
+  (set-variable-value! (assignment/assignment-variable exp)
+                       (eval (assignment/assignment-value exp) env)
                        env)
   :ok)
 
@@ -255,8 +59,8 @@
 
 
 (defn eval-definition [exp env]
-  (define-variable! (definition-variable exp)
-    (eval (definition-value exp) env)
+  (define-variable! (definition/definition-variable exp)
+    (eval (definition/definition-value exp) env)
     env)
   :ok)
 
@@ -327,7 +131,7 @@
 ;; to do that:
 ;;
 ;; (defn application? [exp]
-;;   (tagged-list? exp 'call))
+;;   (util/tagged-list? exp 'call))
 
 ;; (defn operator [exp]
 ;;   (second exp))
@@ -345,25 +149,26 @@
 (defn install-all-forms []
   (reset! forms [])
   (add-form primitive/self-evaluating? (fn [exp env] exp))
-  (add-form variable? lookup-variable-value)
-  (add-form quoted? (fn [exp env] (text-of-quotation exp)))
-  (add-form assignment? eval-assignment)
-  (add-form definition? eval-definition)
-  (add-form if? eval-if)
+  (add-form assignment/variable? lookup-variable-value)
+  (add-form quote/quoted? (fn [exp env] (quote/text-of-quotation exp)))
+  (add-form assignment/assignment? eval-assignment)
+  (add-form definition/definition? eval-definition)
+  (add-form if/if? eval-if)
   ;; Exercise 4.5
-  (add-form and? eval-and)
-  (add-form or? eval-or)
-  (add-form lambda? (fn [exp env]
-                      (make-procedure (lambda-parameters exp)
-                                      (lambda-body exp)
-                                      env)))
-  (add-form begin? (fn [exp env]
-                     (eval-sequence (begin-actions exp) env)))
-  (add-form cond? (fn [exp env]
-                    (eval (cond->if exp) env)))
-  (add-form application? (fn [exp env]
-                           (apply (eval (operator exp) env)
-                                  (list-of-values (operands exp) env)))))
+  (add-form and/and? and/eval-and)
+  (add-form or/or? or/eval-or)
+  (add-form lambda/lambda? (fn [exp env]
+                             (make-procedure (lambda/lambda-parameters exp)
+                                             (lambda/lambda-body exp)
+                                             env)))
+  (add-form begin/begin? (fn [exp env]
+                           (eval-sequence (begin/begin-actions exp) env)))
+  (add-form cond/cond? (fn [exp env]
+                         (eval (cond/cond->if exp) env)))
+  (add-form application/application? (fn [exp env]
+                                       (apply (eval (application/operator exp) env)
+                                              (application/list-of-values
+                                               (application/operands exp) env)))))
 
 
 (install-all-forms)
