@@ -26,16 +26,6 @@
 (declare eval)
 ;; XXX selective import of clojure forms
 
-(defn eval-sequence
-  "Used for (begin) and for the body of a function--can be more than
-  one expression in a row"
-  [exps env]
-  (cond 
-    (util/last-exp? exps) (eval (util/first-exp exps) env)
-    :else (do
-            (eval (util/first-exp exps) env)
-            (eval-sequence (util/rest-exps exps) env))))
-
 (defn set-variable-value! [symbol value env]
   (util/error "set-variable-value! not yet implemented"))
 
@@ -86,12 +76,13 @@
 (defn apply [procedure arguments]
   (cond
     (primitive-procedure? procedure) (apply-primitive-procedure procedure arguments)
-    (compound-procedure? procedure) (eval-sequence
+    (compound-procedure? procedure) (begin/eval-sequence
                                      (procedure-body procedure)
                                      (extend-environment
                                       (procedure-parameters procedure)
                                       arguments
-                                      (procedure-environment procedure)))
+                                      (procedure-environment procedure))
+                                     eval)
     :else (util/error "Unknown procedure type -- APPLY" procedure)))
 
 
@@ -170,7 +161,7 @@
                                              (lambda/lambda-body exp)
                                              env)))
   (add-form begin/begin? (fn [exp env]
-                           (eval-sequence (begin/begin-actions exp) env)))
+                           (begin/eval-sequence (begin/begin-actions exp) env eval)))
   (add-form cond/cond? (fn [exp env]
                          (eval (cond/cond->if exp) env)))
   (add-form application/application? (fn [exp env]
