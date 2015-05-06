@@ -3,7 +3,7 @@
                   [= comment cond cons declare defn empty? first if-not
                    let list list? nil? not ns nth number? println
                    rest second seq str string? symbol? atom filter
-                   -> ->> if-let swap! conj fn]))
+                   -> ->> if-let swap! conj fn > count or reset!]))
 
 (defn foo
   "I don't do a whole lot."
@@ -15,10 +15,17 @@
 (declare eval)
 ;; XXX selective import of clojure forms
 
+;; false not bound in global environment yet--waiting patiently for
+;; section 4.1.4, but in the meantime, this helps test the rest
+(defn boolean? [exp]
+  (or (= true exp)
+      (= false exp)))
+
 (defn self-evaluating? [exp]
   (cond
     (number? exp) true
     (string? exp) true
+    (boolean? exp) true
     :else false))
 
 (defn variable? [exp]
@@ -84,13 +91,30 @@
   (nth exp 2))
 
 (defn if-alternative [exp]
-  (if-not (nil? (nth exp 3))
+  (if (> (count exp) 3)
     (nth exp 3)
-    'false))
+    false))
+;; (if-alternative '(if 1 true))
 
 (defn make-if [predicate consequent alternative]
   (list 'if predicate consequent alternative))
 
+(defn or? [exp]
+  (tagged-list? exp 'or))
+
+(defn or-exps [exp]
+  (rest exp))
+
+(defn eval-or [exp env]
+  (let [exps (or-exps exp)]
+    (if (empty? exps)
+      'false
+      (let [left (first exps)
+            left-value (eval left env)]
+        (if (true? left-value)
+          left-value
+          (eval-or (cons 'or (rest exps)) env))))))
+    
 (defn begin? [exp]
   (tagged-list? exp 'begin))
 
@@ -192,7 +216,13 @@
         (cons left-value rest-values)))))
 
 (defn true? [cond]
-  (error "true? not implemented"))
+  (if (number? cond)
+    (> cond 0)
+    (if (= true cond)
+      true
+      (if (= false cond)
+        false
+        (error "true? not implemented on " cond)))))
 
 (defn eval-if [exp env]
   (if (true? (eval (if-predicate exp) env))
@@ -323,6 +353,8 @@
   (add-form assignment? eval-assignment)
   (add-form definition? eval-definition)
   (add-form if? eval-if)
+  ;; (add-form and? eval-and)
+  (add-form or? eval-or)
   (add-form lambda? (fn [exp env]
                       (make-procedure (lambda-parameters exp)
                                       (lambda-body exp)
@@ -338,8 +370,7 @@
 
 (install-all-forms)
 
-(defn responds-to-exp [exp pred action]
-  (if (pred exp) action))
+;; (reset! forms [])
 
 (defn action-for-exp [exp]
   (if-let [[pred action] (->> @forms
