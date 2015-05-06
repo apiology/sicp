@@ -3,39 +3,18 @@
                   [= comment cond cons declare defn empty? first if-not
                    let list list? nil? not ns nth number? println
                    rest second seq str string? symbol? atom filter
-                   -> ->> if-let swap! conj fn > count or reset!]))
+                   -> ->> if-let swap! conj fn > count or reset!])
+  (:require [section-4-1-2.primitive :as primitive]
+            [section-4-1-2.boolean :as boolean]
+            [section-4-1-2.util :as util]))
 
 (defn foo
   "I don't do a whole lot."
   [x]
   (println x "Hello, World!"))
 
-(defn error [& msg] (throw (IllegalStateException. ^java.lang.String (clojure.core/apply str msg))))
-
 (declare eval)
 ;; XXX selective import of clojure forms
-
-;; false not bound in global environment yet--waiting patiently for
-;; section 4.1.4, but in the meantime, this helps test the rest
-(defn boolean? [exp]
-  (or (clojure.core/true? exp)
-      (clojure.core/false? exp)))
-
-(defn true? [cond]
-  (if (number? cond)
-    (clojure.core/pos? cond)
-    (if (clojure.core/true? cond)
-      true
-      (if (clojure.core/false? cond)
-        false
-        (error "true? not implemented on " cond)))))
-
-(defn self-evaluating? [exp]
-  (cond
-    (number? exp) true
-    (string? exp) true
-    (boolean? exp) true
-    :else false))
 
 (defn variable? [exp]
   (symbol? exp))
@@ -120,7 +99,7 @@
       'false
       (let [left (first exps)
             left-value (eval left env)]
-        (if (true? left-value)
+        (if (boolean/true? left-value)
           left-value
           (eval-or (cons 'or (rest exps)) env))))))
 
@@ -137,7 +116,7 @@
       (let [left (first exps)
             rest-exps (rest exps)
             left-value (eval left env)]
-        (if (true? left-value)
+        (if (boolean/true? left-value)
           (if (empty? rest-exps)
             left-value
             (recur (cons 'and rest-exps) env))
@@ -204,7 +183,7 @@
       (if (cond-else-clause? first)
         (if (empty? rest-clauses)
           (sequence->exp (cond-actions first-clause))
-          (error "ELSE clause isn't last -- COND->IF" clauses))
+          (util/error "ELSE clause isn't last -- COND->IF" clauses))
         (make-if (cond-predicate first)
                  (sequence->exp (cond-actions first))
                  (expand-clauses rest-clauses))))))
@@ -244,7 +223,7 @@
         (cons left-value rest-values)))))
 
 (defn eval-if [exp env]
-  (if (true? (eval (if-predicate exp) env))
+  (if (boolean/true? (eval (if-predicate exp) env))
     (eval (if-consequent exp) env)
     (eval (if-alternative exp) env)))
 
@@ -259,7 +238,7 @@
             (eval-sequence (rest-exps exps) env))))
 
 (defn set-variable-value! [symbol value env]
-  (error "set-variable-value! not yet implemented"))
+  (util/error "set-variable-value! not yet implemented"))
 
 (defn eval-assignment [exp env]
   ;; XXX I think this is a scheme primitive
@@ -269,10 +248,10 @@
   :ok)
 
 (defn define-variable! [symbol value env]
-  (error "define-variable! not yet implemented"))
+  (util/error "define-variable! not yet implemented"))
 
 (defn lookup-variable-value [symbol env]
-  (error "lookup-variable-value not yet implemented"))
+  (util/error "lookup-variable-value not yet implemented"))
 
 
 (defn eval-definition [exp env]
@@ -282,30 +261,28 @@
   :ok)
 
 (defn primitive-procedure? [exp]
-  (error "primitive-procedure? not yet implemented"))
+  (util/error "primitive-procedure? not yet implemented"))
 
 (defn apply-primitive-procedure [procedure arguments]
-  (error "apply-primitive-procedure not yet implemented"))
+  (util/error "apply-primitive-procedure not yet implemented"))
 
 (defn compound-procedure? [exp]
-  (error "compound-procedure? not yet implemented"))
+  (util/error "compound-procedure? not yet implemented"))
 
 (defn procedure-body [procedure]
-  (error "procedure-body not yet implemented"))
+  (util/error "procedure-body not yet implemented"))
 
 (defn procedure-parameters [procedure]
-  (error "procedure-body not yet implemented"))
+  (util/error "procedure-body not yet implemented"))
 
 (defn procedure-environment [procedure]
-  (error "procedure-environment not yet implemented"))
+  (util/error "procedure-environment not yet implemented"))
 
 (defn make-procedure [parameters body env]
-  (error "make-procedure not yet implemented"))
+  (util/error "make-procedure not yet implemented"))
 
 (defn extend-environment [variables values existing-env]
-  (error "extend-environment not yet implemented"))
-
-
+  (util/error "extend-environment not yet implemented"))
 
 (defn apply [procedure arguments]
   (cond
@@ -316,7 +293,7 @@
                                       (procedure-parameters procedure)
                                       arguments
                                       (procedure-environment procedure)))
-    :else (error "Unknown procedure type -- APPLY" procedure)))
+    :else (util/error "Unknown procedure type -- APPLY" procedure)))
 
 (comment original - see below for new
   (defn eval [exp env]
@@ -334,7 +311,7 @@
       (cond? exp) (eval (cond->if exp) env)
       (application? exp) (apply (eval (operator exp) env)
                                 (list-of-values (operands exp) env))
-      :else (error "unknown expression type -- EVAL" exp))))
+      :else (util/error "unknown expression type -- EVAL" exp))))
 
 ;; Exercise 4.2
 
@@ -367,7 +344,7 @@
 
 (defn install-all-forms []
   (reset! forms [])
-  (add-form self-evaluating? (fn [exp env] exp))
+  (add-form primitive/self-evaluating? (fn [exp env] exp))
   (add-form variable? lookup-variable-value)
   (add-form quoted? (fn [exp env] (text-of-quotation exp)))
   (add-form assignment? eval-assignment)
@@ -403,4 +380,4 @@
 (defn eval [exp env]
   (if-let [action (action-for-exp exp)]
     (action exp env)
-    (error "unknown expression type -- EVAL" exp)))
+    (util/error "unknown expression type -- EVAL" exp)))
