@@ -1,4 +1,5 @@
 (ns section-4-1-2.boolean
+  (:refer-clojure :only [defn or number?])
   (:require [section-4-1-2.util :as util]))
 
 ;; false not bound in global environment yet--waiting patiently for
