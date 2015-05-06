@@ -26,10 +26,36 @@
 (declare eval)
 ;; XXX selective import of clojure forms
 
-(defn eval-if [exp env]
-  (if (boolean/true? (eval (if/if-predicate exp) env))
-    (eval (if/if-consequent exp) env)
-    (eval (if/if-alternative exp) env)))
+(defn list-of-values
+  "Evaluates each item in the list of expressions and returns a list
+  of values back"
+  [exps env]
+  (if (application/no-operands? exps)
+    '()
+    (cons (eval (application/first-operand exps) env)
+          (list-of-values (application/rest-operands exps) env))))
+
+;; Exercise 4.1
+(defn list-of-values-left-eval
+  "Evaluates each item in the list of expressions and returns a list
+  of values back"
+  [exps env]
+  (if (application/no-operands? exps)
+    '()
+    (let [left-value (eval (application/first-operand exps) env)]
+      (let [rest-values (list-of-values (application/rest-operands exps) env)]
+        (cons left-value rest-values)))))
+
+;; Exercise 4.1
+(defn list-of-values-right-eval
+  "Evaluates each item in the list of expressions and returns a list
+  of values back"
+  [exps env]
+  (if (application/no-operands? exps)
+    '()
+    (let [rest-values (list-of-values (application/rest-operands exps) env)]
+      (let [left-value (eval (application/first-operand exps) env)]
+        (cons left-value rest-values)))))
 
 (defn eval-sequence
   "Used for (begin) and for the body of a function--can be more than
@@ -99,24 +125,6 @@
                                       (procedure-environment procedure)))
     :else (util/error "Unknown procedure type -- APPLY" procedure)))
 
-(comment original - see below for new
-  (defn eval [exp env]
-    (cond
-      (self-evaluating? exp) exp
-      (variable? exp) (lookup-variable-value exp env)
-      (quoted? exp) (text-of-quotation exp)
-      (assignment? exp) (eval-assignment exp env)
-      (definition? exp) (eval-definition exp env)
-      (if? exp) (eval-if exp env)
-      (lambda? exp) (make-procedure (lambda-parameters exp)
-                                    (lambda-body exp)
-                                    env)
-      (begin? exp) (eval-sequence (begin-actions exp) env)
-      (cond? exp) (eval (cond->if exp) env)
-      (application? exp) (apply (eval (operator exp) env)
-                                (list-of-values (operands exp) env))
-      :else (util/error "unknown expression type -- EVAL" exp))))
-
 ;; Exercise 4.2
 
 ;; a
@@ -153,7 +161,7 @@
   (add-form quote/quoted? (fn [exp env] (quote/text-of-quotation exp)))
   (add-form assignment/assignment? eval-assignment)
   (add-form definition/definition? eval-definition)
-  (add-form if/if? eval-if)
+  (add-form if/if? if/eval-if)
   ;; Exercise 4.5
   (add-form and/and? and/eval-and)
   (add-form or/or? or/eval-or)
@@ -167,7 +175,7 @@
                          (eval (cond/cond->if exp) env)))
   (add-form application/application? (fn [exp env]
                                        (apply (eval (application/operator exp) env)
-                                              (application/list-of-values
+                                              (list-of-values
                                                (application/operands exp) env)))))
 
 
