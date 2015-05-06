@@ -26,37 +26,6 @@
 (declare eval)
 ;; XXX selective import of clojure forms
 
-(defn list-of-values
-  "Evaluates each item in the list of expressions and returns a list
-  of values back"
-  [exps env]
-  (if (application/no-operands? exps)
-    '()
-    (cons (eval (application/first-operand exps) env)
-          (list-of-values (application/rest-operands exps) env))))
-
-;; Exercise 4.1
-(defn list-of-values-left-eval
-  "Evaluates each item in the list of expressions and returns a list
-  of values back"
-  [exps env]
-  (if (application/no-operands? exps)
-    '()
-    (let [left-value (eval (application/first-operand exps) env)]
-      (let [rest-values (list-of-values (application/rest-operands exps) env)]
-        (cons left-value rest-values)))))
-
-;; Exercise 4.1
-(defn list-of-values-right-eval
-  "Evaluates each item in the list of expressions and returns a list
-  of values back"
-  [exps env]
-  (if (application/no-operands? exps)
-    '()
-    (let [rest-values (list-of-values (application/rest-operands exps) env)]
-      (let [left-value (eval (application/first-operand exps) env)]
-        (cons left-value rest-values)))))
-
 (defn eval-sequence
   "Used for (begin) and for the body of a function--can be more than
   one expression in a row"
@@ -206,8 +175,8 @@
                          (eval (cond/cond->if exp) env)))
   (add-form application/application? (fn [exp env]
                                        (apply (eval (application/operator exp) env)
-                                              (list-of-values
-                                               (application/operands exp) env)))))
+                                              (application/list-of-values
+                                               (application/operands exp) env eval)))))
 
 
 (install-all-forms)
