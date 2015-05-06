@@ -18,7 +18,7 @@
 
 (deftest if-true-without-second
   (testing ""
-    (is (= (eval '(if 1 123) default-env) default-env) 123)))
+    (is (= (eval '(if 1 123) default-env) 123))))
 
 ;; false not bound in global environment yet--waiting patiently for section 4.1.4.
 ;; (deftest if-false-without-second
