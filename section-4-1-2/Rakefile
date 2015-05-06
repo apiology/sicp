@@ -1,0 +1,98 @@
+require 'quality/rake/task'
+
+Quality::Rake::Task.new do |t|
+  t.skip_tools = ['flog']
+  t.verbose = true
+end
+
+task :eastwood do
+  sh 'lein eastwood'
+end
+
+task :kibit do
+  sh 'lein kibit'
+end
+
+task :test do
+  sh 'lein test'
+end
+
+BIKESHED_OPTIONS = '-v -m 200'
+task :bikeshed do
+  sh "lein do bikeshed #{BIKESHED_OPTIONS}"
+end
+
+# To add a lein kibit item:
+#
+# 1) Take current production version of kibit and bump a couple of
+#    times, then write it here:
+#    0.1.4-SNAPSHOT
+# 2) Adjust following files to use version:
+#    ~/src/lein/project.clj
+#    ~/src/lein-kibit/project.clj
+#    ~/src/lein-kibit/src/leiningen/kibit.clj
+#    ~/.lein/profiles.clj
+# 3) Run this once:
+#    cd ~/src/GroceriesServer && rake update_lein_kibit update_kibit
+# 4) Make sure this still works:
+#    cd ~/src/GroceriesServer && lein kibit
+# 5) Add a test case in ~/src/kibit/test/kibit/test
+# 6) Run and edit to get working again
+#     cd ~/src/kibit && lein test
+#     ~/src/kibit/src/kibit/rules/collections.clj
+# 6) Run this:
+#    cd ~/src/GroceriesServer && rake update_kibit kibit
+# 7) Fix problem
+# 8) Test fix and make sure it actually was right thing :)
+# 9) Create pull request:
+task :update_lein_kibit do
+  sh 'cd ~/src/lein-kibit && lein install'
+end
+
+task :update_kibit do
+  sh 'cd ~/src/kibit && lein install'
+end
+
+task :ancient do
+  #
+  # 'lein ancient' doesn't return an error code, but I'd like one so
+  # that I can fail CI when we start falling out of date
+  #
+  # 'lein ancient' also doesn't let me dasily boot bad versions
+  #
+  sh 'if lein ancient 2>&1 ' \
+     "| grep -v '^all artifacts are up-to-date.' " \
+     "| grep -v 'org.clojure/core.typed.*0.2.87' " \
+     "| grep -v '^$' " \
+     "| grep '^'; then exit 1; else exit 0; fi"
+  sh 'if lein ancient profiles ' \
+     "| grep -v '^all artifacts are up-to-date.' " \
+     "| grep -v -- '-- ~/.lein/profiles.clj' " \
+     "| grep -v '^$' " \
+     "| grep '^'; then exit 1; else exit 0; fi"
+end
+
+task :clojure_quality do
+  # XXX reduce line size
+  sh 'lein do kibit, eastwood'
+  # sh "lein bikeshed #{BIKESHED_OPTIONS}" # I don't have enough
+  # docstrings for this yet
+end
+
+task :slamhound do
+  sh 'find . -name \*.clj | grep -v project.clj | xargs lein slamhound'
+  sh "if git stat | grep '^'; then exit 1; else exit 0; fi"
+end
+
+task :check_on_reflection do
+  sh 'if lein check 2>&1 ' \
+     "| grep 'Reflection warning' " \
+     "| grep 'groceries_server/' " \
+     "| grep '^'; then exit 1; else exit 0; fi"
+end
+
+task default: [:test, :clojure_quality, :quality, :ancient,
+               :check_on_reflection, :slamhound]
+
+task ci: [:clojure_quality, :quality, :ancient, :check_on_reflection,
+          :slamhound]
