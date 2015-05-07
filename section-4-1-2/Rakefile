@@ -102,6 +102,8 @@ task :cloverage do
   old_coverage = `cat metrics/cloverage_high_water_mark`.strip.to_f
   if coverage < old_coverage
     fail "Coverage dropped to #{coverage} from #{old_coverage}"
+  elsif coverage == old_coverage
+    puts "Coverage maintained at #{coverage}"
   else
     File.open('metrics/cloverage_high_water_mark', 'w') do |file|
       file.write(coverage)
