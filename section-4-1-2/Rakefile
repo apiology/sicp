@@ -97,6 +97,8 @@ end
 # XXX create lein version of quality gem
 # XXX add this idea to lein cloverage
 task :cloverage do
+  # XXX doesn't capture failure, so I have to do 'test' as well as
+  # 'cloverage'...
   coverage =
     `lein cloverage | grep '^Forms covered:' | cut -d' ' -f3`.strip.to_f
   old_coverage = `cat metrics/cloverage_high_water_mark`.strip.to_f
@@ -112,9 +114,7 @@ task :cloverage do
   end
 end
 
-task default: [:cloverage, :clojure_quality, :quality, :ancient,
-               :check_on_reflection, :slamhound]
+task default: [:test, :clojure_quality, :quality, :ancient,
+               :check_on_reflection, :slamhound, :cloverage]
 
-task ci: [:cloverage, :clojure_quality, :quality, :ancient,
-          :check_on_reflection,
-          :slamhound]
+task ci: [:default]
