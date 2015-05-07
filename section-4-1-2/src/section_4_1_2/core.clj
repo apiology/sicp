@@ -20,11 +20,6 @@
                       reset! rest second seq str string? swap!
                       symbol?]))
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
-
 (declare eval)
 
 (defn extend-environment [variables values existing-env]
@@ -44,16 +39,6 @@
       (procedure/procedure-environment procedure))
      eval)
     :else (util/error "Unknown procedure type -- APPLY" procedure)))
-
-(defn eval-or [exp env]
-  (let [exps (or/or-exps exp)]
-    (if (empty? exps)
-      'false
-      (let [left (first exps)
-            left-value (eval left env)]
-        (if (boolean/true? left-value)
-          left-value
-          (eval-or (cons 'or (rest exps)) env))))))
 
 ;; Exercise 4.2
 
@@ -95,7 +80,7 @@
   (add-form if/if? (fn [exp env] (if/eval-if exp env eval)))
   ;; Exercise 4.5
   (add-form and/and? (fn [exp env] (and/eval-and exp env eval)))
-  (add-form or/or? eval-or)
+  (add-form or/or? (fn [exp env] (or/eval-or exp env eval)))
   (add-form lambda/lambda? (fn [exp env]
                              (procedure/make-procedure (lambda/lambda-parameters exp)
                                                        (lambda/lambda-body exp)
