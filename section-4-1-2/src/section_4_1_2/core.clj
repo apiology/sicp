@@ -3,7 +3,6 @@
             [section-4-1-2.application :as application]
             [section-4-1-2.assignment :as assignment]
             [section-4-1-2.begin :as begin]
-            [section-4-1-2.boolean :as boolean]
             [section-4-1-2.cond :as cond]
             [section-4-1-2.definition :as definition]
             [section-4-1-2.if :as if]
