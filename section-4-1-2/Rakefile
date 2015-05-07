@@ -2,6 +2,7 @@ require 'quality/rake/task'
 
 Quality::Rake::Task.new do |t|
   t.skip_tools = ['flog']
+  t.source_dirs = ['.']
   t.verbose = true
 end
 
