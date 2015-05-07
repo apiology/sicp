@@ -11,7 +11,8 @@
             [section-4-1-2.or :as or]
             [section-4-1-2.primitive :as primitive]
             [section-4-1-2.quote :as quote]
-            [section-4-1-2.util :as util])
+            [section-4-1-2.util :as util]
+            [section-4-1-2.procedure :as procedure])
   (:refer-clojure :only
                   [-> ->> = > atom comment cond conj cons count declare
                       defn empty? filter first fn if-let if-not let
@@ -26,46 +27,22 @@
 
 (declare eval)
 
-(defn eval-definition [exp env]
-  (assignment/define-variable! (definition/definition-variable exp)
-    (eval (definition/definition-value exp) env)
-    env)
-  :ok)
-
-(defn primitive-procedure? [exp]
-  (util/error "primitive-procedure? not yet implemented"))
-
-(defn apply-primitive-procedure [procedure arguments]
-  (util/error "apply-primitive-procedure not yet implemented"))
-
-(defn compound-procedure? [exp]
-  (util/error "compound-procedure? not yet implemented"))
-
-(defn procedure-body [procedure]
-  (util/error "procedure-body not yet implemented"))
-
-(defn procedure-parameters [procedure]
-  (util/error "procedure-body not yet implemented"))
-
-(defn procedure-environment [procedure]
-  (util/error "procedure-environment not yet implemented"))
-
-(defn make-procedure [parameters body env]
-  (util/error "make-procedure not yet implemented"))
-
 (defn extend-environment [variables values existing-env]
   (util/error "extend-environment not yet implemented"))
 
 (defn apply [procedure arguments]
   (cond
-    (primitive-procedure? procedure) (apply-primitive-procedure procedure arguments)
-    (compound-procedure? procedure) (begin/eval-sequence
-                                     (procedure-body procedure)
-                                     (extend-environment
-                                      (procedure-parameters procedure)
-                                      arguments
-                                      (procedure-environment procedure))
-                                     eval)
+    (procedure/primitive-procedure? procedure)
+    (procedure/apply-primitive-procedure procedure arguments)
+    
+    (procedure/compound-procedure? procedure)
+    (begin/eval-sequence
+     (procedure/procedure-body procedure)
+     (extend-environment
+      (procedure/procedure-parameters procedure)
+      arguments
+      (procedure/procedure-environment procedure))
+     eval)
     :else (util/error "Unknown procedure type -- APPLY" procedure)))
 
 
@@ -134,15 +111,15 @@
   (add-form assignment/variable? assignment/lookup-variable-value)
   (add-form quote/quoted? (fn [exp env] (quote/text-of-quotation exp)))
   (add-form assignment/assignment? (fn [exp env] (assignment/eval-assignment exp env eval)))
-  (add-form definition/definition? eval-definition)
+  (add-form definition/definition? (fn [exp env] (definition/eval-definition exp env eval)))
   (add-form if/if? eval-if)
   ;; Exercise 4.5
   (add-form and/and? eval-and)
   (add-form or/or? eval-or)
   (add-form lambda/lambda? (fn [exp env]
-                             (make-procedure (lambda/lambda-parameters exp)
-                                             (lambda/lambda-body exp)
-                                             env)))
+                             (procedure/make-procedure (lambda/lambda-parameters exp)
+                                                       (lambda/lambda-body exp)
+                                                       env)))
   (add-form begin/begin? (fn [exp env]
                            (begin/eval-sequence (begin/begin-actions exp) env eval)))
   (add-form cond/cond? (fn [exp env]
