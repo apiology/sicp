@@ -105,6 +105,7 @@ task :cloverage do
   elsif coverage == old_coverage
     puts "Coverage maintained at #{coverage}"
   else
+    puts "Coverage ratcheted up to #{coverage} from #{old_coverage}"
     File.open('metrics/cloverage_high_water_mark', 'w') do |file|
       file.write(coverage)
     end
