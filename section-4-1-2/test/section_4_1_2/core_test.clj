@@ -88,10 +88,6 @@
 ;;   (testing "o"
 ;;     (is (= (eval '(+ 1 1) default-env) 2))))
 
-
-
-
-;; XXX add cloverage
 (deftest cond-with-one-true-clause
   (testing ""
     (is (= (eval '(cond (true 123)) default-env) 123))))
