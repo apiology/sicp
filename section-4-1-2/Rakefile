@@ -6,91 +6,9 @@ Quality::Rake::Task.new do |t|
   t.verbose = true
 end
 
-task :eastwood do
-  sh 'lein eastwood'
-end
-
-task :kibit do
-  sh 'lein kibit'
-end
-
-task :test do
-  sh 'lein test'
-end
-
-BIKESHED_OPTIONS = '-v -m 200'
-task :bikeshed do
-  sh "lein do bikeshed #{BIKESHED_OPTIONS}"
-end
-
-task :update_lein_kibit do
-  sh 'cd ~/src/lein-kibit && lein install'
-end
-
-task :update_kibit do
-  sh 'cd ~/src/kibit && lein install'
-end
-
-task :ancient do
-  #
-  # 'lein ancient' doesn't return an error code, but I'd like one so
-  # that I can fail CI when we start falling out of date
-  #
-  # 'lein ancient' also doesn't let me dasily boot bad versions
-  #
-  sh 'if lein ancient 2>&1 ' \
-     "| grep -v '^all artifacts are up-to-date.' " \
-     "| grep -v 'org.clojure/core.typed.*0.2.87' " \
-     "| grep -v '^$' " \
-     "| grep '^'; then exit 1; else exit 0; fi"
-  sh 'if lein ancient profiles ' \
-     "| grep -v '^all artifacts are up-to-date.' " \
-     "| grep -v -- '-- ~/.lein/profiles.clj' " \
-     "| grep -v '^$' " \
-     "| grep '^'; then exit 1; else exit 0; fi"
-end
-
-task :clojure_quality do
-  # XXX reduce line size
-  sh 'lein do kibit, eastwood'
-  # sh "lein bikeshed #{BIKESHED_OPTIONS}" # I don't have enough
-  # docstrings for this yet
-end
-
-# XXX contribute this back to slamhound
-task :slamhound do
-  sh 'find . -name \*.clj | grep -v project.clj | xargs lein slamhound'
-  sh "if git status --porcelain | grep '^'; then exit 1; else exit 0; fi"
-end
-
-# XXX contribute this back to lein check
-task :check_on_reflection do
-  sh 'if lein check 2>&1 ' \
-     "| grep 'Reflection warning' " \
-     "| grep 'groceries_server/' " \
-     "| grep '^'; then exit 1; else exit 0; fi"
-end
-
-# XXX add ratcheting part of this to quality gem
-# XXX create lein version of quality gem
-# XXX add this idea to lein cloverage
-task :cloverage do
-  # XXX doesn't capture failure, so I have to do 'test' as well as
-  # 'cloverage'...
-  coverage =
-    `lein cloverage | grep '^Forms covered:' | cut -d' ' -f3`.strip.to_f
-  old_coverage = `cat metrics/cloverage_high_water_mark`.strip.to_f
-  if coverage < old_coverage
-    fail "Coverage dropped to #{coverage} from #{old_coverage}"
-  elsif coverage == old_coverage
-    puts "Coverage maintained at #{coverage}"
-  else
-    puts "Coverage ratcheted up to #{coverage} from #{old_coverage}"
-    File.open('metrics/cloverage_high_water_mark', 'w') do |file|
-      file.write(coverage)
-    end
-  end
-end
+# XXX add '.rake' as a default filetype
+# XXX add tasks as a default directory
+Dir['tasks/**/*.rake'].each { |t| load t }
 
 task default: [:test, :clojure_quality, :quality, :ancient,
                :check_on_reflection, :slamhound, :cloverage]
