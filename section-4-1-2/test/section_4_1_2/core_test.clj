@@ -111,3 +111,7 @@
 (deftest cond-with-lots-of-clauses
   (testing ""
     (is (= (eval '(cond (false 123) (true 456) (true 789) (false 233) (true 111)) default-env) 456))))
+
+(deftest cond-with-else-clause
+  (testing ""
+    (is (= (eval '(cond (false 123) (false 456) (false 789) (false 233) (false 111) (else 421)) default-env) 421))))
