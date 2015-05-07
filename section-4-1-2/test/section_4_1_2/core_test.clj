@@ -87,3 +87,27 @@
 ;; (deftest one-plus-one-equals-two
 ;;   (testing "o"
 ;;     (is (= (eval '(+ 1 1) default-env) 2))))
+
+
+
+
+;; XXX add cloverage
+(deftest cond-with-one-true-clause
+  (testing ""
+    (is (= (eval '(cond (true 123)) default-env) 123))))
+
+(deftest cond-with-no-true-clauses
+  (testing ""
+    (is (= (eval '(cond (false 123)) default-env) false))))
+
+(deftest cond-with-one-late-true-clauses
+  (testing ""
+    (is (= (eval '(cond (false 123) (true 456)) default-env) 456))))
+
+(deftest cond-with-two-true-clauses
+  (testing ""
+    (is (= (eval '(cond (false 123) (true 456) (true 789)) default-env) 456))))
+
+(deftest cond-with-lots-of-clauses
+  (testing ""
+    (is (= (eval '(cond (false 123) (true 456) (true 789) (false 233) (true 111)) default-env) 456))))

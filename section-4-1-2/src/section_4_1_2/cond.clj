@@ -29,12 +29,12 @@
     'false
     (let [first-clause (first clauses)
           rest-clauses (rest clauses)]
-      (if (cond-else-clause? first)
+      (if (cond-else-clause? first-clause)
         (if (empty? rest-clauses)
           (sequence->exp (cond-actions first-clause))
           (util/error "ELSE clause isn't last -- COND->IF" clauses))
-        (if/make-if (cond-predicate first)
-                    (sequence->exp (cond-actions first))
+        (if/make-if (cond-predicate first-clause)
+                    (sequence->exp (cond-actions first-clause))
                     (expand-clauses rest-clauses))))))
 
 (defn cond->if [exp]
