@@ -84,6 +84,7 @@
 (defn add-form [pred action]
   (swap! forms conj [pred action]))
 
+;; XXX just move to three-arg form
 (defn install-all-forms []
   (reset! forms [])
   (add-form primitive/self-evaluating? (fn [exp env] exp))
@@ -91,7 +92,7 @@
   (add-form quote/quoted? (fn [exp env] (quote/text-of-quotation exp)))
   (add-form assignment/assignment? (fn [exp env] (assignment/eval-assignment exp env eval)))
   (add-form definition/definition? (fn [exp env] (definition/eval-definition exp env eval)))
-  (add-form if/if? eval-if)
+  (add-form if/if? (fn [exp env] (if/eval-if exp env eval)))
   ;; Exercise 4.5
   (add-form and/and? (fn [exp env] (and/eval-and exp env eval)))
   (add-form or/or? eval-or)

@@ -3,10 +3,10 @@
             [section-4-1-2.util :as util])
   (:refer-clojure :only
                   [-> ->> = > atom comment cond conj cons count declare
-                   defn empty? filter first fn if-let if-not let
-                   list list? nil? not ns nth number? or println
-                   reset! rest second seq str string? swap!
-                   symbol?]))
+                      defn empty? filter first fn if-let if-not let
+                      list list? nil? not ns nth number? or println
+                      reset! rest second seq str string? swap!
+                      symbol?]))
 
 (defn if? [exp]
   (util/tagged-list? exp 'if))
