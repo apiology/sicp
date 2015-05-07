@@ -25,7 +25,6 @@
   (println x "Hello, World!"))
 
 (declare eval)
-;; XXX selective import of clojure forms
 
 (defn eval-definition [exp env]
   (assignment/define-variable! (definition/definition-variable exp)

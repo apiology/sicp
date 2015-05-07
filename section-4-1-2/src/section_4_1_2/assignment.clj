@@ -25,7 +25,6 @@
 
 
 (defn eval-assignment [exp env eval-fn]
-  ;; XXX I think this is a scheme primitive
   (set-variable-value! (assignment-variable exp)
                        (eval-fn (assignment-value exp) env)
                        env)
