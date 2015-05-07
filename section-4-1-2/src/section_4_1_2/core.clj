@@ -45,13 +45,6 @@
      eval)
     :else (util/error "Unknown procedure type -- APPLY" procedure)))
 
-
-(defn eval-if [exp env]
-  (if (boolean/true? (eval (if/if-predicate exp) env))
-    (eval (if/if-consequent exp) env)
-    (eval (if/if-alternative exp) env)))
-
-
 (defn eval-or [exp env]
   (let [exps (or/or-exps exp)]
     (if (empty? exps)
