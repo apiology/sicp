@@ -20,7 +20,7 @@
 (defn define-variable! [symbol value env]
   (util/error "define-variable! not yet implemented"))
 
-(defn lookup-variable-value [symbol env]
+(defn lookup-variable-value [symbol env eval-fn]
   nil)
 
 (defn eval-assignment [exp env eval-fn]

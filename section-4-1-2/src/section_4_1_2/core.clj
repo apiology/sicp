@@ -68,30 +68,29 @@
 (defn add-form [pred action]
   (swap! forms conj [pred action]))
 
-;; XXX just move to three-arg form
 (defn install-all-forms []
   (reset! forms [])
-  (add-form primitive/self-evaluating? (fn [exp env] exp))
+  (add-form primitive/self-evaluating? (fn [exp env eval-fn] exp))
   (add-form assignment/variable? assignment/lookup-variable-value)
   (add-form quote/quoted? (fn [exp env] (quote/text-of-quotation exp)))
-  (add-form assignment/assignment? (fn [exp env] (assignment/eval-assignment exp env eval)))
-  (add-form definition/definition? (fn [exp env] (definition/eval-definition exp env eval)))
-  (add-form if/if? (fn [exp env] (if/eval-if exp env eval)))
+  (add-form assignment/assignment? assignment/eval-assignment)
+  (add-form definition/definition? definition/eval-definition)
+  (add-form if/if? if/eval-if)
   ;; Exercise 4.5
-  (add-form and/and? (fn [exp env] (and/eval-and exp env eval)))
-  (add-form or/or? (fn [exp env] (or/eval-or exp env eval)))
-  (add-form lambda/lambda? (fn [exp env]
+  (add-form and/and? and/eval-and)
+  (add-form or/or? or/eval-or)
+  (add-form lambda/lambda? (fn [exp env eval-fn]
                              (procedure/make-procedure (lambda/lambda-parameters exp)
                                                        (lambda/lambda-body exp)
                                                        env)))
-  (add-form begin/begin? (fn [exp env]
-                           (begin/eval-sequence (begin/begin-actions exp) env eval)))
-  (add-form cond/cond? (fn [exp env]
-                         (eval (cond/cond->if exp) env)))
-  (add-form application/application? (fn [exp env]
-                                       (apply (eval (application/operator exp) env)
+  (add-form begin/begin? (fn [exp env eval-fn]
+                           (begin/eval-sequence (begin/begin-actions exp) env eval-fn)))
+  (add-form cond/cond? (fn [exp env eval-fn]
+                         (eval-fn (cond/cond->if exp) env)))
+  (add-form application/application? (fn [exp env eval-fn]
+                                       (apply (eval-fn (application/operator exp) env)
                                               (application/list-of-values
-                                               (application/operands exp) env eval)))))
+                                               (application/operands exp) env eval-fn)))))
 
 
 (install-all-forms)
@@ -107,5 +106,5 @@
 
 (defn eval [exp env]
   (if-let [action (action-for-exp exp)]
-    (action exp env)
+    (action exp env eval)
     (util/error "unknown expression type -- EVAL" exp)))
