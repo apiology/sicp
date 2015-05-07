@@ -21,8 +21,7 @@
   (util/error "define-variable! not yet implemented"))
 
 (defn lookup-variable-value [symbol env]
-  (util/error "lookup-variable-value not yet implemented"))
-
+  nil)
 
 (defn eval-assignment [exp env eval-fn]
   (set-variable-value! (assignment-variable exp)
