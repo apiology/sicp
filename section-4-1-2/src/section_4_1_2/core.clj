@@ -18,7 +18,7 @@
                       list list? nil? not ns nth number? or println
                       reset! rest second seq str string? swap!
                       symbol?]))
-
+;; XXX capture XXXes in Rakefile
 (declare eval)
 
 (defn extend-environment [variables values existing-env]
