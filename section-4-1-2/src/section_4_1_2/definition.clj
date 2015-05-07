@@ -1,6 +1,6 @@
 (ns section-4-1-2.definition
-  (:require [section-4-1-2.lambda :as lambda]
-            [section-4-1-2.assignment :as assignment]
+  (:require [section-4-1-2.assignment :as assignment]
+            [section-4-1-2.lambda :as lambda]
             [section-4-1-2.util :as util])
   (:refer-clojure :only [defn first nth rest second symbol?]))
 
