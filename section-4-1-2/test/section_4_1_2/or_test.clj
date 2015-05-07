@@ -1,6 +1,7 @@
 (ns section-4-1-2.or-test
-  (:require [section-4-1-2.or :refer :all]
-            [clojure.test :refer :all]))
+  (:require [section-4-1-2.core :refer :all]
+            [clojure.test :refer :all])
+  (:refer-clojure :only [=]))
 
 (def default-env nil)
 

@@ -1,6 +1,7 @@
 (ns section-4-1-2.lambda-test
-  (:require [section-4-1-2.lambda :refer :all]
-            [clojure.test :refer :all]))
+  (:require [section-4-1-2.core :refer :all]
+            [clojure.test :refer :all])
+  (:refer-clojure :only [= list]))
 
 (def default-env nil)
 

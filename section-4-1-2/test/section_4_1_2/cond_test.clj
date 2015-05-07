@@ -1,6 +1,7 @@
 (ns section-4-1-2.cond-test
   (:require [section-4-1-2.core :refer :all]
-            [clojure.test :refer :all]))
+            [clojure.test :refer :all])
+  (:refer-clojure :only [=]))
 
 (def default-env nil)
 (deftest cond-with-one-true-clause
