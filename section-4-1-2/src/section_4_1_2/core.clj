@@ -10,9 +10,9 @@
             [section-4-1-2.lambda :as lambda]
             [section-4-1-2.or :as or]
             [section-4-1-2.primitive :as primitive]
+            [section-4-1-2.procedure :as procedure]
             [section-4-1-2.quote :as quote]
-            [section-4-1-2.util :as util]
-            [section-4-1-2.procedure :as procedure])
+            [section-4-1-2.util :as util])
   (:refer-clojure :only
                   [-> ->> = > atom comment cond conj cons count declare
                       defn empty? filter first fn if-let if-not let
