@@ -83,6 +83,15 @@
   (testing ""
     (is (= (eval '(and 1 2 3 4 5) default-env) 5))))
 
+(deftest simple-lambda
+  (testing ""
+    (is (= (eval '(lambda (x) 1) default-env)
+           (list 'procedure '(x) 1 default-env)))))
+
+(deftest lambda-application
+  (testing ""
+    (is (= (eval '((lambda (x) 1) 123) default-env)
+           1))))
 
 ;; (deftest one-plus-one-equals-two
 ;;   (testing "o"
@@ -112,7 +121,6 @@
   (testing ""
     (is (= (eval '(cond (false 123) (false 456) (false 789) (false 233) (false 111) (else 421)) default-env) 421))))
 
-(deftest simple-lambda
+(deftest cond-with-cond-rocket
   (testing ""
-    (is (= (eval '(lambda (x) 1) default-env)
-           (list 'procedure '(x) 1 default-env)))))
+    (is (= (eval '(cond (true => (lambda (x) 1))) default-env) 1))))

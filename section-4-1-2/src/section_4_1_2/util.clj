@@ -7,9 +7,9 @@
 
 (defn error [& msg] (throw (IllegalStateException. ^java.lang.String (clojure.core/apply str msg))))
 
-(defn last-exp? [seq] (empty? (rest seq)))
+(defn last-exp? [seq] (or (not (seq? seq)) (empty? (rest seq))))
 
-(defn first-exp [seq] (first seq))
+(defn first-exp [seq] (if (seq? seq) (first seq) seq))
 
 (defn rest-exps [seq] (rest seq))
 

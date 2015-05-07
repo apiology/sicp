@@ -22,7 +22,7 @@
 (declare eval)
 
 (defn extend-environment [variables values existing-env]
-  (util/error "extend-environment not yet implemented"))
+  existing-env)
 
 (defn apply [procedure arguments]
   (cond

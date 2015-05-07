@@ -1,24 +1,24 @@
 (ns section-4-1-2.procedure
   (:require [section-4-1-2.util :as util])
-  (:refer-clojure :only [defn list]))
+  (:refer-clojure :only [defn list nth second]))
 
 (defn primitive-procedure? [exp]
-  (util/error "primitive-procedure? not yet implemented"))
+  (util/tagged-list? exp 'primitive))
 
 (defn apply-primitive-procedure [procedure arguments]
   (util/error "apply-primitive-procedure not yet implemented"))
 
 (defn compound-procedure? [exp]
-  (util/error "compound-procedure? not yet implemented"))
-
-(defn procedure-body [procedure]
-  (util/error "procedure-body not yet implemented"))
+  (util/tagged-list? exp 'procedure))
 
 (defn procedure-parameters [procedure]
-  (util/error "procedure-body not yet implemented"))
+  (nth procedure 1))
+
+(defn procedure-body [procedure]
+  (nth procedure 2))
 
 (defn procedure-environment [procedure]
-  (util/error "procedure-environment not yet implemented"))
+  (nth procedure 3))
 
 (defn make-procedure [parameters body env]
   (list 'procedure parameters body env))
