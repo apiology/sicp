@@ -1,7 +1,7 @@
 (ns section-4-1-2.core-test
   (:require [clojure.test :refer :all]
             [section-4-1-2.core :refer :all])
-  (:refer-clojure :only [= comment]))
+  (:refer-clojure :only [= comment list]))
 
 (def default-env nil)
 (deftest one-equals-one
@@ -115,3 +115,8 @@
 (deftest cond-with-else-clause
   (testing ""
     (is (= (eval '(cond (false 123) (false 456) (false 789) (false 233) (false 111) (else 421)) default-env) 421))))
+
+(deftest simple-lambda
+  (testing ""
+    (is (= (eval '(lambda (x) 1) default-env)
+           (list 'procedure '(x) 1 default-env)))))

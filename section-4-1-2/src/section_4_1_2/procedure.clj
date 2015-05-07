@@ -1,6 +1,6 @@
 (ns section-4-1-2.procedure
   (:require [section-4-1-2.util :as util])
-  (:refer-clojure :only [defn]))
+  (:refer-clojure :only [defn list]))
 
 (defn primitive-procedure? [exp]
   (util/error "primitive-procedure? not yet implemented"))
@@ -21,5 +21,4 @@
   (util/error "procedure-environment not yet implemented"))
 
 (defn make-procedure [parameters body env]
-  (util/error "make-procedure not yet implemented"))
-
+  (list 'procedure parameters body env))
