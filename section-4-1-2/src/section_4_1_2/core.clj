@@ -46,20 +46,6 @@
     :else (util/error "Unknown procedure type -- APPLY" procedure)))
 
 
-(defn eval-and [exp env]
-  (let [exps (and/and-exps exp)]
-    (if (empty? exps)
-      'true
-      (let [left (first exps)
-            rest-exps (rest exps)
-            left-value (eval left env)]
-        (if (boolean/true? left-value)
-          (if (empty? rest-exps)
-            left-value
-            (recur (cons 'and rest-exps) env))
-          false)))))
-
-
 (defn eval-if [exp env]
   (if (boolean/true? (eval (if/if-predicate exp) env))
     (eval (if/if-consequent exp) env)
@@ -114,7 +100,7 @@
   (add-form definition/definition? (fn [exp env] (definition/eval-definition exp env eval)))
   (add-form if/if? eval-if)
   ;; Exercise 4.5
-  (add-form and/and? eval-and)
+  (add-form and/and? (fn [exp env] (and/eval-and exp env eval)))
   (add-form or/or? eval-or)
   (add-form lambda/lambda? (fn [exp env]
                              (procedure/make-procedure (lambda/lambda-parameters exp)
