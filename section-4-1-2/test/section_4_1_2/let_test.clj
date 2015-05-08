@@ -7,7 +7,7 @@
 (def default-env nil)
 
 
-(deftest let-form-created
+(deftest let-clauses-created
   (testing ""
     (is (= (let/clauses->lambda-parameters '((a 1))) '(a)))))
 
