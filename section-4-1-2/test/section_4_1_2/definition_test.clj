@@ -13,11 +13,10 @@
     (is (= (eval '(define a 1) default-env)
            :ok))))
 
-;; XXX get this working
-;; (deftest definition_and_use
-;;   (testing ""
-;;     (is (= (eval '(begin
-;;                    (define a 1)
-;;                    a)
-;;                  default-env)
-;;            1))))
+(deftest definition_and_use
+  (testing ""
+    (is (= (eval '(begin
+                   (define a 1)
+                   a)
+                 default-env)
+           1))))
