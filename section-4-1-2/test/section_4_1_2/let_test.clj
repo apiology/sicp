@@ -34,12 +34,3 @@
   (testing ""
     (is (= (letstar/let*->nested-lets '(let* ((a 1) (b 2) (c 3)) c))
            '(let ((a 1)) (let ((b 2)) (let ((c 3)) c)))))))
-
-(deftest let*-super-simple
-  (testing ""
-    (is (= (eval '(let* ((a 1)) a) default-env) 1))))
-
-(deftest let*-advanced
-  (testing ""
-    (is (= (eval '(let* ((a 1) (b 2) (c 3)) c) default-env)
-           3))))
