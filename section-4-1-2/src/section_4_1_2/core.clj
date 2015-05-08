@@ -1,14 +1,13 @@
 (ns section-4-1-2.core
-  (:require [section-4-1-2.assignment :as assignment]
+  (:require [section-4-1-2.begin :as begin]
             [section-4-1-2.environment :as environment]
-            [section-4-1-2.begin :as begin]
             [section-4-1-2.forms :as forms]
             [section-4-1-2.procedure :as procedure]
             [section-4-1-2.util :as util])
   (:refer-clojure :only
-                  [-> ->> = < > atom comment cond conj cons count declare
-                      defn empty? filter first fn if-let if-not let
-                      list list? nil? not ns nth number? or println
+                  [-> ->> < = > atom comment cond conj cons count
+                      declare defn empty? filter first fn if-let if-not
+                      let list list? nil? not ns nth number? or println
                       reset! rest second seq str string? swap!
                       symbol?]))
 

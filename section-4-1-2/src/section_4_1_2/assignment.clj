@@ -1,7 +1,9 @@
 (ns section-4-1-2.assignment
   (:require [section-4-1-2.environment :as environment]
             [section-4-1-2.util :as util])
-  (:refer-clojure :only [< = atom cond cons count defn empty? first let letfn nth println reset! rest symbol?]))
+  (:refer-clojure :only
+                  [< = atom cond cons count defn empty? first let letfn
+                     nth println reset! rest symbol?]))
 
 (defn variable? [exp]
   (symbol? exp))

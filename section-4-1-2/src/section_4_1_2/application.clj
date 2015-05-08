@@ -1,5 +1,6 @@
 (ns section-4-1-2.application
-  (:refer-clojure :only [cons defn empty? first let println rest seq?]))
+  (:refer-clojure :only
+                  [cons defn empty? first let println rest seq?]))
 
 (defn application? [exp]
   (seq? exp))

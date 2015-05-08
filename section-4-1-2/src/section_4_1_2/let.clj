@@ -1,7 +1,9 @@
 (ns section-4-1-2.let
   (:require [section-4-1-2.lambda :as lambda]
             [section-4-1-2.util :as util])
-  (:refer-clojure :only [cons defn empty? first let list map nth println rest second]))
+  (:refer-clojure :only
+                  [cons defn empty? first let list map nth println rest
+                        second]))
 
 (defn let? [exp]
   (util/tagged-list? exp 'let))
