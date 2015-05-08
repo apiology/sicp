@@ -1,6 +1,6 @@
 (ns section-4-1-2.environment
   (:require [section-4-1-2.util :as util])
-  (:refer-clojure :only [atom cons defn first rest]))
+  (:refer-clojure :only [< = atom cons count defn first rest]))
 
 (defn enclosing-environment [env] (rest env))
 
@@ -20,3 +20,9 @@
   (util/set-car! frame (cons var (frame-variables frame)))
   (util/set-cdr! frame (cons val (frame-values frame))))
 
+(defn extend-environment [vars vals base-env]
+  (if (= (count vars) (count vals))
+    (cons (make-frame vars vals) base-env)
+    (if (< (count vars) (count vals))
+      (util/error "Too many arguments supplied" vars vals)
+      (util/error "Too few arguments supplied" vars vals))))

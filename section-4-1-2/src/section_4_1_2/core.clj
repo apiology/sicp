@@ -14,13 +14,6 @@
 
 (declare eval)
 
-(defn extend-environment [vars vals base-env]
-  (if (= (count vars) (count vals))
-    (cons (environment/make-frame vars vals) base-env)
-    (if (< (count vars) (count vals))
-      (util/error "Too many arguments supplied" vars vals)
-      (util/error "Too few arguments supplied" vars vals))))
-
 (defn apply [procedure arguments]
   (cond
     (procedure/primitive-procedure? procedure)
@@ -29,7 +22,7 @@
     (procedure/compound-procedure? procedure)
     (begin/eval-sequence
      (procedure/procedure-body procedure)
-     (extend-environment
+     (environment/extend-environment
       (procedure/procedure-parameters procedure)
       arguments
       (procedure/procedure-environment procedure))
