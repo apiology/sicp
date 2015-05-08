@@ -1,5 +1,6 @@
 (ns section-4-1-2.cond
   (:require [section-4-1-2.begin :as begin]
+            [section-4-1-2.cond-hash :as cond-hash]
             [section-4-1-2.if :as if]
             [section-4-1-2.util :as util]))
 
@@ -24,19 +25,6 @@
     (util/last-exp? seq) (util/first-exp seq)
     :else (begin/make-begin seq)))
 
-(defn cond-hash-clause? [clause]
-  (and (= 3 (count clause))
-       (= '=> (nth clause 1))))
-
-(defn cond-hash-clause-predicate [clause]
-  (first clause))
-
-(defn cond-hash-clause-action [clause]
-  (nth clause 2))
-
-(defn make-hash-cond-application [clause]
-  (list (cond-hash-clause-action clause) (cond-hash-clause-predicate clause)))
-
 (defn expand-clauses [clauses]
   (if (empty? clauses)
     'false
@@ -46,11 +34,11 @@
         (if (empty? rest-clauses)
           (sequence->exp (cond-actions first-clause))
           (util/error "ELSE clause isn't last -- COND->IF" clauses))
-        (if (cond-hash-clause? first-clause)
+        (if (cond-hash/cond-hash-clause? first-clause)
           ;; XXX sure would be nicer if this used a let and a gemsym
           ;; and didn't evaluate predicate twice
-          (if/make-if (cond-hash-clause-predicate first-clause)
-                      (make-hash-cond-application first-clause)
+          (if/make-if (cond-hash/cond-hash-clause-predicate first-clause)
+                      (cond-hash/make-hash-cond-application first-clause)
                       (expand-clauses rest-clauses))
           (if/make-if (cond-predicate first-clause)
                       (sequence->exp (cond-actions first-clause))

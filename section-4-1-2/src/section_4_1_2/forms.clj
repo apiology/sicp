@@ -8,6 +8,7 @@
             [section-4-1-2.if :as if]
             [section-4-1-2.lambda :as lambda]
             [section-4-1-2.let :as let]
+            [section-4-1-2.letstar :as letstar]
             [section-4-1-2.or :as or]
             [section-4-1-2.primitive :as primitive]
             [section-4-1-2.quote :as quote])
@@ -34,6 +35,6 @@
     (add-form lambda/lambda? lambda/eval-lambda)
     (add-form begin/begin? begin/eval-begin)
     (add-form let/let? let/eval-let)
-    (add-form let/let*? let/eval-let*)
+    (add-form letstar/let*? letstar/eval-let*)
     (add-form cond/cond? cond/eval-cond)
     (add-form application/application? application/eval-application)))
