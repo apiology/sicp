@@ -14,3 +14,9 @@
   (testing ""
     (is (= (eval '((lambda (x) 1) 123) default-env)
            1))))
+
+;; XXX reenable this once I have variable handling
+;; (deftest lambda-application-on-variable
+;;   (testing ""
+;;     (is (= (eval '((lambda (x) x) 123) default-env)
+;;            123))))

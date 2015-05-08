@@ -7,17 +7,19 @@
             [section-4-1-2.definition :as definition]
             [section-4-1-2.if :as if]
             [section-4-1-2.lambda :as lambda]
+            [section-4-1-2.let :as let]
             [section-4-1-2.or :as or]
             [section-4-1-2.primitive :as primitive]
             [section-4-1-2.procedure :as procedure]
             [section-4-1-2.quote :as quote])
   (:refer-clojure :only
                   [-> ->> = > atom comment cond conj cons count declare
-                      defn empty? filter first fn if-let if-not let
-                      letfn list list? nil? not ns nth number? or
-                      println reset! rest second seq str string? swap!
-                      symbol?]))
+                   defn empty? filter first fn if-let if-not let
+                   letfn list list? nil? not ns nth number? or
+                   println reset! rest second seq str string? swap!
+                   symbol?]))
 
+;; XXX merge more of these into straight reference to eval-fn
 (defn install-all-forms [forms apply]
   (letfn [(add-form [pred action]
             (swap! forms conj [pred action]))]
@@ -37,8 +39,11 @@
                                                          env)))
     (add-form begin/begin? (fn [exp env eval-fn]
                              (begin/eval-sequence (begin/begin-actions exp) env eval-fn)))
+    (add-form let/let? let/eval-let)
     (add-form cond/cond? (fn [exp env eval-fn]
                            (eval-fn (cond/cond->if exp) env)))
+    (add-form let/let (fn [exp env eval-fn]
+                        (eval-fn (cond/cond->if exp) env)))
     (add-form application/application? (fn [exp env eval-fn]
                                          (apply (eval-fn (application/operator exp) env)
                                                 (application/list-of-values

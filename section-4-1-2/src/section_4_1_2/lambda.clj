@@ -10,5 +10,10 @@
 (defn lambda-body [exp]
   (nth exp 2))
 
+(defn as-list [singleton-or-list]
+  (if (seq? singleton-or-list)
+    singleton-or-list
+    [singleton-or-list]))
+
 (defn make-lambda [parameters body]
-  (cons 'lambda (cons parameters body)))
+  (cons 'lambda (cons parameters (as-list body))))
