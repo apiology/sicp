@@ -1,6 +1,7 @@
 (ns section-4-1-2.environment
   (:require [section-4-1-2.util :as util])
-  (:refer-clojure :only [< = atom cons count defn first list map rest]))
+  (:refer-clojure :only
+                  [< = atom cons count defn first list map rest]))
 
 (defn enclosing-environment [env] (rest env))
 

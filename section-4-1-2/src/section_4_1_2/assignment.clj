@@ -2,8 +2,8 @@
   (:require [section-4-1-2.environment :as environment]
             [section-4-1-2.util :as util])
   (:refer-clojure :only
-                  [< = atom cond cons count defn deref empty? first let letfn
-                     nth println reset! rest symbol?]))
+                  [< = atom cond cons count defn deref empty? first let
+                     letfn nth println reset! rest symbol?]))
 
 (defn variable? [exp]
   (symbol? exp))
