@@ -35,6 +35,8 @@
      eval)
     :else (util/error "Unknown procedure type -- APPLY" procedure)))
 
+;; this vector contains pairs of predicate functions and action
+;; functions to identify each form
 (def forms (atom []))
 
 (forms/install-all-forms forms)
