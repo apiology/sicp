@@ -11,7 +11,7 @@
 
 (deftest and-with-one-false-arg
   (testing ""
-    (is (= (eval '(and 0) default-env) false))))
+    (is (= (eval '(and false) default-env) false))))
 
 (deftest and-with-one-true-arg
   (testing ""
@@ -19,11 +19,11 @@
 
 (deftest and-with-one-false-and-one-true-arg
   (testing ""
-    (is (= (eval '(and 0 1) default-env) false))))
+    (is (= (eval '(and false 1) default-env) false))))
 
 (deftest and-short-circuits
   (testing ""
-    (is (= (eval '(and 0 1 unkonwn-symbol) default-env) false))))
+    (is (= (eval '(and false 1 unkonwn-symbol) default-env) false))))
 
 (deftest and-with-many-false-and-one-true-arg
   (testing ""
