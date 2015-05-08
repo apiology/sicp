@@ -13,3 +13,8 @@
 
 (defn rest-exps [seq] (rest seq))
 
+(defn set-car! [atom-of-list new-car]
+  (reset! atom-of-list (cons new-car (rest @atom-of-list))))
+
+(defn set-cdr! [atom-of-list new-cdr]
+  (reset! atom-of-list (cons (first @atom-of-list) new-cdr)))

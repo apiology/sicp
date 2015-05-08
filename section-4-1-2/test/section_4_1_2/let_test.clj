@@ -4,7 +4,7 @@
             [section-4-1-2.let :as let])
   (:refer-clojure :only [=]))
 
-(def default-env section-4-1-2.assignment/the-empty-environment)
+(def default-env section-4-1-2.environment/the-empty-environment)
 
 
 (deftest let-clauses-created

@@ -1,5 +1,6 @@
 (ns section-4-1-2.core
   (:require [section-4-1-2.assignment :as assignment]
+            [section-4-1-2.environment :as environment]
             [section-4-1-2.begin :as begin]
             [section-4-1-2.forms :as forms]
             [section-4-1-2.procedure :as procedure]
@@ -15,7 +16,7 @@
 
 (defn extend-environment [vars vals base-env]
   (if (= (count vars) (count vals))
-    (cons (assignment/make-frame vars vals) base-env)
+    (cons (environment/make-frame vars vals) base-env)
     (if (< (count vars) (count vals))
       (util/error "Too many arguments supplied" vars vals)
       (util/error "Too few arguments supplied" vars vals))))

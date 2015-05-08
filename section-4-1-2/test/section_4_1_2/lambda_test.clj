@@ -4,7 +4,7 @@
             [section-4-1-2.lambda :as lambda])
   (:refer-clojure :only [= list]))
 
-(def default-env section-4-1-2.assignment/the-empty-environment)
+(def default-env section-4-1-2.environment/the-empty-environment)
 
 (deftest simple-lambda
   (testing ""
