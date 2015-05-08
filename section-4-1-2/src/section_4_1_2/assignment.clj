@@ -14,9 +14,6 @@
 (defn assignment-value [exp]
   (nth exp 2))
 
-(defn lookup-variable-value [symbol env eval-fn]
-  nil)
-
 (defn enclosing-environment [env] (rest env))
 (defn first-frame [env]
   (first env))
@@ -46,24 +43,42 @@
       (util/error "Too many arguments supplied" vars vals)
       (util/error "Too few arguments supplied" vars vals))))
 
-(defn set-variable-value! [var val env]
+(defn lookup-variable-value [var env eval-fn apply-fn]
   (letfn [(env-loop [env]
             (letfn [(scan [vars vals]
-                     (cond (empty? vars)
-                           (env-loop (enclosing-environment env))
-
-                           (= var (first vars))
-                           ;; XXX not sure this is right
-                           (set-car! vals val)
-                           
-                           :else
-                           (scan (rest vars) (rest vals))))]
+                           (cond (empty? vars)
+                                 (env-loop (enclosing-environment env))
+                                 
+                                 (= var (first vars))
+                                 (first vals)
+                    
+                                 :else
+                                 (scan (rest vars) (rest vals))))]
               (if (= env the-empty-environment)
-                (util/error "Unbound variable -- SET!" var)
+                (util/error "Unbound variable" var)
                 (let [frame (first-frame env)]
                   (scan (frame-variables frame)
                         (frame-values frame))))))]
     (env-loop env)))
+
+    (defn set-variable-value! [var val env]
+      (letfn [(env-loop [env]
+                (letfn [(scan [vars vals]
+                          (cond (empty? vars)
+                                (env-loop (enclosing-environment env))
+
+                                (= var (first vars))
+                                ;; XXX not sure this is right
+                                (set-car! vals val)
+                                
+                                :else
+                                (scan (rest vars) (rest vals))))]
+                  (if (= env the-empty-environment)
+                    (util/error "Unbound variable -- SET!" var)
+                    (let [frame (first-frame env)]
+                      (scan (frame-variables frame)
+                            (frame-values frame))))))]
+        (env-loop env)))
 
 (defn define-variable! [var val env]
   (let [frame (first-frame env)]
