@@ -19,7 +19,6 @@
                       println reset! rest second seq str string? swap!
                       symbol?]))
 
-;; XXX merge more of these into straight reference to eval-fn
 (defn install-all-forms [forms]
   (letfn [(add-form [pred action]
             (swap! forms conj [pred action]))]

@@ -2,6 +2,7 @@ require 'quality/rake/task'
 
 Quality::Rake::Task.new do |t|
   t.skip_tools = ['flog']
+  # XXX do I still need the following?  If I do, should fix that in quality gem
   t.source_dirs = ['.']
   t.verbose = true
 end
