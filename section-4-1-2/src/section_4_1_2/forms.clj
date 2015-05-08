@@ -42,8 +42,6 @@
     (add-form let/let? let/eval-let)
     (add-form cond/cond? (fn [exp env eval-fn]
                            (eval-fn (cond/cond->if exp) env)))
-    (add-form let/let (fn [exp env eval-fn]
-                        (eval-fn (cond/cond->if exp) env)))
     (add-form application/application? (fn [exp env eval-fn]
                                          (apply (eval-fn (application/operator exp) env)
                                                 (application/list-of-values
