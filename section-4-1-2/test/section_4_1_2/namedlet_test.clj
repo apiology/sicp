@@ -1,7 +1,6 @@
 (ns section-4-1-2.namedlet-test
-  (:require [section-4-1-2.namedlet :refer :all]
+  (:require [section-4-1-2.let :refer :all]
             [clojure.test :refer :all]))
-
 
 ;; XXX get this working
 ;; (deftest namedlet-advanced
