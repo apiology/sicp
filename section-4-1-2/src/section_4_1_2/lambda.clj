@@ -1,6 +1,6 @@
 (ns section-4-1-2.lambda
-  (:require [section-4-1-2.util :as util]
-            [section-4-1-2.procedure :as procedure]))
+  (:require [section-4-1-2.procedure :as procedure]
+            [section-4-1-2.util :as util]))
 
 (defn lambda? [exp]
   (util/tagged-list? exp 'lambda))

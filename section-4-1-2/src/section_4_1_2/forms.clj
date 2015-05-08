@@ -10,7 +10,6 @@
             [section-4-1-2.let :as let]
             [section-4-1-2.or :as or]
             [section-4-1-2.primitive :as primitive]
-            [section-4-1-2.procedure :as procedure]
             [section-4-1-2.quote :as quote])
   (:refer-clojure :only
                   [-> ->> = > atom comment cond conj cons count declare
