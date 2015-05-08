@@ -30,43 +30,15 @@
      eval)
     :else (util/error "Unknown procedure type -- APPLY" procedure)))
 
-;; Exercise 4.2
-
-;; a
-
-;; Won't work--special forms like (define) need to be special forms
-;; and not regular function calls
-
-
-;; b
-
-;;
-;; to do that:
-;;
-;; (defn application? [exp]
-;;   (util/tagged-list? exp 'call))
-
-;; (defn operator [exp]
-;;   (second exp))
-
-;; (defn operands [exp]
-;;   (rest (rest exp)))
-
-;; Exercise 4.3
-
 (def forms (atom []))
 
-
 (forms/install-all-forms forms)
-
-;; 
 
 (defn action-for-exp [exp]
   (if-let [[pred action] (->> @forms
                              (filter #((first %) exp))
                              first)]
     action))
-
 
 (defn eval [exp env]
   (if-let [action (action-for-exp exp)]
