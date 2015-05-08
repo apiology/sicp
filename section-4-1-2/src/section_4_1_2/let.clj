@@ -28,5 +28,5 @@
                               bound-expression)
           (map clause->value clauses))))
 
-(defn eval-let [exp env eval-fn]
+(defn eval-let [exp env eval-fn apply-fn]
   (eval-fn (let->combination exp) env))

@@ -9,7 +9,7 @@
 (defn and-exps [exp]
   (rest exp))
 
-(defn eval-and [exp env eval-fn]
+(defn eval-and [exp env eval-fn apply-fn]
   (let [exps (and-exps exp)]
     (if (empty? exps)
       'true
@@ -19,7 +19,7 @@
         (if (boolean/true? left-value)
           (if (empty? rest-exps)
             left-value
-            (recur (cons 'and rest-exps) env eval-fn))
+            (recur (cons 'and rest-exps) env eval-fn apply-fn))
           false)))))
 
 

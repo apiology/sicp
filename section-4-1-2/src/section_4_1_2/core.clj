@@ -57,7 +57,7 @@
 (def forms (atom []))
 
 
-(forms/install-all-forms forms apply)
+(forms/install-all-forms forms)
 
 ;; 
 
@@ -70,5 +70,5 @@
 
 (defn eval [exp env]
   (if-let [action (action-for-exp exp)]
-    (action exp env eval)
+    (action exp env eval apply)
     (util/error "unknown expression type -- EVAL" exp)))

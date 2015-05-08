@@ -1,5 +1,6 @@
 (ns section-4-1-2.lambda
-  (:require [section-4-1-2.util :as util]))
+  (:require [section-4-1-2.util :as util]
+            [section-4-1-2.procedure :as procedure]))
 
 (defn lambda? [exp]
   (util/tagged-list? exp 'lambda))
@@ -17,3 +18,8 @@
 
 (defn make-lambda [parameters body]
   (cons 'lambda (cons parameters (as-list body))))
+
+(defn eval-lambda [exp env eval-fn apply-fn]
+  (procedure/make-procedure (lambda-parameters exp)
+                            (lambda-body exp)
+                            env))

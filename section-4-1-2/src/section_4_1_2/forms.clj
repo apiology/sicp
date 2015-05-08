@@ -20,30 +20,21 @@
                       symbol?]))
 
 ;; XXX merge more of these into straight reference to eval-fn
-(defn install-all-forms [forms apply]
+(defn install-all-forms [forms]
   (letfn [(add-form [pred action]
             (swap! forms conj [pred action]))]
     (reset! forms [])
-    (add-form primitive/self-evaluating? (fn [exp env eval-fn] exp))
+    (add-form primitive/self-evaluating? primitive/eval-primitive)
     (add-form assignment/variable? assignment/lookup-variable-value)
-    (add-form quote/quoted? (fn [exp env] (quote/text-of-quotation exp)))
+    (add-form quote/quoted? quote/eval-quoted)
     (add-form assignment/assignment? assignment/eval-assignment)
     (add-form definition/definition? definition/eval-definition)
     (add-form if/if? if/eval-if)
     ;; Exercise 4.5
     (add-form and/and? and/eval-and)
     (add-form or/or? or/eval-or)
-    (add-form lambda/lambda? (fn [exp env eval-fn]
-                               (procedure/make-procedure (lambda/lambda-parameters exp)
-                                                         (lambda/lambda-body exp)
-                                                         env)))
-    (add-form begin/begin? (fn [exp env eval-fn]
-                             (begin/eval-sequence (begin/begin-actions exp) env eval-fn)))
+    (add-form lambda/lambda? lambda/eval-lambda)
+    (add-form begin/begin? begin/eval-begin)
     (add-form let/let? let/eval-let)
-    (add-form cond/cond? (fn [exp env eval-fn]
-                           (eval-fn (cond/cond->if exp) env)))
-    (add-form application/application? (fn [exp env eval-fn]
-                                         (apply (eval-fn (application/operator exp) env)
-                                                (application/list-of-values
-                                                 (application/operands exp) env eval-fn))))))
-
+    (add-form cond/cond? cond/eval-cond)
+    (add-form application/application? application/eval-application)))

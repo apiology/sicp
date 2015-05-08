@@ -23,7 +23,7 @@
 (defn lookup-variable-value [symbol env eval-fn]
   nil)
 
-(defn eval-assignment [exp env eval-fn]
+(defn eval-assignment [exp env eval-fn apply-fn]
   (set-variable-value! (assignment-variable exp)
                        (eval-fn (assignment-value exp) env)
                        env)

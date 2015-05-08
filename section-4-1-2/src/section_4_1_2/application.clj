@@ -50,3 +50,8 @@
       (let [left-value (eval-fn (first-operand exps) env)]
         (cons left-value rest-values)))))
 
+
+(defn eval-application [exp env eval-fn apply-fn]
+  (apply-fn (eval-fn (operator exp) env)
+            (list-of-values
+             (operands exp) env eval-fn)))

@@ -26,7 +26,7 @@
 (defn make-if [predicate consequent alternative]
   (list 'if predicate consequent alternative))
 
-(defn eval-if [exp env eval-fn]
+(defn eval-if [exp env eval-fn apply-fn]
   (if (boolean/true? (eval-fn (if-predicate exp) env))
     (eval-fn (if-consequent exp) env)
     (eval-fn (if-alternative exp) env)))

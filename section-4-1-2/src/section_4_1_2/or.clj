@@ -9,7 +9,7 @@
 (defn or-exps [exp]
   (rest exp))
 
-(defn eval-or [exp env eval-fn]
+(defn eval-or [exp env eval-fn apply-fn]
   (let [exps (or-exps exp)]
     (if (empty? exps)
       'false
@@ -17,5 +17,5 @@
             left-value (eval-fn left env)]
         (if (boolean/true? left-value)
           left-value
-          (recur (cons 'or (rest exps)) env eval-fn))))))
+          (recur (cons 'or (rest exps)) env eval-fn apply-fn))))))
 

@@ -9,5 +9,5 @@
     (boolean/boolean? exp) true
     :else false))
 
-
-
+(defn eval-primitive [exp env eval-fn apply-fn]
+  exp)

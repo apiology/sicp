@@ -58,3 +58,6 @@
 
 (defn cond->if [exp]
   (expand-clauses (cond-clauses exp)))
+
+(defn eval-cond [exp env eval-fn apply-fn]
+  (eval-fn (cond->if exp) env))

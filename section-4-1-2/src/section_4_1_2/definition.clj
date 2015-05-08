@@ -22,7 +22,7 @@
     (lambda/make-lambda (rest (nth exp 1)) ;; formal parameters
                         (nth exp 2)))) ;; body
 
-(defn eval-definition [exp env eval-fn]
+(defn eval-definition [exp env eval-fn apply-fn]
   (assignment/define-variable! (definition-variable exp)
     (eval-fn (definition-value exp) env)
     env)

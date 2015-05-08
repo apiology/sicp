@@ -20,3 +20,5 @@
             (eval-fn (util/first-exp exps) env)
             (eval-sequence (util/rest-exps exps) env eval-fn))))
 
+(defn eval-begin [exp env eval-fn apply-fn]
+  (eval-sequence (begin-actions exp) env eval-fn))

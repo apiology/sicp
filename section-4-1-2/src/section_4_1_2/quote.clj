@@ -6,3 +6,6 @@
 
 (defn text-of-quotation [exp]
   (second exp))
+
+(defn eval-quoted [exp env eval-fn apply-fn]
+  (text-of-quotation exp))
