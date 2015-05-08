@@ -14,9 +14,6 @@
 (defn assignment-value [exp]
   (nth exp 2))
 
-(defn define-variable! [symbol value env]
-  (util/error "define-variable! not yet implemented"))
-
 (defn lookup-variable-value [symbol env eval-fn]
   nil)
 
@@ -50,7 +47,7 @@
       (util/error "Too few arguments supplied" vars vals))))
 
 (defn set-variable-value! [var val env]
-  (letfn [(env-loop [env env]
+  (letfn [(env-loop [env]
             (letfn [(scan [vars vals]
                      (cond (empty? vars)
                            (env-loop (enclosing-environment env))
