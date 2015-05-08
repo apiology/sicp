@@ -32,7 +32,7 @@ GEM
     powerpack (0.1.1)
     procto (0.0.2)
     punchlist (0.0.2)
-    quality (7.0.0)
+    quality (8.0.0)
       bigfiles
       cane (>= 2.6)
       flay (>= 2.4, != 2.6.0)
