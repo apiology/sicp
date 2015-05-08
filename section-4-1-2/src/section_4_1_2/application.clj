@@ -1,8 +1,8 @@
 (ns section-4-1-2.application
-  (:refer-clojure :only [cons defn empty? first let list? rest]))
+  (:refer-clojure :only [cons defn empty? first let println rest seq?]))
 
 (defn application? [exp]
-  (list? exp))
+  (seq? exp))
 
 (defn operator [exp]
   (first exp))
