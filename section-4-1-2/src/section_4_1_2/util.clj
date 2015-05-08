@@ -1,7 +1,7 @@
 (ns section-4-1-2.util)
 
 (defn tagged-list? [exp tag]
-  (if (list? exp)
+  (if (seq? exp)
     (= (first exp) tag)
     false))
 
