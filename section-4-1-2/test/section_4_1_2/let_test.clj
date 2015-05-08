@@ -1,6 +1,5 @@
 (ns section-4-1-2.let-test
   (:require [clojure.test :refer :all]
-            [section-4-1-2.core :refer :all]
             [section-4-1-2.let :as let])
   (:refer-clojure :only [=]))
 

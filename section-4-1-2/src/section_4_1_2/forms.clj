@@ -14,10 +14,10 @@
             [section-4-1-2.quote :as quote])
   (:refer-clojure :only
                   [-> ->> = > atom comment cond conj cons count declare
-                   defn empty? filter first fn if-let if-not let
-                   letfn list list? nil? not ns nth number? or
-                   println reset! rest second seq str string? swap!
-                   symbol?]))
+                      defn empty? filter first fn if-let if-not let
+                      letfn list list? nil? not ns nth number? or
+                      println reset! rest second seq str string? swap!
+                      symbol?]))
 
 ;; XXX merge more of these into straight reference to eval-fn
 (defn install-all-forms [forms apply]
