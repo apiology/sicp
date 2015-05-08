@@ -22,4 +22,11 @@
                  (default-env))
            1))))
 
-;; XXX test redefinition
+(deftest redefinition_and_use
+  (testing ""
+    (is (= (eval '(begin
+                   (define a 1)
+                   (define a 2)
+                   a)
+                 (default-env))
+           2))))

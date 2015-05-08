@@ -2,7 +2,7 @@
   (:require [section-4-1-2.environment :as environment]
             [section-4-1-2.util :as util])
   (:refer-clojure :only
-                  [< = atom cond cons count defn empty? first let letfn
+                  [< = atom cond cons count defn deref empty? first let letfn
                      nth println reset! rest symbol?]))
 
 (defn variable? [exp]
@@ -24,7 +24,7 @@
                             (env-loop (environment/enclosing-environment env))
                             
                             (= var (first vars))
-                            (first vals)
+                            (deref (first vals))
                             
                             :else
                             (scan (rest vars) (rest vals))))]
@@ -39,11 +39,11 @@
   (letfn [(env-loop [env]
             (letfn [(scan [vars vals]
                       (cond (empty? vars)
-                            (env-loop (environment/enclosing-environment env))
+                            (env-loop (environment/enclosing-environment
+                                       env))
 
                             (= var (first vars))
-                            ;; XXX not sure this is right
-                            (util/set-car! vals val)
+                            (reset! (first vals) val)
                             
                             :else
                             (scan (rest vars) (rest vals))))]
@@ -61,7 +61,7 @@
                     (environment/add-binding-to-frame! var val frame)
                     
                     (= var (first vars))
-                    (util/set-car! vals val)
+                    (reset! (first vals) val)
                     
                     :else
                     (scan (rest vars) (rest vals))))]
