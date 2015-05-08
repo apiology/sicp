@@ -2,7 +2,7 @@
   (:require [section-4-1-2.assignment :as assignment]
             [section-4-1-2.lambda :as lambda]
             [section-4-1-2.util :as util])
-  (:refer-clojure :only [defn first nth rest second symbol?]))
+  (:refer-clojure :only [defn first nth println rest second symbol?]))
 
 (defn definition? [exp]
   (util/tagged-list? exp 'define))
