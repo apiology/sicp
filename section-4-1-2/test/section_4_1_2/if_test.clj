@@ -7,7 +7,7 @@
 
 (deftest if-false
   (testing "if-false"
-    (is (= (eval '(if 0 123 456) default-env) 456))))
+    (is (= (eval '(if false 123 456) default-env) 456))))
 
 (deftest if-true
   (testing ""
