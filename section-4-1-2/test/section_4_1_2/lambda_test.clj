@@ -3,7 +3,7 @@
             [section-4-1-2.core :refer :all])
   (:refer-clojure :only [= list]))
 
-(def default-env nil)
+(def default-env section-4-1-2.assignment/the-empty-environment)
 
 (deftest simple-lambda
   (testing ""
@@ -15,8 +15,7 @@
     (is (= (eval '((lambda (x) 1) 123) default-env)
            1))))
 
-;; XXX reenable this once I have variable handling
-;; (deftest lambda-application-on-variable
-;;   (testing ""
-;;     (is (= (eval '((lambda (x) x) 123) default-env)
-;;            123))))
+(deftest lambda-application-on-variable
+  (testing ""
+    (is (= (eval '((lambda (x) x) 123) default-env)
+            123))))

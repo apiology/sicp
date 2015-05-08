@@ -1,10 +1,11 @@
 (ns section-4-1-2.core
-  (:require [section-4-1-2.begin :as begin]
+  (:require [section-4-1-2.assignment :as assignment]
+            [section-4-1-2.begin :as begin]
             [section-4-1-2.forms :as forms]
             [section-4-1-2.procedure :as procedure]
             [section-4-1-2.util :as util])
   (:refer-clojure :only
-                  [-> ->> = > atom comment cond conj cons count declare
+                  [-> ->> = < > atom comment cond conj cons count declare
                       defn empty? filter first fn if-let if-not let
                       list list? nil? not ns nth number? or println
                       reset! rest second seq str string? swap!
@@ -12,8 +13,12 @@
 
 (declare eval)
 
-(defn extend-environment [variables values existing-env]
-  existing-env)
+(defn extend-environment [vars vals base-env]
+  (if (= (count vars) (count vals))
+    (cons (assignment/make-frame vars vals) base-env)
+    (if (< (count vars) (count vals))
+      (util/error "Too many arguments supplied" vars vals)
+      (util/error "Too few arguments supplied" vars vals))))
 
 (defn apply [procedure arguments]
   (cond

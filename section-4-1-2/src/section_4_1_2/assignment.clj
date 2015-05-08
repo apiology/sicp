@@ -1,6 +1,6 @@
 (ns section-4-1-2.assignment
   (:require [section-4-1-2.util :as util])
-  (:refer-clojure :only [< = atom cond cons count defn empty? first let letfn nth reset! rest symbol?]))
+  (:refer-clojure :only [< = atom cond cons count defn empty? first let letfn nth println reset! rest symbol?]))
 
 (defn variable? [exp]
   (symbol? exp))
@@ -15,8 +15,10 @@
   (nth exp 2))
 
 (defn enclosing-environment [env] (rest env))
+
 (defn first-frame [env]
   (first env))
+
 (def the-empty-environment '())
 
 (defn make-frame [variables values]
@@ -36,13 +38,6 @@
   (set-car! frame (cons var (frame-variables frame)))
   (set-cdr! frame (cons val (frame-values frame))))
 
-(defn extend-environment [vars vals base-env]
-  (if (= (count vars) (count vals))
-    (cons (make-frame vars vals) base-env)
-    (if (< (count vars) (count vals))
-      (util/error "Too many arguments supplied" vars vals)
-      (util/error "Too few arguments supplied" vars vals))))
-
 (defn lookup-variable-value [var env eval-fn apply-fn]
   (letfn [(env-loop [env]
             (letfn [(scan [vars vals]
@@ -55,7 +50,7 @@
                                  :else
                                  (scan (rest vars) (rest vals))))]
               (if (= env the-empty-environment)
-                (util/error "Unbound variable" var)
+                (util/error "Unbound variable " var)
                 (let [frame (first-frame env)]
                   (scan (frame-variables frame)
                         (frame-values frame))))))]
