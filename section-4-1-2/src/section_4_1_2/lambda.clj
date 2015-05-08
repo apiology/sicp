@@ -9,15 +9,10 @@
   (nth exp 1))
 
 (defn lambda-body [exp]
-  (nth exp 2))
-
-(defn as-list [singleton-or-list]
-  (if (seq? singleton-or-list)
-    singleton-or-list
-    [singleton-or-list]))
+  (rest (rest exp)))
 
 (defn make-lambda [parameters body]
-  (cons 'lambda (cons parameters (as-list body))))
+  (cons 'lambda (cons parameters (list body))))
 
 (defn eval-lambda [exp env eval-fn apply-fn]
   (procedure/make-procedure (lambda-parameters exp)

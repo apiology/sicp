@@ -19,6 +19,11 @@
    (testing ""
      (is (= (eval '(let ((a 1)) a) default-env) 1))))
 
+(deftest let-complicated
+  (testing ""
+    (is (= (eval '(let ((a 1)) (let ((b 2)) (let ((c 3)) c))) default-env)
+           3))))
+
 (deftest let-created-from-let*-basic
   (testing ""
     (is (= (let/let*->nested-lets '(let* ((a 1)) a))
@@ -33,8 +38,7 @@
   (testing ""
     (is (= (eval '(let* ((a 1)) a) default-env) 1))))
 
-;; ;; XXX reenable this once I have variable handling
-;; (deftest let*-advanced
-;;   (testing ""
-;;     (is (= (eval '(let* ((a 1) (b 2) (c 3)) c) default-env)
-;;            3))))
+(deftest let*-advanced
+  (testing ""
+    (is (= (eval '(let* ((a 1) (b 2) (c 3)) c) default-env)
+           3))))
