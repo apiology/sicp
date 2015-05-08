@@ -31,6 +31,9 @@
 (defn eval-let [exp env eval-fn apply-fn]
   (eval-fn (let->combination exp) env))
 
+(defn let*? [exp]
+  (util/tagged-list? exp 'let*))
+
 (defn let*->nested-lets [exp]
   (let [clauses (let-clauses exp)
         let-bound-expression (let-bound-expression exp)]
@@ -38,5 +41,6 @@
         let-bound-expression
         (list 'let (list (first clauses)) (let*->nested-lets (list 'let (rest clauses) let-bound-expression))))))
 
-
+(defn eval-let* [exp env eval-fn apply-fn]
+  (eval-fn (let*->nested-lets exp) env))
 

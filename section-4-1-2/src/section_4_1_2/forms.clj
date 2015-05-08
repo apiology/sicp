@@ -34,5 +34,6 @@
     (add-form lambda/lambda? lambda/eval-lambda)
     (add-form begin/begin? begin/eval-begin)
     (add-form let/let? let/eval-let)
+    (add-form let/let*? let/eval-let*)
     (add-form cond/cond? cond/eval-cond)
     (add-form application/application? application/eval-application)))
