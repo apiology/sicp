@@ -7,7 +7,7 @@ Quality::Rake::Task.new do |t|
   t.verbose = true
 end
 
-# XXX add tasks as a default directory
+# XXX add tasks as a default directory in quality
 Dir['tasks/**/*.rake'].each { |t| load t }
 
 task default: [:test, :clojure_quality, :quality, :ancient,
