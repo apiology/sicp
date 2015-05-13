@@ -1,8 +1,9 @@
 (ns section-4-1-2.lambda-test
   (:require [clojure.test :refer :all]
             [section-4-1-2.core :refer :all]
-            [section-4-1-2.lambda :as lambda])
-  (:refer-clojure :only [= list]))
+            [section-4-1-2.lambda :as lambda]
+            [section-4-1-2.test-env :refer [test-env]])
+  (:refer-clojure :only [= drop-last first list]))
 
 (def default-env section-4-1-2.environment/the-empty-environment)
 
@@ -31,3 +32,7 @@
     (is (= (lambda/make-lambda '(a) 'a)
            '(lambda (a) a)))))
 
+(deftest lambda-complicted
+  (testing ""
+    (is (= (drop-last (eval '(lambda (a b count) (if (= count 0) b (fib-iter (+ a b) a (- count 1)))) (test-env)))
+           '(procedure (a b count) ((if (= count 0) b (fib-iter (+ a b) a (- count 1)))))))))
