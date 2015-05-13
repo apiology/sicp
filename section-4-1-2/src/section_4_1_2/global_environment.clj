@@ -17,8 +17,6 @@
   (map (fn [proc] (list 'primitive (second proc)))
        primitive-procedures))
 
-
-;; XXX get rid of existing definitons of true
 (defn setup-environment []
   (let [initial-env
         (environment/extend-environment (primitive-procedure-names)
