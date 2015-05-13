@@ -27,7 +27,7 @@
 
 (defn expand-clauses [clauses]
   (if (empty? clauses)
-    'false
+    ''false
     (let [first-clause (first clauses)
           rest-clauses (rest clauses)]
       (if (cond-else-clause? first-clause)
