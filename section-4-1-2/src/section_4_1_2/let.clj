@@ -44,7 +44,7 @@
           (cons name (map clause->value clauses)))))
 
 (defn named-let? [exp]
-  <(and (let? exp) (= (count exp) 4)))
+  (and (let? exp) (= (count exp) 4)))
 
 (defn let->combination [exp]
   (if (named-let? exp)
