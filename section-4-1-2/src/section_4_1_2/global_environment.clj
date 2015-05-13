@@ -1,6 +1,7 @@
 (ns section-4-1-2.global-environment
   (:require [section-4-1-2.environment :as environment]
-            [section-4-1-2.assignment :as assignment]))
+            [section-4-1-2.assignment :as assignment]
+            [section-4-1-2.binding :as binding]))
 
 (def primitive-procedures
   (list (list 'car first)
@@ -22,8 +23,8 @@
         (environment/extend-environment (primitive-procedure-names)
                                         (primitive-procedure-objects)
                                         environment/the-empty-environment)]
-        (assignment/define-variable! 'true true initial-env)
-        (assignment/define-variable! 'false false initial-env)
+        (binding/define-variable! 'true true initial-env)
+        (binding/define-variable! 'false false initial-env)
         initial-env))
 
 (def the-global-environment (setup-environment))

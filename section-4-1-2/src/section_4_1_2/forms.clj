@@ -3,6 +3,7 @@
             [section-4-1-2.application :as application]
             [section-4-1-2.assignment :as assignment]
             [section-4-1-2.begin :as begin]
+            [section-4-1-2.binding :as binding]
             [section-4-1-2.cond :as cond]
             [section-4-1-2.definition :as definition]
             [section-4-1-2.if :as if]
@@ -24,7 +25,7 @@
             (swap! forms conj [pred action]))]
     (reset! forms [])
     (add-form primitive/self-evaluating? primitive/eval-primitive)
-    (add-form assignment/variable? assignment/lookup-variable-value)
+    (add-form assignment/variable? binding/lookup-variable-value)
     (add-form quote/quoted? quote/eval-quoted)
     (add-form assignment/assignment? assignment/eval-assignment)
     (add-form definition/definition? definition/eval-definition)
