@@ -88,9 +88,7 @@
                (scan [vars vals]
               ;; (println "scanning vars=" vars ", vals=" vals)
               (cond (empty? vars)
-                    (do
-                      ;; (println "adding binding to frame " frame)
-                      (environment/add-binding-to-frame! var val frame))
+                    (environment/add-binding-to-frame! var val frame)
                     
                     (= var (first vars))
                     (let [first-val (first vals)
@@ -100,9 +98,8 @@
                       
                     
                     :else
-                    (do
-                      ;; (println "Moving to next variable...")
-                      (scan (rest vars) (rest vals)))))]
+                    ;; XXX add recur
+                    (scan (rest vars) (rest vals))))]
       (scan (environment/frame-variables frame)
             (environment/frame-values frame)))))
 
