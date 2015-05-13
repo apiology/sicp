@@ -6,7 +6,6 @@
   (cond
     (number? exp) true
     (string? exp) true
-    (boolean/boolean? exp) true
     :else false))
 
 (defn eval-primitive [exp env eval-fn apply-fn]
