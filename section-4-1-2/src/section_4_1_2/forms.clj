@@ -29,7 +29,7 @@
     (add-form assignment/assignment? assignment/eval-assignment)
     (add-form definition/definition? definition/eval-definition)
     (add-form if/if? if/eval-if)
-    ;; Exercise 4.5
+    ;; Exercise 4.4
     (add-form and/and? and/eval-and)
     (add-form or/or? or/eval-or)
     (add-form lambda/lambda? lambda/eval-lambda)
