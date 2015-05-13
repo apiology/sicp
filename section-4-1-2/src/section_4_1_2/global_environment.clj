@@ -6,7 +6,8 @@
   (list (list 'car first)
         (list 'cdr rest)
         (list 'cons cons)
-        (list 'null? empty?)))
+        (list 'null? empty?)
+        (list '= =)))
 
 (defn primitive-procedure-names []
   (map first
