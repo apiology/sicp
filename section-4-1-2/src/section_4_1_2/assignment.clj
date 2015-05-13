@@ -98,8 +98,7 @@
                       
                     
                     :else
-                    ;; XXX add recur
-                    (scan (rest vars) (rest vals))))]
+                    (recur (rest vars) (rest vals))))]
       (scan (environment/frame-variables frame)
             (environment/frame-values frame)))))
 
