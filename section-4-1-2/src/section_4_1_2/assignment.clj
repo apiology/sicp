@@ -41,7 +41,7 @@
                                                 derefed-first-val)
                             
                                               :else
-                                              (scan (rest vars) (rest vals))))]
+                                              (recur (rest vars) (rest vals))))]
                                  (if (or (= env environment/the-empty-environment)
                                          (nil? env))
                                    (util/error "Unbound variable " var)
@@ -70,7 +70,7 @@
                               :ok)
                             
                             :else
-                            (scan (rest vars) (rest vals))))]
+                            (recur (rest vars) (rest vals))))]
               (if (= env environment/the-empty-environment)
                 (util/error "Unbound variable -- SET!" var)
                 (let [frame (environment/first-frame env)
