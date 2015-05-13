@@ -1,7 +1,6 @@
 (ns section-4-1-2.begin-test
   (:require [clojure.test :refer :all]
             [section-4-1-2.core :refer [eval]]
-            [section-4-1-2.begin :refer :all]
             [section-4-1-2.test-env :refer [test-env]])
   (:refer-clojure :only [=]))
 

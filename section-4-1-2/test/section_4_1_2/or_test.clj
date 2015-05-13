@@ -1,7 +1,7 @@
 (ns section-4-1-2.or-test
   (:require [clojure.test :refer :all]
-            [section-4-1-2.test-env :refer [test-env]]
-            [section-4-1-2.core :refer :all])
+            [section-4-1-2.core :refer :all]
+            [section-4-1-2.test-env :refer [test-env]])
   (:refer-clojure :only [=]))
 
 (deftest or-with-nothing

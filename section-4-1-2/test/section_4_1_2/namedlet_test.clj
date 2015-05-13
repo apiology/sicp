@@ -1,9 +1,8 @@
 (ns section-4-1-2.namedlet-test
-  (:require [section-4-1-2.environment :as environment]
-            [section-4-1-2.let :as let]
-            [section-4-1-2.test-env :refer [test-env]]
+  (:require [clojure.test :refer :all]
             [section-4-1-2.core :refer [eval]]
-            [clojure.test :refer :all])
+            [section-4-1-2.let :as let]
+            [section-4-1-2.test-env :refer [test-env]])
   (:refer-clojure :only [= first let second]))
 
 

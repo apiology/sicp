@@ -5,6 +5,8 @@
 
 ;; (clojure.core.typed/check-ns)
 
+(def ^{:preserve [types/Expression]} from-slamhound true)
+
 (defn tagged-list? [exp :- types/Expression
                     tag :- t/Symbol] :- Boolean
   (if (seq? exp)

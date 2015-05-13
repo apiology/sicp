@@ -1,5 +1,4 @@
 (ns section-4-1-2.primitive
-  (:require [section-4-1-2.boolean :as boolean])
   (:refer-clojure :only [cond defn number? or string?]))
 
 (defn self-evaluating? [exp]

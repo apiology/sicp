@@ -6,6 +6,8 @@
 
 ;; (clojure.core.typed/check-ns)
 
+(def ^{:preserve [types/Environment]} from-slamhound true)
+
 (defn enclosing-environment [env :- types/Environment] :- types/Environment
   (rest env))
 

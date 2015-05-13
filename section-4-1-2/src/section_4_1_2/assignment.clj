@@ -1,12 +1,13 @@
 (ns section-4-1-2.assignment
   (:require [clojure.core.typed :as t :refer [defn]]
             [section-4-1-2.binding :as binding]
-            [section-4-1-2.environment :as environment]
             [section-4-1-2.types :as types]
             [section-4-1-2.util :as util])
   (:refer-clojure :exclude [defn eval]))
 
 ;; (clojure.core.typed/check-ns)
+
+(def ^{:preserve [types/Expression]} from-slamhound true)
 
 (defn variable? [exp :- types/Expression] :- Boolean
   (symbol? exp))

@@ -1,7 +1,6 @@
 (ns section-4-1-2.global-environment
-  (:require [section-4-1-2.environment :as environment]
-            [section-4-1-2.assignment :as assignment]
-            [section-4-1-2.binding :as binding]))
+  (:require [section-4-1-2.binding :as binding]
+            [section-4-1-2.environment :as environment]))
 
 (def primitive-procedures
   (list (list 'car first)
