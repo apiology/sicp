@@ -56,4 +56,5 @@
             (map clause->value clauses)))))
   
 (defn eval-let [exp env eval-fn apply-fn]
+  ;; XXX I'll bet we need to add things to the environment when evaluating this...
   (eval-fn (let->combination exp) env))
