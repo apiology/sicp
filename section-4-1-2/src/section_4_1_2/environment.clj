@@ -28,7 +28,7 @@
 
 (defn add-binding-to-frame! [var :- types/Var
                              val :- types/RawVal
-                             frame :- types/Frame] :- Any
+                             frame :- types/Frame] :- (t/Value :ok)
   (t/let [new-vars :- types/Variables
           (cons var (frame-variables frame))
           
@@ -36,7 +36,8 @@
           (cons (atom val) (frame-values frame))]
     ;; (println "new-vars=" new-vars ", new-vals=" new-vals)
     (util/set-first! frame new-vars)
-    (util/set-second! frame new-vals)))
+    (util/set-second! frame new-vals)
+    :ok))
 
 (defn extend-environment [vars :- types/Variables
                           vals :- types/RawValues
