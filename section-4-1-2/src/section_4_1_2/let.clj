@@ -36,11 +36,12 @@
   (let [name (named-let-name exp)
         clauses (named-let-clauses exp)
         bound-expression (named-let-bound-expression exp)]
-    (cons (list 'let
-                (list (list name
-                            (lambda/make-lambda (clauses->lambda-parameters clauses)
-                                                bound-expression)))
-                (cons name (map clause->value clauses))))))
+
+    (list 'let
+          (list (list name
+                      (lambda/make-lambda (clauses->lambda-parameters clauses)
+                                          bound-expression)))
+          (cons name (map clause->value clauses)))))
 
 (defn named-let? [exp]
   <(and (let? exp) (= (count exp) 4)))
