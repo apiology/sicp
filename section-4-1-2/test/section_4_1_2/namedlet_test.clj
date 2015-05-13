@@ -31,9 +31,8 @@
                  (test-env))
            :ok))))
 
-;; (environment/first-frame (test-env))
-
-;; XXX get this working
+;; Won't work until '=' is defined as a procedure
+;;
 ;; (deftest namedlet-advanced-with-use
 ;;   (testing ""
 ;;     (is (= (eval '(begin
