@@ -27,10 +27,12 @@
 (defn rest-exps [seq :- types/Expressions] :- types/Expressions
   (rest seq))
 
-(t/ann set-first! (t/All [x y] [(t/Atom1 (t/HVec [x y])) x -> Any]))
+(t/ann set-first! (t/All [x y] [(t/Atom1 (t/HVec [x y])) x -> (t/Value :ok)]))
 (defn set-first! [atom-of-list new-car]
-  (reset! atom-of-list [new-car (second @atom-of-list)]))
+  (reset! atom-of-list [new-car (second @atom-of-list)])
+  :ok)
 
-(t/ann set-second! (t/All [x y] [(t/Atom1 (t/HVec [x y])) y -> Any]))
+(t/ann set-second! (t/All [x y] [(t/Atom1 (t/HVec [x y])) y -> (t/Value :ok)]))
 (defn set-second! [atom-of-list new-cdr]
-  (reset! atom-of-list [(first @atom-of-list) new-cdr]))
+  (reset! atom-of-list [(first @atom-of-list) new-cdr])
+  :ok)
