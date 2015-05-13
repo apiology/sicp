@@ -1,9 +1,10 @@
 (ns section-4-1-2.test-env
-  (:require [section-4-1-2.environment :refer :all]
+  (:require [section-4-1-2.environment :as environment]
+            [section-4-1-2.global-environment :as global-environment]
             [clojure.test :refer :all]))
 
 (defn test-env []
-  (section-4-1-2.environment/extend-environment
+  (environment/extend-environment
    '()
    '()
-   section-4-1-2.environment/the-empty-environment))
+   global-environment/the-global-environment))
