@@ -13,8 +13,6 @@
 
 (t/defalias Frame (t/Atom1 (t/HVec [Variables Values])))
 
-(t/defalias EmptyEnvironment nil)
-
 (t/defalias Environment (t/Option (t/Seqable Frame)))
 
 (t/defalias Primitive (t/U t/Symbol Number String))
