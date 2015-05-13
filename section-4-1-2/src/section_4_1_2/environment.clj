@@ -17,8 +17,8 @@
                   values]
   (atom (list variables (map atom values))))
 
-(t/ann the-empty-environment types/EmptyEnvironment)
-(def the-empty-environment nil)
+(t/ann the-empty-environment types/Environment)
+(def the-empty-environment '())
 
 (defn frame-variables [frame :- types/Frame] :- types/Variables
   (first @frame))
