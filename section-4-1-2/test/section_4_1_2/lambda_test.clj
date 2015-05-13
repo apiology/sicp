@@ -32,7 +32,7 @@
     (is (= (lambda/make-lambda '(a) 'a)
            '(lambda (a) a)))))
 
-(deftest lambda-complicted
+(deftest lambda-complicated
   (testing ""
     (is (= (drop-last (eval '(lambda (a b count) (if (= count 0) b (fib-iter (+ a b) a (- count 1)))) (test-env)))
            '(procedure (a b count) ((if (= count 0) b (fib-iter (+ a b) a (- count 1)))))))))
