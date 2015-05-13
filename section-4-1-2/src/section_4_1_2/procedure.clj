@@ -5,8 +5,12 @@
 (defn primitive-procedure? [exp]
   (util/tagged-list? exp 'primitive))
 
+(defn primitive-implementation [proc]
+  (second proc))
+
 (defn apply-primitive-procedure [procedure arguments]
-  (util/error "apply-primitive-procedure not yet implemented"))
+  (clojure.core/apply
+   (primitive-implementation procedure) arguments))
 
 (defn compound-procedure? [exp]
   (util/tagged-list? exp 'procedure))
