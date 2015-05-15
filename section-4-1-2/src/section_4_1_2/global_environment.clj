@@ -7,7 +7,10 @@
         (list 'cdr rest)
         (list 'cons cons)
         (list 'null? empty?)
-        (list '= =)))
+        (list '= =)
+        (list '+ +)
+        (list '- -)
+        ))
 
 (defn primitive-procedure-names []
   (map first

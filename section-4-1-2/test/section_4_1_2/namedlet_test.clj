@@ -14,8 +14,20 @@
                                               (if (= count 0)
                                                 b
                                                 (fib-iter (+ a b) a (- count 1)))))
-            '(let ((fib-iter (lambda (a b count) (if (= count 0) b (fib-iter (+ a b) a (- count 1)))))) (fib-iter 1 0 n))
-            ))))
+            '(begin (define fib-iter (lambda (a b count) (if (= count 0) b (fib-iter (+ a b) a (- count 1))))) (fib-iter 1 0 n))))))
+
+
+(deftest namedlet-easy
+  (testing ""
+    
+    (is (= (eval '(let fib-iter ((a 1)
+                                 (b 0)
+                                 (count 2))
+                       (if (= count 0)
+                         b
+                         (fib-iter (+ a b) a (- count 1))))
+                 (test-env))
+           1))))
 
 (deftest namedlet-advanced
   (testing ""
@@ -30,17 +42,18 @@
                  (test-env))
            :ok))))
 
-;; (deftest namedlet-advanced-with-use
-;;   (testing ""
-;;     (is (= (eval '(begin
-;;                    (define (fib n)
-;;                      (let fib-iter ((a 1)
-;;                                     (b 0)
-;;                                     (count n))
-;;                           (if (= count 0)
-;;                             b
-;;                             (fib-iter (+ a b) a (- count 1)))))
-;;                    (fib 2)
-;;                    1)
-;;                  (test-env))
-;;            :ok))))
+(deftest namedlet-advanced-with-use
+  (testing ""
+    (is (= (eval '(begin
+                   (define (fib n)
+                     (let fib-iter ((a 1)
+                                    (b 0)
+                                    (count n))
+                          (if (= count 0)
+                            b
+                            (fib-iter (+ a b) a (- count 1)))))
+                   (fib 6))
+                 (test-env))
+           8))))
+
+;; 1 1 2 3 5 8

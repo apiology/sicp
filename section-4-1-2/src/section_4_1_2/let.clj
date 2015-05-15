@@ -37,10 +37,10 @@
         clauses (named-let-clauses exp)
         bound-expression (named-let-bound-expression exp)]
 
-    (list 'let
-          (list (list name
-                      (lambda/make-lambda (clauses->lambda-parameters clauses)
-                                          bound-expression)))
+    (list 'begin
+          (list 'define name
+                (lambda/make-lambda (clauses->lambda-parameters clauses)
+                                    bound-expression))
           (cons name (map clause->value clauses)))))
 
 (defn named-let? [exp]
