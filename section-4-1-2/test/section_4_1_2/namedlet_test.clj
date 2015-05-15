@@ -30,8 +30,6 @@
                  (test-env))
            :ok))))
 
-;; Won't work until '=' is defined as a procedure
-;;
 ;; (deftest namedlet-advanced-with-use
 ;;   (testing ""
 ;;     (is (= (eval '(begin
