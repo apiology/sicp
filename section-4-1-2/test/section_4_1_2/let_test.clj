@@ -7,7 +7,6 @@
 
 (def default-env section-4-1-2.environment/the-empty-environment)
 
-
 (deftest let-clauses-created
   (testing ""
     (is (= (let/clauses->lambda-parameters '((a 1))) '(a)))))
