@@ -1,14 +1,14 @@
 (ns section-4-1-2.namedlet-test
   (:require [clojure.test :refer :all]
             [section-4-1-2.core :refer [eval]]
-            [section-4-1-2.let :as let]
+            [section-4-1-2.named-let :as named-let]
             [section-4-1-2.test-env :refer [test-env]])
   (:refer-clojure :only [= first let second]))
 
 
 (deftest namedlet-translation
    (testing ""
-     (is (= (let/named-let->combination '(let fib-iter ((a 1)
+     (is (= (named-let/named-let->combination '(let fib-iter ((a 1)
                                                         (b 0)
                                                         (count n))
                                               (if (= count 0)

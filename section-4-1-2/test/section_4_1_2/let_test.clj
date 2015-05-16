@@ -2,6 +2,7 @@
   (:require [clojure.test :refer :all]
             [section-4-1-2.core :refer :all]
             [section-4-1-2.let :as let]
+            [section-4-1-2.let-clause :as let-clause]
             [section-4-1-2.letstar :as letstar])
   (:refer-clojure :only [=]))
 
@@ -9,7 +10,7 @@
 
 (deftest let-clauses-created
   (testing ""
-    (is (= (let/clauses->lambda-parameters '((a 1))) '(a)))))
+    (is (= (let-clause/clauses->lambda-parameters '((a 1))) '(a)))))
 
 (deftest let-form-created
   (testing ""
