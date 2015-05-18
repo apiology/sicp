@@ -58,3 +58,10 @@ your option) any later version.
 
 ;; Exercise 4.3
 
+;; Exercise 4.10
+
+;; This is trivial - simple examples would be changing some of the
+;; names in global_environment.clj.  A slightly more complicated
+;; example would be supporting more clojure-like binding syntax,
+;; ideally by first centralizing all binding parsing and then adding
+;; usage of the [] braces.
