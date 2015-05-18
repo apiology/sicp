@@ -15,12 +15,12 @@
 (defn do-bindings [exp]
   (->> exp
        (do-bindings-and-increments)
-       (map #(take 2 %)))) ;; XXX shouldn't this be map?
+       (map #(take 2 %))))
 
 (defn do-increments [exp]
   (->> exp
        (do-bindings-and-increments)
-       (map #(nth % 2)))) ;; XXX shouldn't this be map?
+       (map #(nth % 2))))
 
 (defn do-exit-condition-and-exprs [exp]
   (nth exp 2))
