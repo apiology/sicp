@@ -9,7 +9,13 @@
         (list 'null? empty?)
         (list '= =)
         (list '+ +)
+        (list '* *)
+        (list '/ /)
         (list '- -)
+        (list '> >)
+        (list '< <)
+        (list 'inc inc)
+        (list 'println println)
         ))
 
 (defn primitive-procedure-names []

@@ -5,6 +5,7 @@
             [section-4-1-2.begin :as begin]
             [section-4-1-2.binding :as binding]
             [section-4-1-2.cond :as cond]
+            [section-4-1-2.do :as do]
             [section-4-1-2.definition :as definition]
             [section-4-1-2.if :as if]
             [section-4-1-2.lambda :as lambda]
@@ -33,6 +34,7 @@
     ;; Exercise 4.4
     (add-form and/and? and/eval-and)
     (add-form or/or? or/eval-or)
+    (add-form do/do? do/eval-do)
     (add-form lambda/lambda? lambda/eval-lambda)
     (add-form begin/begin? begin/eval-begin)
     (add-form let/let? let/eval-let)

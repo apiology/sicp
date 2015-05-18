@@ -19,12 +19,6 @@
 (defn cond-actions [clause]
   (rest clause))
 
-(defn sequence->exp [seq]
-  (cond 
-    (empty? seq) seq
-    (util/last-exp? seq) (util/first-exp seq)
-    :else (begin/make-begin seq)))
-
 (defn expand-clauses [clauses]
   (if (empty? clauses)
     ''false
@@ -32,7 +26,7 @@
           rest-clauses (rest clauses)]
       (if (cond-else-clause? first-clause)
         (if (empty? rest-clauses)
-          (sequence->exp (cond-actions first-clause))
+          (begin/sequence->exp (cond-actions first-clause))
           (util/error "ELSE clause isn't last -- COND->IF" clauses))
         (if (cond-hash/cond-hash-clause? first-clause)
           ;; XXX sure would be nicer if this used a let and a gemsym
@@ -41,7 +35,7 @@
                       (cond-hash/make-hash-cond-application first-clause)
                       (expand-clauses rest-clauses))
           (if/make-if (cond-predicate first-clause)
-                      (sequence->exp (cond-actions first-clause))
+                      (begin/sequence->exp (cond-actions first-clause))
                       (expand-clauses rest-clauses)))))))
 
 (defn cond->if [exp]

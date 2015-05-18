@@ -23,6 +23,9 @@
                                     bound-expression))
           (cons name (map let-clause/clause->value clauses)))))
 
+(defn make-named-let [fn-name bindings body]
+  (list 'let fn-name bindings body))
+
 (defn named-let? [exp]
   (and (util/tagged-list? exp 'let)
        (= (count exp) 4)))
