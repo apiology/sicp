@@ -9,7 +9,9 @@
 
 (t/defalias RawValues (t/Seqable RawVal))
 
-(t/defalias Values (t/Seqable (t/Atom1 RawVal)))
+(t/defalias Value (t/Atom1 RawVal))
+
+(t/defalias Values (t/Seqable Value))
 
 (t/defalias Frame (t/Atom1 (t/HVec [Variables Values])))
 
