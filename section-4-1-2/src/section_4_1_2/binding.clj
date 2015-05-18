@@ -38,7 +38,7 @@
 
 (defn lookup-variable-value [var :- types/Var
                              env :- types/Environment
-                             eval-fn :- types/EvalFn ;; XXX why do we get these last two params?
+                             eval-fn :- types/EvalFn
                              apply-fn :- types/ApplyFn] :- types/RawVal
   ;; (println "Lookup-variable-value ")
   (scan-for-variable var env value->rawval))
