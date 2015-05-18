@@ -38,16 +38,14 @@
 (defn do-body [exp]
   (drop 3 exp))
 
-
 ;; (do ((x 1 (inc x))) ;; note: 1+ doesn't pass clojure reader
 ;;      ((> x 4))
 ;;      x)
-
+;; ->
 ;; (let gensym ((x 1))
 ;;     (if (> x 4)
 ;;       x
 ;;       (gensym (inc x))))
-
 (defn do->combination [exp]
   (let [fn-name (clojure.core/gensym)
         bindings (do-bindings exp)
